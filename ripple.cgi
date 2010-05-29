@@ -107,16 +107,11 @@ sub do_callback {
 }
 
 sub do_wave {
-    print $q->header("text/html");
+    _html_header();
 
-    print
-        q{<form action='}.$base_uri.q{' method='get'>}.
-            q{<input type='hidden' name='do' value='wave' />}.
-            q{<input type='hidden' name='token' value='}.$q->param("token").q{' />}.
-            q{<input type='hidden' name='token_secret' value='}.$q->param("token_secret").q{' />}.
-            q{<input type='submit' name='action' value='inbox' />}.
-        q{</form>}
-    ;
+    _form_wrap(
+        [qw(submit action inbox)],
+    );
 
     my %action_handler = (
         inbox => \&action_inbox,
@@ -126,6 +121,8 @@ sub do_wave {
     if ($action && exists $action_handler{$action}) {
         print $action_handler{$action}->();
     }
+
+    _html_footer();
 }
 
 sub action_inbox {
@@ -136,8 +133,6 @@ sub action_inbox {
             query => "in:inbox",
         },
     });
-
-    return '<pre>'.Dumper($data).'</pre>';
 
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
@@ -194,4 +189,46 @@ sub _default_request_params {
         timestamp        => time,
         nonce            => join('', rand_chars(size => 16, set => "alphanumeric"))
     );
+}
+
+sub _html_header {
+    print $q->header("text/html");
+
+    print <<HTML_HEADER
+<html>
+<head>
+<title>ripple</title>
+<style type="text/css">body { font-family: sans-serif; }</style>
+</head>
+<body>
+HTML_HEADER
+;
+}
+
+sub _html_footer {
+    print <<HTML_FOOTER
+</body>
+</html>
+HTML_FOOTER
+;
+}
+
+sub _form_wrap {
+    my (@elements) = @_;
+
+    print
+        q{<form action='}.$base_uri.q{' method='get'>}.
+            q{<input type='hidden' name='do' value='wave' />}.
+            q{<input type='hidden' name='token' value='}.$q->param("token").q{' />}.
+            q{<input type='hidden' name='token_secret' value='}.$q->param("token_secret").q{' />}
+    ;
+
+    for my $element (@elements) {
+        my ($type, $name, $value) = @$element;
+        print q{<input type='}.$type.q{' name='}.$name.q{' value='}.$value.q{' />};
+    }
+
+    print
+        q{</form>}
+    ;
 }
