@@ -35,15 +35,15 @@ my $base_uri = "http://junai/ripple/ripple.cgi";
 my $q = CGI->new;
 given ($q->param("do")) {
     when ("login") {
-        do_login($q);
+        do_login();
         exit 0;
     }
     when ("callback") {
-        do_callback($q);
+        do_callback();
         exit 0;
     }
     when ("wave") {
-        do_wave($q);
+        do_wave();
         exit 0;
     }
     default {
@@ -58,8 +58,6 @@ given ($q->param("do")) {
 }
 
 sub do_login {
-    my ($q) = @_;
-
     my $oa_req = Net::OAuth->request("request token")->new(
         _default_request_params(),
         request_url => $oa_req_uri,
@@ -87,8 +85,6 @@ sub do_login {
 }
 
 sub do_callback {
-    my ($q) = @_;
-
     my $oa_res = Net::OAuth->response("user auth")->from_hash({$q->Vars});
 
     my $oa_req = Net::OAuth->request("access token")->new(
@@ -113,11 +109,9 @@ sub do_callback {
 }
 
 sub do_wave {
-    my ($q) = @_;
-
     given ($q->param("action")) {
         when ("inbox") {
-            do_wave_inbox($q);
+            do_wave_inbox();
         }
         default {
             print $q->redirect("$base_uri?do=wave&token=".$q->param("token")."&action=inbox");
@@ -126,9 +120,7 @@ sub do_wave {
 }
 
 sub do_wave_inbox {
-    my ($q) = @_;
-
-    my $data = _wave_request($q, {
+    my $data = _wave_request({
         id     => "op1",
         method => "wave.robot.search",
         params => {
@@ -141,7 +133,7 @@ sub do_wave_inbox {
 }
 
 sub _wave_request {
-    my ($q, $rpc) = @_;
+    my ($rpc) = @_;
 
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
