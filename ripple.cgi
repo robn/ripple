@@ -109,22 +109,50 @@ sub do_callback {
 }
 
 sub do_wave {
-    given ($q->param("action")) {
-        when ("inbox") {
-            do_wave_inbox();
-        }
-        default {
-            print $q->redirect("$base_uri?do=wave&token=".$q->param("token")."&action=inbox");
-        }
+    print $q->header("text/html");
+
+    print
+        q{<form action='}.$base_uri.q{' method='get'>}.
+            q{<input type='hidden' name='do' value='wave' />}.
+            q{<input type='hidden' name='token' value='}.$q->param("token").q{' />}.
+            q{<input type='submit' name='action' value='inbox' />}.
+        q{</form>}
+    ;
+
+    my %action_handler = (
+        inbox => \&action_inbox,
+    );
+
+    my $action = $q->param("action");
+    if ($action && exists $action_handler{$action}) {
+        print $action_handler{$action}->();
     }
 }
 
-sub do_wave_inbox {
+sub action_inbox {
     my $data = _wave_request({
         id     => "op1",
         method => "wave.robot.search",
         params => {
             query => "in:inbox",
+        },
+    });
+
+    my $out = '';
+    for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
+        $out .= q{<b>}.$digest->{title}.q{</b> }.$digest->{snippet}.q{<br />};
+    }
+
+    return $out;
+}
+
+sub do_wave_test {
+    my $data = _wave_request({
+        id => "test1",
+        method => "wave.robot.fetchWave",
+        params => {
+            waveId => q{ga-staff-dev.monash.edu!w+Zgx9msiJA},
+            waveletId => q{ga-staff-dev.monash.edu!conv+root},
         },
     });
 
