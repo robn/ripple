@@ -12,7 +12,7 @@ use Net::OAuth;
 use Data::Random qw(rand_chars);
 use LWP::UserAgent;
 use CGI ();
-use JSON qw(decode_json);
+use JSON qw(decode_json encode_json);
 use Data::Dumper;
 
 my $consumer_key     = q{ga-staff-dev.monash.edu};
@@ -33,31 +33,31 @@ my $private_key = Crypt::OpenSSL::RSA->new_private_key(do { local (@ARGV, $/) = 
 my $base_uri = "http://junai/ripple/ripple.cgi";
 
 my $q = CGI->new;
-given ($q->param("action")) {
+given ($q->param("do")) {
     when ("login") {
-        action_login($q);
+        do_login($q);
         exit 0;
     }
     when ("callback") {
-        action_callback($q);
+        do_callback($q);
         exit 0;
     }
     when ("wave") {
-        action_wave($q);
+        do_wave($q);
         exit 0;
     }
     default {
         if ($q->param("token")) {
-            print $q->redirect("$base_uri?action=wave&token=".$q->param("token"));
+            print $q->redirect("$base_uri?do=wave&token=".$q->param("token"));
         }
         else {
-            print $q->redirect("$base_uri?action=login");
+            print $q->redirect("$base_uri?do=login");
         }
         exit 0;
     }
 }
 
-sub action_login {
+sub do_login {
     my ($q) = @_;
 
     my $oa_req = Net::OAuth->request("request token")->new(
@@ -80,13 +80,13 @@ sub action_login {
 
     $oa_req = Net::OAuth->request("user auth")->new(
         token    => $oa_res->token,
-        callback => "$base_uri?action=callback",
+        callback => "$base_uri?do=callback",
     );
 
     print $q->redirect($oa_req->to_url($oa_auth_uri));
 }
 
-sub action_callback {
+sub do_callback {
     my ($q) = @_;
 
     my $oa_res = Net::OAuth->response("user auth")->from_hash({$q->Vars});
@@ -109,11 +109,39 @@ sub action_callback {
     my $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
     my $token = $oa_res->token;
 
-    print $q->redirect("$base_uri?action=wave&token=$token");
+    print $q->redirect("$base_uri?do=wave&token=$token");
 }
 
-sub action_wave {
+sub do_wave {
     my ($q) = @_;
+
+    given ($q->param("action")) {
+        when ("inbox") {
+            do_wave_inbox($q);
+        }
+        default {
+            print $q->redirect("$base_uri?do=wave&token=".$q->param("token")."&action=inbox");
+        }
+    }
+}
+
+sub do_wave_inbox {
+    my ($q) = @_;
+
+    my $data = _wave_request($q, {
+        id     => "op1",
+        method => "wave.robot.search",
+        params => {
+            query => "in:inbox",
+        },
+    });
+
+    print $q->header("text/plain");
+    print Dumper $data;
+}
+
+sub _wave_request {
+    my ($q, $rpc) = @_;
 
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
@@ -124,16 +152,13 @@ sub action_wave {
     $oa_req->sign($private_key);
 
     my $ua = LWP::UserAgent->new;
-    my $res = $ua->post($oa_req->to_url, Content_type => "application/json", Content => q{{'id':'op1','method':'wave.robot.search','params':{'query':'in:inbox'}}});
+    my $res = $ua->post($oa_req->to_url, Content_type => "application/json", Content => encode_json($rpc));
 
     if (!$res->is_success) {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
     }
 
-    my $stuff = decode_json($res->content);
-
-    print $q->header("text/plain");
-    print Dumper $stuff;
+    return decode_json($res->content);
 }
 
 sub _default_request_params {
