@@ -12,6 +12,8 @@ use Net::OAuth;
 use Data::Random qw(rand_chars);
 use LWP::UserAgent;
 use CGI ();
+use JSON qw(decode_json);
+use Data::Dumper;
 
 my $consumer_key     = q{ga-staff-dev.monash.edu};
 my $consumer_secret  = q{1tSn68zoE0iUJH/UWtf+EsbI};
@@ -128,8 +130,10 @@ sub action_wave {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
     }
 
+    my $stuff = decode_json($res->content);
+
     print $q->header("text/plain");
-    print $res->content;
+    print Dumper $stuff;
 }
 
 sub _default_request_params {
