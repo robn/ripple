@@ -15,9 +15,8 @@ use CGI ();
 use JSON qw(decode_json encode_json);
 use Data::Dumper;
 
-my $consumer_key     = q{ga-staff-dev.monash.edu};
-my $consumer_secret  = q{1tSn68zoE0iUJH/UWtf+EsbI};
-my $private_key_file = q{/home/rob/sso/google_ga-staff-dev.monash.edu.key};
+my $consumer_key     = "anonymous";
+my $consumer_secret  = "anonymous";
 
 my $scope = q{http://wave.googleusercontent.com/api/rpc};
 
@@ -27,8 +26,6 @@ my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
 
 my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 
-
-my $private_key = Crypt::OpenSSL::RSA->new_private_key(do { local (@ARGV, $/) = ($private_key_file); <> });
 
 my $base_uri = "http://junai/ripple/ripple.cgi";
 
@@ -65,7 +62,7 @@ sub do_login {
             scope => $scope,
         },
     );
-    $oa_req->sign($private_key);
+    $oa_req->sign;
 
     my $ua = LWP::UserAgent->new;
     my $res = $ua->get($oa_req->to_url);
@@ -77,8 +74,8 @@ sub do_login {
     my $oa_res = Net::OAuth->response("request token")->from_post_body($res->content);
 
     $oa_req = Net::OAuth->request("user auth")->new(
-        token    => $oa_res->token,
-        callback => "$base_uri?do=callback",
+        token        => $oa_res->token,
+        callback     => "$base_uri?do=callback&token_secret=".uri_escape($oa_res->token_secret),
     );
 
     print $q->redirect($oa_req->to_url($oa_auth_uri));
@@ -91,9 +88,9 @@ sub do_callback {
         _default_request_params(),
         request_url  => $oa_access_uri,
         token        => $oa_res->token,
-        token_secret => '',
+        token_secret => $q->param("token_secret"),
     );
-    $oa_req->sign($private_key);
+    $oa_req->sign;
 
     my $ua = LWP::UserAgent->new;
     my $res = $ua->get($oa_req->to_url);
@@ -102,10 +99,11 @@ sub do_callback {
         die "could not get access token: ".$res->status_line."\n".$res->content;
     }
 
-    my $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
+    $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
     my $token = $oa_res->token;
+    my $token_secret = $oa_res->token_secret;
 
-    print $q->redirect("$base_uri?do=wave&token=$token");
+    print $q->redirect("$base_uri?do=wave&token=$token&token_secret=$token_secret");
 }
 
 sub do_wave {
@@ -115,6 +113,7 @@ sub do_wave {
         q{<form action='}.$base_uri.q{' method='get'>}.
             q{<input type='hidden' name='do' value='wave' />}.
             q{<input type='hidden' name='token' value='}.$q->param("token").q{' />}.
+            q{<input type='hidden' name='token_secret' value='}.$q->param("token_secret").q{' />}.
             q{<input type='submit' name='action' value='inbox' />}.
         q{</form>}
     ;
@@ -137,6 +136,8 @@ sub action_inbox {
             query => "in:inbox",
         },
     });
+
+    return '<pre>'.Dumper($data).'</pre>';
 
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
@@ -167,9 +168,9 @@ sub _wave_request {
         _default_request_params("POST"),
         request_url  => $rpc_uri,
         token        => $q->param("token"),
-        token_secret => '',
+        token_secret => $q->param("token_secret"),
     );
-    $oa_req->sign($private_key);
+    $oa_req->sign;
 
     my $ua = LWP::UserAgent->new;
     my $res = $ua->post($oa_req->to_url, Content_type => "application/json", Content => encode_json($rpc));
@@ -187,9 +188,9 @@ sub _default_request_params {
 
     return (
         consumer_key     => $consumer_key,
-        consumer_secret  => '',
+        consumer_secret  => $consumer_secret,
         request_method   => $method,
-        signature_method => "RSA-SHA1",
+        signature_method => "HMAC-SHA1",
         timestamp        => time,
         nonce            => join('', rand_chars(size => 16, set => "alphanumeric"))
     );
