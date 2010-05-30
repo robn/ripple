@@ -117,8 +117,8 @@ sub do_wave {
 
     my $out;
 
-    my $action = $q->param("a");
-    if ($action && exists $action_handler{$action}) {
+    my $action = $q->param("a") || "inbox";
+    if (exists $action_handler{$action}) {
         $out = $action_handler{$action}->();
     }
 
