@@ -101,9 +101,12 @@ sub do_callback {
 
     $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
     my $token = $oa_res->token;
-    my $token_secret = $oa_res->token_secret;
+    my $secret = $oa_res->token_secret;
 
-    print $q->redirect("$base_uri?do=wave&token=$token&token_secret=$token_secret");
+    my $token_cookie = $q->cookie(-name => 'token', -value => $token);
+    my $secret_cookie = $q->cookie(-name => 'secret', -value => $secret);
+
+    print $q->redirect(-uri => "$base_uri?do=wave", -cookie => [$token_cookie, $secret_cookie]);
 }
 
 sub do_wave {
@@ -228,8 +231,8 @@ sub _wave_request {
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
         request_url  => $rpc_uri,
-        token        => $q->param("token"),
-        token_secret => $q->param("token_secret"),
+        token        => $q->cookie("token"),
+        token_secret => $q->cookie("secret"),
     );
     $oa_req->sign;
 
@@ -288,9 +291,7 @@ sub _form_wrap {
 
     print
         q{<form action='}.$base_uri.q{' method='get'>}.
-            q{<input type='hidden' name='do' value='wave' />}.
-            q{<input type='hidden' name='token' value='}.$q->param("token").q{' />}.
-            q{<input type='hidden' name='token_secret' value='}.$q->param("token_secret").q{' />}
+            q{<input type='hidden' name='do' value='wave' />}
     ;
 
     for my $element (@elements) {
