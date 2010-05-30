@@ -109,33 +109,48 @@ sub do_logout {
 }
 
 sub do_wave {
+    my %action_handler = (
+        inbox  => \&action_inbox,
+        search => \&action_search,
+        test   => \&action_test,
+    );
+
+    my $out;
+
+    my $action = $q->param("a");
+    if ($action && exists $action_handler{$action}) {
+        $out = $action_handler{$action}->();
+    }
+
     _html_header();
 
     _form_wrap(
         [qw(submit a inbox)],
         [qw(submit a test)],
+        [qw(submit s logout)],
     );
 
-    my %action_handler = (
-        inbox => \&action_inbox,
-        test  => \&action_test,
+    _form_wrap(
+        [qw(text q), $q->param("q")],
+        [qw(submit a search)],
     );
 
-    my $action = $q->param("a");
-    if ($action && exists $action_handler{$action}) {
-        my $out = $action_handler{$action}->();
-        print $out if $out;
-    }
+    print $out if $out;
 
     _html_footer();
 }
 
 sub action_inbox {
+    $q->param("q", "in:inbox");
+    return action_search();
+}
+
+sub action_search {
     my $data = _wave_request({
         id     => "op1",
         method => "wave.robot.search",
         params => {
-            query => "in:inbox",
+            query => $q->param("q"),
         },
     });
 
@@ -225,8 +240,6 @@ sub action_test {
 sub _wave_request {
     my ($rpc) = @_;
 
-    print "<p><b>request:</b><pre>",Dumper($rpc),"</pre></p>";
-
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
         request_url  => $rpc_uri,
@@ -242,11 +255,7 @@ sub _wave_request {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
     }
 
-    my $data = decode_json($res->content);
-
-    print "<p><b>response:</b><pre>",Dumper($data),"</pre></p>";
-
-    return $data;
+    return decode_json($res->content);
 }
 
 sub _default_request_params {
@@ -292,6 +301,7 @@ sub _form_wrap {
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
+        $value ||= '';
         print q{<input type='}.$type.q{' name='}.$name.q{' value='}.$value.q{' />};
     }
 
