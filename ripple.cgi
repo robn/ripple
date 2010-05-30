@@ -111,15 +111,18 @@ sub do_wave {
 
     _form_wrap(
         [qw(submit action inbox)],
+        [qw(submit action test)],
     );
 
     my %action_handler = (
         inbox => \&action_inbox,
+        test  => \&action_test,
     );
 
     my $action = $q->param("action");
     if ($action && exists $action_handler{$action}) {
-        print $action_handler{$action}->();
+        my $out = $action_handler{$action}->();
+        print $out if $out;
     }
 
     _html_footer();
@@ -142,7 +145,67 @@ sub action_inbox {
     return $out;
 }
 
-sub do_wave_test {
+# waveletdata
+# {
+#   'waveletId': 'eatenbyagrue.org!conv+root',
+#   'waveId': 'eatenbyagrue.org!TBD_0x4c8cad8a',
+#   'rootBlipId': 'TBD_eatenbyagrue.org!conv+root_0x401c33cd',
+#   'participants': set(['rob@eatenbyagrue.org'])
+# }
+# blipdata
+# {
+#   'waveletId': 'eatenbyagrue.org!conv+root',
+#   'blipId': 'TBD_eatenbyagrue.org!conv+root_0x401c33cd',
+#   'waveId': 'eatenbyagrue.org!TBD_0x4c8cad8a',
+#   'content': '',
+#   'parentBlipId': None}
+# }
+#
+# operation
+# {
+#   'id': 'op1'
+#   'method': 'robot.createWavelet',
+#   'params': {
+#     'waveId': 'eatenbyagrue.org!TBD_0x16348be1'
+#     'waveletId': 'eatenbyagrue.org!conv+root', 
+#     'waveletData': {
+#       'waveletId': 'eatenbyagrue.org!conv+root', 
+#       'waveId': 'eatenbyagrue.org!TBD_0x16348be1',
+#       'rootBlipId': 'TBD_eatenbyagrue.org!conv+root_0x4b666aa8',
+#       'participants': [
+#         'rob@eatenbyagrue.org'
+#       ]
+#     },
+#   },
+# }
+
+sub action_test {
+    my $wave_id = sprintf q{eatenbyagrue.org!TBD_0x%08x}, int rand 4294967296;
+    my $wavelet_id = q{eatenbyagrue.org!conv+root};
+    my $root_blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
+
+    my $data = _wave_request({
+        id => "test1",
+        method => "wave.robot.createWavelet",
+        params => {
+            waveId => $wave_id,
+            waveletId => $wavelet_id,
+            waveletData => {
+                waveId => $wave_id,
+                waveletId => $wavelet_id,
+                rootBlipId => $root_blip_id,
+                participants => [
+                    q{rob@eatenbyagrue.org},
+                ],
+            },
+        },
+    });
+
+    return;
+}
+
+=pod
+sub action_test {
     my $data = _wave_request({
         id => "test1",
         method => "wave.robot.fetchWave",
@@ -155,9 +218,12 @@ sub do_wave_test {
     print $q->header("text/plain");
     print Dumper $data;
 }
+=cut
 
 sub _wave_request {
     my ($rpc) = @_;
+
+    print "<p><b>request:</b><pre>",Dumper($rpc),"</pre></p>";
 
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
@@ -174,7 +240,11 @@ sub _wave_request {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
     }
 
-    return decode_json($res->content);
+    my $data = decode_json($res->content);
+
+    print "<p><b>response:</b><pre>",Dumper($data),"</pre></p>";
+
+    return $data;
 }
 
 sub _default_request_params {
