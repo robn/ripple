@@ -111,8 +111,8 @@ sub do_wave {
     _html_header();
 
     _form_wrap(
-        [qw(submit action inbox)],
-        [qw(submit action test)],
+        [qw(submit a inbox)],
+        [qw(submit a test)],
     );
 
     my %action_handler = (
@@ -120,7 +120,7 @@ sub do_wave {
         test  => \&action_test,
     );
 
-    my $action = $q->param("action");
+    my $action = $q->param("a");
     if ($action && exists $action_handler{$action}) {
         my $out = $action_handler{$action}->();
         print $out if $out;
@@ -287,10 +287,7 @@ HTML_FOOTER
 sub _form_wrap {
     my (@elements) = @_;
 
-    print
-        q{<form action='}.$base_uri.q{' method='get'>}.
-            q{<input type='hidden' name='do' value='wave' />}
-    ;
+    print q{<form action='}.$base_uri.q{' method='get'>};
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
