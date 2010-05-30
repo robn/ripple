@@ -30,29 +30,21 @@ my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 my $base_uri = "http://junai/ripple/ripple.cgi";
 
 my $q = CGI->new;
-given ($q->param("do")) {
-    when ("login") {
-        do_login();
-        exit 0;
-    }
-    when ("callback") {
-        do_callback();
-        exit 0;
-    }
-    when ("wave") {
-        do_wave();
-        exit 0;
-    }
-    default {
-        if ($q->param("token")) {
-            print $q->redirect("$base_uri?do=wave&token=".$q->param("token"));
-        }
-        else {
-            print $q->redirect("$base_uri?do=login");
-        }
-        exit 0;
-    }
+
+if ($q->param("s") eq "callback") {
+    do_callback();
 }
+elsif ($q->param("s") eq "logout") {
+    do_logout();
+}
+elsif ($q->cookie("token") && $q->cookie("secret")) {
+    do_wave();
+}
+else {
+    do_login();
+}
+
+exit 0;
 
 sub do_login {
     my $oa_req = Net::OAuth->request("request token")->new(
@@ -75,10 +67,12 @@ sub do_login {
 
     $oa_req = Net::OAuth->request("user auth")->new(
         token        => $oa_res->token,
-        callback     => "$base_uri?do=callback&token_secret=".uri_escape($oa_res->token_secret),
+        callback     => "$base_uri?s=callback",
     );
 
-    print $q->redirect($oa_req->to_url($oa_auth_uri));
+    my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
+
+    print $q->redirect(-uri => $oa_req->to_url($oa_auth_uri), -cookie => [$secret_cookie]);
 }
 
 sub do_callback {
@@ -88,7 +82,7 @@ sub do_callback {
         _default_request_params(),
         request_url  => $oa_access_uri,
         token        => $oa_res->token,
-        token_secret => $q->param("token_secret"),
+        token_secret => $q->cookie("secret"),
     );
     $oa_req->sign;
 
@@ -100,13 +94,17 @@ sub do_callback {
     }
 
     $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
-    my $token = $oa_res->token;
-    my $secret = $oa_res->token_secret;
 
-    my $token_cookie = $q->cookie(-name => 'token', -value => $token);
-    my $secret_cookie = $q->cookie(-name => 'secret', -value => $secret);
+    my $token_cookie = $q->cookie(-name => 'token', -value => $oa_res->token);
 
-    print $q->redirect(-uri => "$base_uri?do=wave", -cookie => [$token_cookie, $secret_cookie]);
+    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie]);
+}
+
+sub do_logout {
+    my $token_cookie = $q->cookie(-name => "token", -value => "");
+    my $secret_cookie = $q->cookie(-name => "secret", -value => "");
+
+    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie, $secret_cookie]);
 }
 
 sub do_wave {
