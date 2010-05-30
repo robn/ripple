@@ -95,9 +95,10 @@ sub do_callback {
 
     $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
 
-    my $token_cookie = $q->cookie(-name => 'token', -value => $oa_res->token);
+    my $token_cookie = $q->cookie(-name => "token", -value => $oa_res->token);
+    my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
 
-    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie]);
+    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie, $secret_cookie]);
 }
 
 sub do_logout {
