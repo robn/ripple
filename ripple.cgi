@@ -116,29 +116,31 @@ sub do_wave {
         test   => \&action_test,
     );
 
-    my $out;
+    my $out = '';
 
     my $action = $q->param("a") || "inbox";
     if (exists $action_handler{$action}) {
         $out = $action_handler{$action}->();
     }
 
-    _html_header();
+    if (defined $out) {
+        _html_header();
 
-    _form_wrap(
-        [qw(submit a inbox)],
-        [qw(submit a test)],
-        [qw(submit s logout)],
-    );
+        _form_wrap(
+            [qw(submit a inbox)],
+            [qw(submit a test)],
+            [qw(submit s logout)],
+        );
 
-    _form_wrap(
-        [qw(text q), $q->param("q")],
-        [qw(submit a search)],
-    );
+        _form_wrap(
+            [qw(text q), $q->param("q")],
+            [qw(submit a search)],
+        );
 
-    print $out if $out;
+        print $out;
 
-    _html_footer();
+        _html_footer();
+    }
 }
 
 sub action_inbox {
