@@ -112,6 +112,7 @@ sub do_wave {
     my %action_handler = (
         inbox  => \&action_inbox,
         search => \&action_search,
+        read   => \&action_read,
         test   => \&action_test,
     );
 
@@ -156,10 +157,30 @@ sub action_search {
 
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
-        $out .= q{<b>}.$digest->{title}.q{</b> }.$digest->{snippet}.q{<br />};
+        $out .=
+            q{<a href='}.$base_uri.q{?a=read&w=}.uri_escape($digest->{waveId}).q{'>}.
+                q{<b>}.$digest->{title}.q{</b> }.$digest->{snippet}.
+            q{</a><br />};
     }
 
     return $out;
+}
+
+sub action_read {
+    my $wave_id = $q->param("w");
+    my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
+    $wavelet_id .= q{!conv+root};
+
+    my $data = _wave_request({
+        id     => "read1",
+        method => "wave.robot.fetchWave",
+        params => {
+            waveId    => $wave_id,
+            waveletId => $wavelet_id,
+        },
+    });
+
+    return q{<pre>}.Dumper($data).q{</pre>};
 }
 
 # waveletdata
