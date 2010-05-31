@@ -182,7 +182,17 @@ sub action_read {
         },
     });
 
-    return q{<pre>}.Dumper($data).q{</pre>};
+    my $out;
+    if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
+        $out = _render_blip($root_blip_id, $data->{data}->{blips});
+    }
+    else {
+        $out = '<p>no root blip?</p>';
+    }
+
+    $out .= q{<pre>}.Dumper($data).q{</pre>};
+
+    return $out;
 }
 
 # waveletdata
@@ -240,6 +250,8 @@ sub action_test {
             },
         },
     });
+
+    return q{<pre>}.Dumper($data).q{</pre>};
 
     return;
 }
@@ -331,4 +343,21 @@ sub _form_wrap {
     print
         q{</form>}
     ;
+}
+
+sub _render_blip {
+    my ($id, $blips) = @_;
+
+    my $blip = $blips->{$id};
+
+    my $out = '';
+
+    $out .= qq{<b>blip: $id</b> }.$blip->{creator}.q{<br />};
+    $out .= q{<div style='background-color: #cccccc'>}.$blip->{content}.q{</div>};
+
+    for my $child_blip_id (@{$blip->{childBlipIds}}) {
+        $out .= _render_blip($child_blip_id, $blips);
+    }
+
+    return $out;
 }
