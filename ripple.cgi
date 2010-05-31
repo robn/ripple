@@ -314,7 +314,21 @@ sub _html_header {
 <html>
 <head>
 <title>ripple</title>
-<style type="text/css">body { font-family: sans-serif; }</style>
+<style type="text/css">
+body {
+    font-family: sans-serif;
+}
+div.blip {
+    margin: 5px;
+    padding: 5px;
+    border: solid black 1px;
+    background-color: #99ff99;
+}
+div.blip-content {
+    padding: 5px;
+    background-color: #ccccff;
+}
+</style>
 </head>
 <body>
 HTML_HEADER
@@ -350,12 +364,53 @@ sub _render_blip {
 
     my $blip = $blips->{$id};
 
+    my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
+
     my $out = '';
+    $out .=
+        q{<div class='blip'>}.
+        q{<b>blip: }.$id.q{</b> }.$blip->{creator};
 
-    $out .= qq{<b>blip: $id</b> }.$blip->{creator}.q{<br />};
-    $out .= q{<div style='background-color: #cccccc'>}.$blip->{content}.q{</div>};
+    my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
+    if (@contributors) {
+        $out .=
+            q{ (and }.
+            join (q{, }, @contributors).
+            q{)};
+    }
 
-    for my $child_blip_id (@{$blip->{childBlipIds}}) {
+    $out .=
+        q{<div class='blip-content'>};
+
+    my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
+    if (!@element_positions) {
+        $out .= $blip->content;
+    }
+
+    else {
+        for my $i (0 .. $#element_positions) {
+            my $element = $blip->{elements}->{$element_positions[$i]};
+
+            given ($element->{type}) {
+                when ("LINE") {
+                    $out .= q{<br />} if $element_positions[$i] != 0;
+                }
+                when ("INLINE_BLIP") {
+                    my $blip_id = $element->{properties}->{id};
+                    $out .= _render_blip($blip_id, $blips);
+                    delete $children{$blip_id};
+                }
+            }
+
+            $out .= substr ($blip->{content},
+                            $element_positions[$i],
+                            ($i < $#element_positions ? $element_positions[$i+1] : length $blip->{content}) - $element_positions[$i]);
+        }
+    }
+
+    $out .= q{</div></div>};
+
+    for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
         $out .= _render_blip($child_blip_id, $blips);
     }
 
