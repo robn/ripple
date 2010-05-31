@@ -173,6 +173,12 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
+    my $data = do {
+        no strict;
+        eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
+    };
+
+=pod
     my $data = _wave_request({
         id     => "read1",
         method => "wave.robot.fetchWave",
@@ -181,6 +187,7 @@ sub action_read {
             waveletId => $wavelet_id,
         },
     });
+=cut
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
@@ -382,29 +389,75 @@ sub _render_blip {
     $out .=
         q{<div class='blip-content'>};
 
-    my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
-    if (!@element_positions) {
+    # 0 - end annotation
+    # 1 - element
+    # 2 - start annotation
+
+    my $meta = {};
+    for my $pos (keys %{$blip->{elements}}) {
+        push @{$meta->{$pos}}, [ 1, $blip->{elements}->{$pos} ];
+    }
+    for my $annotation (@{$blip->{annotations}}) {
+        push @{$meta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
+        push @{$meta->{$annotation->{range}->{end}}},   [ 0, $annotation ];
+    }
+
+    if (!keys %$meta) {
         $out .= $blip->content;
     }
 
     else {
-        for my $i (0 .. $#element_positions) {
-            my $element = $blip->{elements}->{$element_positions[$i]};
+        my @positions = sort { $a <=> $b } keys %$meta;
+        for my $i (0 .. $#positions) {
+            my $position = $positions[$i];
 
-            given ($element->{type}) {
-                when ("LINE") {
-                    $out .= q{<br />} if $element_positions[$i] != 0;
+            for my $meta (sort { $a <=> $b } @{$meta->{$position}}) {
+                my ($type, $thing) = @$meta;
+
+                if ($type == 2) {
+                    given ($thing->{name}) {
+                        when ("link/auto") {
+                            $out .= q{<a href='}.$thing->{value}.q{'>};
+                        }
+                        default {
+                            #$out .= q{<span style='background-color: #000066; color: #ffffff;'>}.$thing->{name}.q{</span>};
+                        }
+                    }
                 }
-                when ("INLINE_BLIP") {
-                    my $blip_id = $element->{properties}->{id};
-                    $out .= _render_blip($blip_id, $blips);
-                    delete $children{$blip_id};
+
+                elsif ($type == 0) {
+                    given ($thing->{name}) {
+                        when ("link/auto") {
+                            $out .= q{</a>}
+                        }
+                        default {
+                            #$out .= q{<span style='background-color: #006600; color: #ffffff;'>}.$thing->{name}.q{</span>};
+                        }
+                    }
+                }
+
+                elsif ($type == 1) {
+                    given ($thing->{type}) {
+                        when ("LINE") {
+                            $out .= q{<br />} if $positions[$i] != 0;
+                        }
+                        when ("INLINE_BLIP") {
+                            my $blip_id = $thing->{properties}->{id};
+                            $out .= _render_blip($blip_id, $blips);
+                            delete $children{$blip_id};
+                        }
+                        default {
+                            #$out .= q{<span style='background-color: #660000; color: #ffffff;'>}.$thing->{type}.q{</span>};
+                        }
+                    }
                 }
             }
 
+            #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
+
             $out .= substr ($blip->{content},
-                            $element_positions[$i],
-                            ($i < $#element_positions ? $element_positions[$i+1] : length $blip->{content}) - $element_positions[$i]);
+                            $position,
+                            ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position);
         }
     }
 
