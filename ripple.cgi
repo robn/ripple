@@ -173,12 +173,13 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
+=pod
     my $data = do {
         no strict;
         eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
     };
+=cut
 
-=pod
     my $data = _wave_request({
         id     => "read1",
         method => "wave.robot.fetchWave",
@@ -187,7 +188,6 @@ sub action_read {
             waveletId => $wavelet_id,
         },
     });
-=cut
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
