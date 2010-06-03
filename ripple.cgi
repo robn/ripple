@@ -362,9 +362,15 @@ HTML_FOOTER
 }
 
 sub _form_wrap {
-    my (@elements) = @_;
+    my @elements = grep { ref $_ eq "ARRAY" } @_;
+    my ($opts)   = grep { ref $_ eq "HASH"  } @_;
 
-    my $out = q{<form action='}.$base_uri.q{' method='get'>};
+    $opts //= {};
+    $opts->{'method'} ||= 'get';
+
+    my $out = q{<form action='}.$base_uri.q{' method='}.$opts->{method}.q{'};
+    $out .= q{ style='}.$opts->{style}.q{'} if exists $opts->{style};
+    $out .= q{>};
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
@@ -502,7 +508,7 @@ sub _reply_textarea {
 
     return
         q{<div class='blip-reply'>}.
-            _form_wrap(
+            _form_wrap( { style => 'display: inline;' },
                [qw(textarea r)],
             ).
         q{</div>}
