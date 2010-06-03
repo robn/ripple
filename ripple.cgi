@@ -513,6 +513,7 @@ sub _reply_textarea {
                [qw(hidden wl), $wavelet_id],
                [qw(hidden b),  $blip_id],
                [qw(textarea r)],
+               [qw(submit a reply)], 
             ).
         q{</div>}
     ;
