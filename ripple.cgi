@@ -31,6 +31,7 @@ my $base_uri = "http://junai/ripple/ripple.cgi";
 
 my $q = CGI->new;
 
+=pod
 if ($q->param("s") eq "callback") {
     do_callback();
 }
@@ -43,6 +44,9 @@ elsif ($q->cookie("token") && $q->cookie("secret")) {
 else {
     do_login();
 }
+=cut
+
+do_wave();
 
 exit 0;
 
@@ -173,13 +177,12 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
-=pod
     my $data = do {
         no strict;
         eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
     };
-=cut
 
+=pod
     my $data = _wave_request({
         id     => "read1",
         method => "wave.robot.fetchWave",
@@ -188,10 +191,11 @@ sub action_read {
             waveletId => $wavelet_id,
         },
     });
+=cut
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
-        $out = _render_blip($root_blip_id, $data->{data}->{blips});
+        $out = _render_blip($root_blip_id, $data->{data}->{blips}, -1);
     }
     else {
         $out = '<p>no root blip?</p>';
@@ -367,7 +371,7 @@ sub _form_wrap {
 }
 
 sub _render_blip {
-    my ($id, $blips) = @_;
+    my ($id, $blips, $is_child) = @_;
 
     my $blip = $blips->{$id};
 
@@ -461,11 +465,15 @@ sub _render_blip {
         }
     }
 
-    $out .= q{</div></div>};
+    $out .= q{</div>};
+
+    $out .= q{</div>} if !$is_child;
 
     for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-        $out .= _render_blip($child_blip_id, $blips);
+        $out .= _render_blip($child_blip_id, $blips, 1);
     }
+
+    $out .= q{</div>} if $is_child;
 
     return $out;
 }
