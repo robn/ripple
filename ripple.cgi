@@ -343,7 +343,7 @@ div.blip-reply {
     padding: 5px;
     background-color: #ff9999;
 }
-div.blip-reply > textarea {
+div.blip-reply textarea {
     width: 100%;
 }
 </style>
