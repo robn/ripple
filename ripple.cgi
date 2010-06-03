@@ -339,6 +339,13 @@ div.blip-content {
     padding: 5px;
     background-color: #ccccff;
 }
+div.blip-reply {
+    padding: 5px;
+    background-color: #ff9999;
+}
+div.blip-reply > textarea {
+    width: 100%;
+}
 </style>
 </head>
 <body>
@@ -478,10 +485,16 @@ sub _render_blip {
     }
     else {
         $out .= q{</div>} if $is_child;
-        $out .= q{<textarea></textarea>};
+        $out .= _reply_textarea($id);
     }
 
-    $out .= q{<textarea></textarea>} if !$is_child;
+    $out .= _reply_textarea($id) if !$is_child;
 
     return $out;
+}
+
+sub _reply_textarea {
+    my ($id) = @_;
+
+    return q{<div class='blip-reply'><textarea>}.$id.q{</textarea></div>};
 }
