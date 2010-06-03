@@ -195,7 +195,7 @@ sub action_read {
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
-        $out = _render_blip($root_blip_id, $data->{data}->{blips}, -1);
+        $out = _render_blip($root_blip_id, $data->{data}->{blips});
     }
     else {
         $out = '<p>no root blip?</p>';
@@ -380,7 +380,7 @@ sub _render_blip {
     my $out = '';
     $out .=
         q{<div class='blip'>}.
-        q{<b>blip: }.$id.q{</b> }.$blip->{creator};
+        q{<b>blip: }.$id.q{ parent: }.$blip->{parentBlipId}.q{</b> }.$blip->{creator};
 
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
     if (@contributors) {
@@ -447,7 +447,7 @@ sub _render_blip {
                         }
                         when ("INLINE_BLIP") {
                             my $blip_id = $thing->{properties}->{id};
-                            $out .= _render_blip($blip_id, $blips);
+                            $out .= _render_blip($blip_id, $blips, 1);
                             delete $children{$blip_id};
                         }
                         default {
@@ -469,11 +469,19 @@ sub _render_blip {
 
     $out .= q{</div>} if !$is_child;
 
-    for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-        $out .= _render_blip($child_blip_id, $blips, 1);
+    my @child_blip_ids = grep { exists $children{$_} } @{$blip->{childBlipIds}};
+    if (@child_blip_ids) {
+        for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
+            $out .= _render_blip($child_blip_id, $blips, 1);
+        }
+        $out .= q{</div>} if $is_child;
+    }
+    else {
+        $out .= q{</div>} if $is_child;
+        $out .= q{<textarea></textarea>};
     }
 
-    $out .= q{</div>} if $is_child;
+    $out .= q{<textarea></textarea>} if !$is_child;
 
     return $out;
 }
