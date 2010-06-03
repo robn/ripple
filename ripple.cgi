@@ -128,22 +128,24 @@ sub do_wave {
     }
 
     if (defined $out) {
-        _html_header();
+        print $q->header("text/html");
 
-        _form_wrap(
+        print _html_header();
+
+        print _form_wrap(
             [qw(submit a inbox)],
             [qw(submit a test)],
             [qw(submit s logout)],
         );
 
-        _form_wrap(
+        print _form_wrap(
             [qw(text q), $q->param("q")],
             [qw(submit a search)],
         );
 
         print $out;
 
-        _html_footer();
+        print _html_footer();
     }
 }
 
@@ -319,9 +321,7 @@ sub _default_request_params {
 }
 
 sub _html_header {
-    print $q->header("text/html");
-
-    print <<HTML_HEADER
+    return <<HTML_HEADER
 <html>
 <head>
 <title>ripple</title>
@@ -354,7 +354,7 @@ HTML_HEADER
 }
 
 sub _html_footer {
-    print <<HTML_FOOTER
+    return <<HTML_FOOTER
 </body>
 </html>
 HTML_FOOTER
@@ -364,16 +364,20 @@ HTML_FOOTER
 sub _form_wrap {
     my (@elements) = @_;
 
-    print q{<form action='}.$base_uri.q{' method='get'>};
+    my $out = q{<form action='}.$base_uri.q{' method='get'>};
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
         $value ||= '';
-        print q{<input type='}.$type.q{' name='}.$name.q{' value='}.$value.q{' />};
+        if ($type eq 'textarea') {
+            $out .= q{<textarea name='}.$name.q{'>}.$value.q{</textarea>};
+        }
+        else {
+            $out .= q{<input type='}.$type.q{' name='}.$name.q{' value='}.$value.q{' />};
+        }
     }
 
-    print
-        q{</form>}
+    $out .= q{</form>}
     ;
 }
 
@@ -496,5 +500,11 @@ sub _render_blip {
 sub _reply_textarea {
     my ($id) = @_;
 
-    return q{<div class='blip-reply'><textarea>}.$id.q{</textarea></div>};
+    return
+        q{<div class='blip-reply'>}.
+            _form_wrap(
+               [qw(textarea r)],
+            ).
+        q{</div>}
+    ;
 }
