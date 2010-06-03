@@ -197,7 +197,7 @@ sub action_read {
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
-        $out = _render_blip($root_blip_id, $data->{data}->{blips});
+        $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
     }
     else {
         $out = '<p>no root blip?</p>';
@@ -388,16 +388,16 @@ sub _form_wrap {
 }
 
 sub _render_blip {
-    my ($id, $blips, $is_child) = @_;
+    my ($wave_id, $wavelet_id, $blip_id, $blips, $is_child) = @_;
 
-    my $blip = $blips->{$id};
+    my $blip = $blips->{$blip_id};
 
     my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
 
     my $out = '';
     $out .=
         q{<div class='blip'>}.
-        q{<b>blip: }.$id.q{ parent: }.$blip->{parentBlipId}.q{</b> }.$blip->{creator};
+        q{<b>blip: }.$blip_id.q{ parent: }.$blip->{parentBlipId}.q{</b> }.$blip->{creator};
 
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
     if (@contributors) {
@@ -464,7 +464,7 @@ sub _render_blip {
                         }
                         when ("INLINE_BLIP") {
                             my $blip_id = $thing->{properties}->{id};
-                            $out .= _render_blip($blip_id, $blips, 1);
+                            $out .= _render_blip($wave_id, $wavelet_id, $blip_id, $blips, 1);
                             delete $children{$blip_id};
                         }
                         default {
@@ -489,26 +489,29 @@ sub _render_blip {
     my @child_blip_ids = grep { exists $children{$_} } @{$blip->{childBlipIds}};
     if (@child_blip_ids) {
         for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-            $out .= _render_blip($child_blip_id, $blips, 1);
+            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, 1);
         }
         $out .= q{</div>} if $is_child;
     }
     else {
         $out .= q{</div>} if $is_child;
-        $out .= _reply_textarea($id);
+        $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id);
     }
 
-    $out .= _reply_textarea($id) if !$is_child;
+    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if !$is_child;
 
     return $out;
 }
 
 sub _reply_textarea {
-    my ($id) = @_;
+    my ($wave_id, $wavelet_id, $blip_id) = @_;
 
     return
         q{<div class='blip-reply'>}.
-            _form_wrap( { style => 'display: inline;' },
+            _form_wrap( { method => 'post', style  => 'display: inline;' },
+               [qw(hidden w),  $wave_id],
+               [qw(hidden wl), $wavelet_id],
+               [qw(hidden b),  $blip_id],
                [qw(textarea r)],
             ).
         q{</div>}
