@@ -361,7 +361,7 @@ div.blip-content > div.blip {
 }
 
 div.blip-content {
-    //padding: 5px;
+    padding: 5px;
     background-color: #ccccff;
 }
 div.blip-reply {
@@ -415,7 +415,8 @@ sub _form_wrap {
 }
 
 sub _render_blip {
-    my ($wave_id, $wavelet_id, $blip_id, $blips, $is_child) = @_;
+    my ($wave_id, $wavelet_id, $blip_id, $blips, $distance) = @_;
+    $distance ||= 0;
 
     my $blip = $blips->{$blip_id};
 
@@ -511,20 +512,17 @@ sub _render_blip {
 
     $out .= q{</div>};
 
-    $out .= q{</div>} if !$is_child;
+    $out .= q{</div>} if $distance == 0; # root blip
 
     if (@{$blip->{childBlipIds}}) {
         for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, 1);
+            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, $distance+1);
         }
-        $out .= q{</div>} if $is_child;
-    }
-    elsif ($is_child) {
-        $out .= q{</div>};
-        $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id);
     }
 
-    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if !$is_child;
+    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance <= 1;
+
+    $out .= q{</div>} if $distance > 0; # close the top blip
 
     return $out;
 }
