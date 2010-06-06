@@ -348,14 +348,16 @@ body > div.blip {
 
 /* normal blip */
 div.blip > div.blip {
-    margin: 0;
-    padding: 0;
-    border: 0;
+    margin: 5px;
+    padding: 5px;
+    border: solid black 1px;
     background-color: #9999ff;
 }
 
 /* inline blip */
 div.blip-content > div.blip {
+    margin: 5px;
+    padding: 5px;
     background-color: #ff99ff;
     border: solid black 1px;
 }
@@ -512,7 +514,7 @@ sub _render_blip {
 
     $out .= q{</div>};
 
-    $out .= q{</div>} if $distance == 0; # root blip
+    $out .= q{</div>} if $distance != 1; # root or thread blip
 
     if (@{$blip->{childBlipIds}}) {
         for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
@@ -522,7 +524,7 @@ sub _render_blip {
 
     $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance <= 1;
 
-    $out .= q{</div>} if $distance > 0; # close the top blip
+    $out .= q{</div>} if $distance == 1; # top reply blip
 
     return $out;
 }
