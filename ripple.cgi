@@ -337,14 +337,24 @@ sub _html_header {
 body {
     font-family: sans-serif;
 }
-div.blip {
+body > div.blip {
     margin: 5px;
     padding: 5px;
     border: solid black 1px;
     background-color: #99ff99;
 }
+div.blip > div.blip {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: #9999ff;
+}
+div.blip-content > div.blip {
+    background-color: #ff99ff;
+    border: solid black 1px;
+}
 div.blip-content {
-    padding: 5px;
+    //padding: 5px;
     background-color: #ccccff;
 }
 div.blip-reply {
