@@ -413,6 +413,7 @@ sub _render_blip {
     my $blip = $blips->{$blip_id};
 
     my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
+    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
 
     my $out = '';
     $out .=
@@ -485,7 +486,6 @@ sub _render_blip {
                         when ("INLINE_BLIP") {
                             my $blip_id = $thing->{properties}->{id};
                             $out .= _render_blip($wave_id, $wavelet_id, $blip_id, $blips, 1);
-                            delete $children{$blip_id};
                         }
                         default {
                             #$out .= q{<span style='background-color: #660000; color: #ffffff;'>}.$thing->{type}.q{</span>};
@@ -506,8 +506,7 @@ sub _render_blip {
 
     $out .= q{</div>} if !$is_child;
 
-    my @child_blip_ids = grep { exists $children{$_} } @{$blip->{childBlipIds}};
-    if (@child_blip_ids) {
+    if (@{$blip->{childBlipIds}}) {
         for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
             $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, 1);
         }
