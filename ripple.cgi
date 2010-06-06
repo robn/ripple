@@ -31,17 +31,26 @@ my $base_uri = "http://junai/ripple/ripple.cgi";
 
 my $q = CGI->new;
 
-if ($q->param("s") eq "callback") {
-    do_callback();
+my $LOCAL = 0;
+$LOCAL = 1 if $q->param("l");
+
+if (!$LOCAL) {
+    if ($q->param("s") eq "callback") {
+        do_callback();
+    }
+    elsif ($q->param("s") eq "logout") {
+        do_logout();
+    }
+    elsif ($q->cookie("token") && $q->cookie("secret")) {
+        do_wave();
+    }
+    else {
+        do_login();
+    }
 }
-elsif ($q->param("s") eq "logout") {
-    do_logout();
-}
-elsif ($q->cookie("token") && $q->cookie("secret")) {
-    do_wave();
-}
+
 else {
-    do_login();
+    do_wave();
 }
 
 exit 0;
@@ -175,21 +184,24 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
-=pod
-    my $data = do {
-        no strict;
-        eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
-    };
-=cut
+    my $data;
+    if ($LOCAL) {
+        $data = do {
+            no strict;
+            eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
+        };
+    }
 
-    my $data = _wave_request({
-        id     => "read1",
-        method => "wave.robot.fetchWave",
-        params => {
-            waveId    => $wave_id,
-            waveletId => $wavelet_id,
-        },
-    });
+    else {
+        $data = _wave_request({
+            id     => "read1",
+            method => "wave.robot.fetchWave",
+            params => {
+                waveId    => $wave_id,
+                waveletId => $wavelet_id,
+            },
+        });
+    }
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
@@ -367,6 +379,8 @@ sub _form_wrap {
     my $out = q{<form action='}.$base_uri.q{' method='}.$opts->{method}.q{'};
     $out .= q{ style='}.$opts->{style}.q{'} if exists $opts->{style};
     $out .= q{>};
+
+    $out .= q{<input type='hidden' name='l' value='1' />} if $LOCAL;
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
