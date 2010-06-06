@@ -31,7 +31,6 @@ my $base_uri = "http://junai/ripple/ripple.cgi";
 
 my $q = CGI->new;
 
-=pod
 if ($q->param("s") eq "callback") {
     do_callback();
 }
@@ -44,9 +43,6 @@ elsif ($q->cookie("token") && $q->cookie("secret")) {
 else {
     do_login();
 }
-=cut
-
-do_wave();
 
 exit 0;
 
@@ -179,12 +175,13 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
+=pod
     my $data = do {
         no strict;
         eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
     };
+=cut
 
-=pod
     my $data = _wave_request({
         id     => "read1",
         method => "wave.robot.fetchWave",
@@ -193,7 +190,6 @@ sub action_read {
             waveletId => $wavelet_id,
         },
     });
-=cut
 
     my $out;
     if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
@@ -493,8 +489,8 @@ sub _render_blip {
         }
         $out .= q{</div>} if $is_child;
     }
-    else {
-        $out .= q{</div>} if $is_child;
+    elsif ($is_child) {
+        $out .= q{</div>};
         $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id);
     }
 
