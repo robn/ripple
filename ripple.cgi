@@ -480,6 +480,10 @@ sub _render_blip {
                             next if $start{link};
                             $start{link} = $thing->{value};
                         }
+                        when ("link/wave") {
+                            next if $start{link};
+                            $start{link} = $base_uri.q{?a=read&w=}.$thing->{value};
+                        }
 
                         when (m{^style/(.*)}) {
                             my $name = $1;
