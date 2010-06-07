@@ -375,6 +375,11 @@ div.blip-reply {
 div.blip-reply textarea {
     width: 100%;
 }
+
+div.gadget {
+    border: dashed #666666 3px;
+    background-color: #ffff99;
+}
 </style>
 </head>
 <body>
@@ -535,6 +540,9 @@ sub _render_blip {
                         when ("INLINE_BLIP") {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
+                        when ("GADGET") {
+                            push @{$point{gadgets}}, $thing->{properties};
+                        }
                         default {
                             #$out .= q{<span style='background-color: #660000; color: #ffffff;'>}.$thing->{type}.q{</span>};
                         }
@@ -569,6 +577,8 @@ sub _render_blip {
             }
 
             $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
+
+            $out .= _render_gadget($_) for @{$point{gadgets}};
 
             # range end
             $out .= q{</span>} if $end{style};
@@ -615,4 +625,13 @@ sub _reply_textarea {
             ).
         q{</div>}
     ;
+}
+
+sub _render_gadget {
+    my ($properties) = @_;
+
+    return
+        q{<div class='gadget'>}.
+            q{GADGET: }.encode_entities($properties->{url}).
+        q{</div>};
 }
