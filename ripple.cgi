@@ -171,7 +171,7 @@ sub action_search {
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
         $out .=
-            q{<a href='}.$base_uri.q{?a=read&w=}.uri_escape($digest->{waveId}).q{'>}.
+            q{<a href='}.$base_uri.q{?a=read&w=}.$digest->{waveId}.q{'>}.
                 q{<b>}.$digest->{title}.q{</b> }.$digest->{snippet}.
             q{</a><br />};
     }
