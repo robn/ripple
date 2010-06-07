@@ -13,6 +13,7 @@ use Data::Random qw(rand_chars);
 use LWP::UserAgent;
 use CGI ();
 use JSON qw(decode_json encode_json);
+use HTML::Entities;
 use Data::Dumper;
 
 my $consumer_key     = "anonymous";
@@ -172,7 +173,8 @@ sub action_search {
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
         $out .=
             q{<a href='}.$base_uri.q{?a=read&w=}.$digest->{waveId}.q{'>}.
-                q{<b>}.$digest->{title}.q{</b> }.$digest->{snippet}.
+                q{<b>}.encode_entities($digest->{title}).q{</b>}.
+                q{ }.encode_entities($digest->{snippet}).
             q{</a><br />};
     }
 
@@ -564,9 +566,9 @@ sub _render_blip {
             #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
 
             # blip content
-            $out .= substr ($blip->{content},
-                            $position,
-                            ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position);
+            $out .= encode_entities(substr ($blip->{content},
+                                            $position,
+                                            ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position));
         }
     }
 
