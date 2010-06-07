@@ -468,6 +468,9 @@ sub _render_blip {
 
                 if ($type == 2) {
                     given ($thing->{name}) {
+                        when ("conv/title") {
+                            $out .= q{<h1>};
+                        }
                         when ("link/auto") {
                             $out .= q{<a href='}.$thing->{value}.q{'>};
                         }
@@ -479,6 +482,9 @@ sub _render_blip {
 
                 elsif ($type == 0) {
                     given ($thing->{name}) {
+                        when ("conv/title") {
+                            $out .= q{</h1>};
+                        }
                         when ("link/auto") {
                             $out .= q{</a>}
                         }
