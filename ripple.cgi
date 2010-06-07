@@ -182,7 +182,7 @@ sub action_search {
 }
 
 sub action_read {
-    my $wave_id = $q->param("w");
+    my $wave_id = $q->param("w"); $wave_id =~ s/ /+/g;
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
@@ -190,7 +190,7 @@ sub action_read {
     if ($LOCAL) {
         $data = do {
             no strict;
-            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_googlewave.com!w+2WMEqdGlA'); <> };
+            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_'.$wave_id); <> };
         };
     }
 
