@@ -77,7 +77,7 @@ sub do_login {
 
     $oa_req = Net::OAuth->request("user auth")->new(
         token        => $oa_res->token,
-        callback     => "$base_uri?s=callback",
+        callback     => _build_internal_uri(s => 'callback'),
     );
 
     my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
@@ -108,14 +108,14 @@ sub do_callback {
     my $token_cookie = $q->cookie(-name => "token", -value => $oa_res->token);
     my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
 
-    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie, $secret_cookie]);
+    print $q->redirect(-uri => _build_internal_uri(), -cookie => [$token_cookie, $secret_cookie]);
 }
 
 sub do_logout {
     my $token_cookie = $q->cookie(-name => "token", -value => "");
     my $secret_cookie = $q->cookie(-name => "secret", -value => "");
 
-    print $q->redirect(-uri => $base_uri, -cookie => [$token_cookie, $secret_cookie]);
+    print $q->redirect(-uri => _build_internal_uri(), -cookie => [$token_cookie, $secret_cookie]);
 }
 
 sub do_wave {
@@ -172,7 +172,7 @@ sub action_search {
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
         $out .=
-            q{<a href='}.$base_uri.q{?a=read&w=}.$digest->{waveId}.q{'>}.
+            q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveID}).q{'>}.
                 q{<b>}.encode_entities($digest->{title}).q{</b>}.
                 q{ }.encode_entities($digest->{snippet}).
             q{</a><br />};
@@ -390,6 +390,14 @@ HTML_FOOTER
 ;
 }
 
+sub _build_internal_uri {
+    my (%args) = @_;
+
+    $args{l} = 1 if $LOCAL and !exists $args{l};
+
+    return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{});
+}
+
 sub _form_wrap {
     my @elements = grep { ref $_ eq "ARRAY" } @_;
     my ($opts)   = grep { ref $_ eq "HASH"  } @_;
@@ -397,7 +405,7 @@ sub _form_wrap {
     $opts //= {};
     $opts->{'method'} ||= 'get';
 
-    my $out = q{<form action='}.$base_uri.q{' method='}.$opts->{method}.q{'};
+    my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'};
     $out .= q{ style='}.$opts->{style}.q{'} if exists $opts->{style};
     $out .= q{>};
 
@@ -482,7 +490,7 @@ sub _render_blip {
                         }
                         when ("link/wave") {
                             next if $start{link};
-                            $start{link} = $base_uri.q{?a=read&w=}.$thing->{value};
+                            $start{link} = _build_internal_uri(a => 'read', w => $thing->{value});
                         }
 
                         when (m{^style/(.*)}) {
