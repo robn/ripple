@@ -190,7 +190,7 @@ sub action_read {
     if ($LOCAL) {
         $data = do {
             no strict;
-            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_googlewave.com!w+lw3NfNa3F'); <> };
+            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_googlewave.com!w+2WMEqdGlA'); <> };
         };
     }
 
