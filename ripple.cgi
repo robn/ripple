@@ -467,31 +467,65 @@ sub _render_blip {
                 my ($type, $thing) = @$meta;
 
                 if ($type == 2) {
+                    my @elems;
+                    my %style;
+
                     given ($thing->{name}) {
                         when ("conv/title") {
-                            $out .= q{<h1>};
+                            push @elems, [qw(h1)];
                         }
                         when ("link/auto") {
-                            $out .= q{<a href='}.$thing->{value}.q{'>};
+                            push @elems, [qw(a href), $thing->{value}];
                         }
+
+                        when (m{^style/(.*)}) {
+                            my $name = $1;
+                            $name =~ s/([A-Z])/q{-}.lc($1)/e;
+                            $style{$name} = $thing->{value};
+                        }
+
                         default {
                             #$out .= q{<span style='background-color: #000066; color: #ffffff;'>}.$thing->{name}.q{</span>};
                         }
                     }
+
+                    for my $elem (@elems) {
+                        my ($tag, %attrs) = @$elem;
+                        $out .= q{<}.$tag;
+                        $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
+                        $out .= q{>};
+                    }
+
+                    if (keys %style) {
+                        $out .= q{<span style='};
+                        $out .= $_.q{: }.$style{$_}.q{;} for keys %style;
+                        $out .= q{'>};
+                    }
                 }
 
                 elsif ($type == 0) {
+                    my @elems;
+                    my $style;
+
                     given ($thing->{name}) {
                         when ("conv/title") {
-                            $out .= q{</h1>};
+                            push @elems, q{h1};
                         }
                         when ("link/auto") {
-                            $out .= q{</a>}
+                            push @elems, q{a};
                         }
+
+                        when (m{^style/}) {
+                            $style = 1;
+                        }
+
                         default {
                             #$out .= q{<span style='background-color: #006600; color: #ffffff;'>}.$thing->{name}.q{</span>};
                         }
                     }
+
+                    $out .= q{</span>} if $style;
+                    $out .= q{</}.$_.q{>} for @elems;
                 }
 
                 elsif ($type == 1) {
