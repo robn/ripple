@@ -445,43 +445,44 @@ sub _render_blip {
     # 1 - element
     # 2 - start annotation
 
-    my $meta = {};
+    my $blipmeta = {};
     for my $pos (keys %{$blip->{elements}}) {
-        push @{$meta->{$pos}}, [ 1, $blip->{elements}->{$pos} ];
+        push @{$blipmeta->{$pos}}, [ 1, $blip->{elements}->{$pos} ];
     }
     for my $annotation (@{$blip->{annotations}}) {
-        push @{$meta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
-        push @{$meta->{$annotation->{range}->{end}}},   [ 0, $annotation ];
+        push @{$blipmeta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
+        push @{$blipmeta->{$annotation->{range}->{end}}},   [ 0, $annotation ];
     }
 
-    if (!keys %$meta) {
+    if (!keys %$blipmeta) {
         $out .= $blip->content;
     }
 
     else {
-        my @positions = sort { $a <=> $b } keys %$meta;
+        my @positions = sort { $a <=> $b } keys %$blipmeta;
         for my $i (0 .. $#positions) {
             my $position = $positions[$i];
 
-            for my $meta (sort { $a <=> $b } @{$meta->{$position}}) {
+            my (%start, %end, %point);
+
+            for my $meta (sort { $a <=> $b } @{$blipmeta->{$position}}) {
                 my ($type, $thing) = @$meta;
 
                 if ($type == 2) {
-                    my @elems;
-                    my %style;
-
                     given ($thing->{name}) {
                         when ("conv/title") {
-                            push @elems, [qw(h1)];
+                            push @{$start{elements}}, [qw(h1)];
                         }
-                        when ("link/auto") {
-                            push @elems, [qw(a href), $thing->{value}];
+
+                        when (m{^link/(?:manual|auto)}) {
+                            next if $start{link};
+                            $start{link} = $thing->{value};
                         }
 
                         when (m{^style/(.*)}) {
                             my $name = $1;
                             $name =~ s/([A-Z])/q{-}.lc($1)/e;
-                            $style{$name} = $thing->{value};
+                            $start{style}->{$name} = $thing->{value};
                         }
 
                         default {
@@ -489,34 +490,20 @@ sub _render_blip {
                         }
                     }
 
-                    for my $elem (@elems) {
-                        my ($tag, %attrs) = @$elem;
-                        $out .= q{<}.$tag;
-                        $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
-                        $out .= q{>};
-                    }
-
-                    if (keys %style) {
-                        $out .= q{<span style='};
-                        $out .= $_.q{: }.$style{$_}.q{;} for keys %style;
-                        $out .= q{'>};
-                    }
                 }
 
                 elsif ($type == 0) {
-                    my @elems;
-                    my $style;
-
                     given ($thing->{name}) {
                         when ("conv/title") {
-                            push @elems, q{h1};
+                            push @{$end{elements}}, qw(h1);
                         }
-                        when ("link/auto") {
-                            push @elems, q{a};
+
+                        when (m{^link/}) {
+                            $end{link} = 1;
                         }
 
                         when (m{^style/}) {
-                            $style = 1;
+                            $end{style} = 1;
                         }
 
                         default {
@@ -524,18 +511,15 @@ sub _render_blip {
                         }
                     }
 
-                    $out .= q{</span>} if $style;
-                    $out .= q{</}.$_.q{>} for @elems;
                 }
 
                 elsif ($type == 1) {
                     given ($thing->{type}) {
                         when ("LINE") {
-                            $out .= q{<br />} if $positions[$i] != 0;
+                            push @{$point{elements}}, [q{br}] if $positions[$i] != 0;
                         }
                         when ("INLINE_BLIP") {
-                            my $blip_id = $thing->{properties}->{id};
-                            $out .= _render_blip($wave_id, $wavelet_id, $blip_id, $blips, 1);
+                            push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         default {
                             #$out .= q{<span style='background-color: #660000; color: #ffffff;'>}.$thing->{type}.q{</span>};
@@ -544,8 +528,42 @@ sub _render_blip {
                 }
             }
 
+            # range start
+            for my $elem (@{$start{elements}}) {
+                my ($tag, %attrs) = @$elem;
+                $out .= q{<}.$tag;
+                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
+                $out .= q{>};
+            }
+
+            if ($start{link}) {
+                $out .= q{<a href='}.$start{link}.q{'>};
+            }
+
+            if (keys %{$start{style}}) {
+                $out .= q{<span style='};
+                $out .= $_.q{: }.$start{style}->{$_}.q{;} for keys %{$start{style}};
+                $out .= q{'>};
+            }
+
+            # points
+            for my $elem (@{$point{elements}}) {
+                my ($tag, %attrs) = @$elem;
+                $out .= q{<}.$tag;
+                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
+                $out .= q{ />};
+            }
+
+            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
+
+            # range end
+            $out .= q{</span>} if $end{style};
+            $out .= q{</a>} if $end{link};
+            $out .= q{</}.$_.q{>} for @{$end{elements}};
+
             #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
 
+            # blip content
             $out .= substr ($blip->{content},
                             $position,
                             ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position);
