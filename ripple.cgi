@@ -427,7 +427,7 @@ sub _render_blip {
 
     my $out = '';
     $out .=
-        q{<div class='blip'>}.
+        q{<div class='blip' id='}.$blip_id.q{'>}.
         q{<b>blip: }.$blip_id.q{ parent: }.$blip->{parentBlipId}.q{</b> }.$blip->{creator};
 
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
