@@ -188,7 +188,7 @@ sub action_read {
     if ($LOCAL) {
         $data = do {
             no strict;
-            eval do { local (@ARGV, $/) = ('/home/rob/waves/wave_wavewatchers.org!w+4hCT3AWXC'); <> };
+            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_googlewave.com!w+lw3NfNa3F'); <> };
         };
     }
 
