@@ -376,6 +376,11 @@ div.blip-reply textarea {
     width: 100%;
 }
 
+div.image {
+    border: dashed #666666 3px;
+    background-color: #ffff99;
+}
+
 div.gadget {
     border: dashed #666666 3px;
     background-color: #ffff99;
@@ -540,6 +545,9 @@ sub _render_blip {
                         when ("INLINE_BLIP") {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
+                        when ("IMAGE") {
+                            push @{$point{images}}, $thing->{properties};
+                        }
                         when ("GADGET") {
                             push @{$point{gadgets}}, $thing->{properties};
                         }
@@ -577,7 +585,7 @@ sub _render_blip {
             }
 
             $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
-
+            $out .= _render_image($_) for @{$point{images}};
             $out .= _render_gadget($_) for @{$point{gadgets}};
 
             # range end
@@ -625,6 +633,19 @@ sub _reply_textarea {
             ).
         q{</div>}
     ;
+}
+
+sub _render_image {
+    my ($properties) = @_;
+
+    my $out =
+        q{<div class='image'>}.
+            q{IMAGE: [}.encode_entities($properties->{attachmentId}).q{]};
+    
+    $out .= q{ }.encode_entities($properties->{caption}) if exists $properties->{caption};
+    $out .= q{</div>};
+
+    return $out;
 }
 
 sub _render_gadget {
