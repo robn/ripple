@@ -585,6 +585,31 @@ sub _render_blip {
                 }
             }
 
+            # range end
+            if ($end{style}) {
+                $out .= q{</span>};
+            }
+
+            if ($end{link}) {
+                $out .= q{</a>};
+            }
+
+            for my $elem (@{$end{elements}}) {
+                $out .= q{</}.$elem.q{>};
+            }
+
+            # points
+            for my $elem (@{$point{elements}}) {
+                my ($tag, %attrs) = @$elem;
+                $out .= q{<}.$tag;
+                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
+                $out .= q{ />};
+            }
+
+            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
+            $out .= _render_image($_) for @{$point{images}};
+            $out .= _render_gadget($_) for @{$point{gadgets}};
+
             # range start
             for my $elem (@{$start{elements}}) {
                 my ($tag, %attrs) = @$elem;
@@ -603,34 +628,10 @@ sub _render_blip {
                 $out .= q{'>};
             }
 
-            # points
-            for my $elem (@{$point{elements}}) {
-                my ($tag, %attrs) = @$elem;
-                $out .= q{<}.$tag;
-                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
-                $out .= q{ />};
-            }
-
-            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
-            $out .= _render_image($_) for @{$point{images}};
-            $out .= _render_gadget($_) for @{$point{gadgets}};
-
-            # range end
-            if ($end{style}) {
-                $out .= q{</span>};
-            }
-
-            if ($end{link}) {
-                $out .= q{</a>};
-            }
-
-            for my $elem (@{$end{elements}}) {
-                $out .= q{</}.$elem.q{>};
-            }
-
-            #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
 
             # blip content
+            #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
+
             $out .= encode_entities(substr ($blip->{content},
                                             $position,
                                             ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position));
