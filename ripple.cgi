@@ -481,9 +481,10 @@ sub _render_blip {
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
     if (@contributors) {
         $out .=
-            q{ (and }.
-            join (q{, }, @contributors).
-            q{)};
+            q{<br />}.
+            q{with <b>}.
+            join (q{</b>, <b>}, @contributors).
+            q{</b>};
     }
 
     $out .= 
