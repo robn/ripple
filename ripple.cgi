@@ -204,6 +204,10 @@ sub action_read {
                 waveletId => $wavelet_id,
             },
         });
+
+        open my $fh, '>', '/home/rob/code/wave/ripple/waves/wave_'.$wave_id;
+        print $fh Dumper $data;
+        close $fh;
     }
 
     my $out;
