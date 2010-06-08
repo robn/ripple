@@ -173,7 +173,7 @@ sub action_search {
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
         $out .=
-            q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveID}).q{'>}.
+            q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
                 q{<b>}.encode_entities($digest->{title}).q{</b>}.
                 q{ }.encode_entities($digest->{snippet}).
             q{</a><br />};
