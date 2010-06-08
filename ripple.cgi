@@ -668,17 +668,65 @@ sub _render_blip {
 
     $out .= q{</div>};
 
-    $out .= q{</div>} if $distance != 1; # root or thread blip
+    #
+    # that's the blip rendered. now for the stuff under it. this happens
+    # slightly differently depending on what kind of blip it is.
+    #
+    # since we don't have access to the conversation model, we have to infer
+    # things a bit. this results it a structure that isn't strictly correct
+    # but there's limits to what we can do
+    #
+    # we define three blip types: root, top and thread, as follows
+    #
+    # root
+    # top
+    #   thread
+    #   thread
+    #   thread
+    # top
+    #   thread
+    # top
+    # top
+    #   thread
+    #   thread
+    #
+    # replies to thread blips appear underneath as more thread blips (this is
+    # where the lack of the conversation model hurts). a reply box is added to
+    # the root and every top blip
+    #
+    # inline blips are just top blips rendered inside the blip content
+    #
+    # the distance is the how far away we are from the root. because of the
+    # way children are defined are setup in the wave json, we can infer the
+    # following from the blip distance:
+    #
+    # 0: root
+    # 1: top
+    # 2+ thread
+    #
 
+    # root blip gets a reply box
+    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance == 0;
+
+    # the root and thread blips don't have any other blips inside them
+    $out .= q{</div>} if $distance != 1;
+
+    # render the child blips
     if (@{$blip->{childBlipIds}}) {
         for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
             $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, $distance+1);
         }
     }
 
-    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance <= 1;
+    # top blips...
+    # top blips get a reply box after all their thread blips
+    if ($distance == 1) {
+        # get a reply box
+        $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id);
 
-    $out .= q{</div>} if $distance == 1; # top reply blip
+        # and then they're done
+        $out .= q{</div>} if $distance == 1;
+    }
 
     return $out;
 }
