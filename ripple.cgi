@@ -346,11 +346,16 @@ body {
     font-size: smaller;
 }
 
+img {
+    border: none;
+}
+
 /* root blip */
 body > div.blip {
     margin: 5px;
     padding: 5px;
-    background-color: #99ff99;
+    background-color: #9999ff;
+    border: solid black 1px;
 }
 
 /* normal blip */
@@ -364,7 +369,8 @@ div.blip > div.blip {
 div.blip-content > div.blip {
     margin: 5px;
     padding: 5px;
-    background-color: #ff99ff;
+    background-color: #9999ff;
+    border: solid black 1px;
 }
 
 div.blip-debug {
@@ -378,7 +384,7 @@ div.blip-debug {
 
 div.blip-content {
     padding: 5px;
-    background-color: white;
+    background-color: #ffffff;
     border: solid black 1px;
 }
 div.blip-content h1 {
@@ -393,9 +399,6 @@ div.blip-reply textarea {
 }
 
 div.image {
-    border: dashed #666666 3px;
-    background-color: #ffff99;
-    font-family: monospace;
     padding: 2px;
 }
 
@@ -751,9 +754,19 @@ sub _render_image {
 
     my $out =
         q{<div class='image'>}.
-            q{IMAGE: [}.encode_entities($properties->{attachmentId}).q{]};
+            #q{IMAGE: [}.encode_entities($properties->{attachmentId}).q{]};
+            q{<a href='}.$properties->{attachmentUrl}.q{'}.
+                q{<img src='}.$properties->{attachmentUrl}.q{'};
+
+    $out .= q{ alt='}.$properties->{caption}.q{'} if exists $properties->{caption};
+
+    $out .=
+                q{ />}.
+            q{</a>}.
+            q{<br />};
+
+    $out .= q{<caption>}.encode_entities($properties->{caption}).q{</caption>} if exists $properties->{caption};
     
-    $out .= q{ }.encode_entities($properties->{caption}) if exists $properties->{caption};
     $out .= q{</div>};
 
     return $out;
