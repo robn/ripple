@@ -405,6 +405,13 @@ div.gadget {
     font-family: monospace;
     padding: 2px;
 }
+
+div.attachment {
+    border: dashed #666666 3px;
+    background-color: #ffff99;
+    font-family: monospace;
+    padding: 2px;
+}
 </style>
 </head>
 <body>
@@ -587,8 +594,13 @@ sub _render_blip {
                         when ("INLINE_BLIP") {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
-                        when ("IMAGE") {
-                            push @{$point{images}}, $thing->{properties};
+                        when ("ATTACHMENT") {
+                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
+                                push @{$point{images}}, $thing->{properties};
+                            }
+                            else {
+                                push @{$point{attachments}}, $thing->{properties};
+                            }
                         }
                         when ("GADGET") {
                             push @{$point{gadgets}}, $thing->{properties};
@@ -621,9 +633,10 @@ sub _render_blip {
                 $out .= q{ />};
             }
 
-            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
             $out .= _render_image($_) for @{$point{images}};
             $out .= _render_gadget($_) for @{$point{gadgets}};
+            $out .= _render_attachment($_) for @{$point{attachment}};
+            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
 
             # range start
             for my $elem (@{$start{elements}}) {
@@ -705,5 +718,14 @@ sub _render_gadget {
     return
         q{<div class='gadget'>}.
             q{GADGET: }.encode_entities($properties->{url}).
+        q{</div>};
+}
+
+sub _render_attachment {
+    my ($properties) = @_;
+
+    return
+        q{<div class='attachment'>}.
+            q{ATTACHMENT: }.encode_entities($properties->{url}).
         q{</div>};
 }
