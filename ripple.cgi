@@ -14,6 +14,7 @@ use LWP::UserAgent;
 use CGI ();
 use JSON qw(decode_json encode_json);
 use HTML::Entities;
+use Date::Format;
 use Data::Dumper;
 
 my $consumer_key     = "anonymous";
@@ -338,13 +339,13 @@ sub _html_header {
 <style type="text/css">
 body {
     font-family: sans-serif;
+    font-size: smaller;
 }
 
 /* root blip */
 body > div.blip {
     margin: 5px;
     padding: 5px;
-    border: solid black 1px;
     background-color: #99ff99;
 }
 
@@ -352,7 +353,6 @@ body > div.blip {
 div.blip > div.blip {
     margin: 5px;
     padding: 5px;
-    border: solid black 1px;
     background-color: #9999ff;
 }
 
@@ -361,16 +361,28 @@ div.blip-content > div.blip {
     margin: 5px;
     padding: 5px;
     background-color: #ff99ff;
+}
+
+div.blip-debug {
+    float: right;
+    margin-right: 5px;
+    padding: 2px;
     border: solid black 1px;
+    background-color: #ffff99;
+    font-family: monospace;
 }
 
 div.blip-content {
     padding: 5px;
-    background-color: #ccccff;
+    background-color: white;
+    border: solid black 1px;
 }
+div.blip-content h1 {
+    display: inline;
+}
+
 div.blip-reply {
     padding: 5px;
-    background-color: #ff9999;
 }
 div.blip-reply textarea {
     width: 100%;
@@ -379,11 +391,15 @@ div.blip-reply textarea {
 div.image {
     border: dashed #666666 3px;
     background-color: #ffff99;
+    font-family: monospace;
+    padding: 2px;
 }
 
 div.gadget {
     border: dashed #666666 3px;
     background-color: #ffff99;
+    font-family: monospace;
+    padding: 2px;
 }
 </style>
 </head>
@@ -448,7 +464,8 @@ sub _render_blip {
     my $out = '';
     $out .=
         q{<div class='blip' id='}.$blip_id.q{'>}.
-        q{<b>blip: }.$blip_id.q{ parent: }.$blip->{parentBlipId}.q{</b> }.$blip->{creator};
+        q{<b>}.$blip->{creator}.q{</b>}.
+        time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
 
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
     if (@contributors) {
@@ -457,6 +474,12 @@ sub _render_blip {
             join (q{, }, @contributors).
             q{)};
     }
+
+    $out .= 
+        q{<div class='blip-debug'>}.
+            q{blip: }.$blip_id.q{<br />}.
+            q{parent: }.$blip->{parentBlipId}.q{<br />}.
+        q{</div>};
 
     $out .=
         q{<div class='blip-content'>};
