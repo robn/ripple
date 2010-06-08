@@ -526,8 +526,6 @@ sub _render_blip {
     }
 
     else {
-        # split the enclosing range
-
         my @positions = sort { $a <=> $b } keys %$blipmeta;
         for my $i (0 .. $#positions) {
             my $position = $positions[$i];
