@@ -616,9 +616,17 @@ sub _render_blip {
             $out .= _render_gadget($_) for @{$point{gadgets}};
 
             # range end
-            $out .= q{</span>} if $end{style};
-            $out .= q{</a>} if $end{link};
-            $out .= q{</}.$_.q{>} for @{$end{elements}};
+            if ($end{style}) {
+                $out .= q{</span>};
+            }
+
+            if ($end{link}) {
+                $out .= q{</a>};
+            }
+
+            for my $elem (@{$end{elements}}) {
+                $out .= q{</}.$elem.q{>};
+            }
 
             #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
 
