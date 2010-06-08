@@ -497,7 +497,20 @@ sub _render_blip {
         push @{$blipmeta->{$pos}}, [ 1, $blip->{elements}->{$pos} ];
     }
     for my $annotation (@{$blip->{annotations}}) {
+        # certain elements render strangely if rendered "inside" some ranges
+        # (eg an inline blip inside an link range). to get around this we
+        # check each annotation to see if there is one of these elements
+        # inside it. if there is, we create two or more annotations such that
+        # they sit between each element in the range
+        my @element_positions = grep { $_ > $annotation->{range}->{start} && 
+                                       $_ < $annotation->{range}->{end}   &&
+                                       $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|ATTACHMENT|GADGET)$/ } keys %{$blip->{elements}};
+
         push @{$blipmeta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
+        for my $element_position (@element_positions) {
+            push @{$blipmeta->{$element_position}},         [ 0, $annotation ];
+            push @{$blipmeta->{$element_position}},         [ 2, $annotation ];
+        }
         push @{$blipmeta->{$annotation->{range}->{end}}},   [ 0, $annotation ];
     }
 
@@ -506,6 +519,8 @@ sub _render_blip {
     }
 
     else {
+        # split the enclosing range
+
         my @positions = sort { $a <=> $b } keys %$blipmeta;
         for my $i (0 .. $#positions) {
             my $position = $positions[$i];
