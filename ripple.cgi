@@ -606,13 +606,7 @@ sub _render_blip {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         when ("ATTACHMENT") {
-                            #if (0) {
-                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
-                                push @{$point{images}}, $thing->{properties};
-                            }
-                            else {
-                                push @{$point{attachments}}, $thing->{properties};
-                            }
+                            push @{$point{attachments}}, $thing->{properties};
                         }
                         when ("GADGET") {
                             push @{$point{gadgets}}, $thing->{properties};
@@ -645,9 +639,8 @@ sub _render_blip {
                 $out .= q{ />};
             }
 
-            $out .= _render_image($_) for @{$point{images}};
-            $out .= _render_gadget($_) for @{$point{gadgets}};
             $out .= _render_attachment($_) for @{$point{attachments}};
+            $out .= _render_gadget($_) for @{$point{gadgets}};
             $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
 
             # range start
@@ -759,17 +752,19 @@ sub _reply_textarea {
     ;
 }
 
-sub _render_image {
+sub _render_attachment {
     my ($properties) = @_;
 
     my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
+    my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
+
+    my $type = $properties->{mimeType} =~ m{^image/(?:png|gif|jpeg)$} ? "image" : "attachment";
 
     my $out =
-        q{<div class='image'>}.
+        q{<div class='}.$type.q{'>}.
             q{<a href='}.$properties->{attachmentUrl}.q{'}.
                 q{<img}.
-                    #q{ src='}.$properties->{attachmentUrl}.q{'}.
-                    q{ src='/ripple/microwave62s.png'}.
+                    q{ src='}.($type eq "image" ? $properties->{attachmentUrl} : $icon_path.$icon).q{'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
                 q{<br />}.
@@ -778,25 +773,6 @@ sub _render_image {
         q{</div>};
 
     return $out;
-}
-
-sub _render_attachment {
-    my ($properties) = @_;
-
-    my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
-    my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
-
-    my $out =
-        q{<div class='attachment'>}.
-            q{<a href='}.$properties->{attachmentUrl}.q{'}.
-                q{<img}.
-                    q{ src='}.$icon_path.$icon.q{'}.
-                    q{ alt='}.$caption.q{'}.
-                q{ />}.
-                q{<br />}.
-                $caption.
-            q{</a>}.
-        q{</div>};
 }
 
 sub _render_gadget {
