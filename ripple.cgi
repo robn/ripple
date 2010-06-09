@@ -406,9 +406,16 @@ div.blip-reply textarea {
 
 div.image, div.attachment {
     display: table-cell;
-    padding: 5px;
     border: solid #999999 1px;
     background-color: #ffff99;
+    margin: 0;
+    padding: 0;
+}
+div.image > a, div.attachment > a {
+    display: block;
+    padding: 5px;
+    color: inherit;
+    text-decoration: none;
 }
 
 div.gadget {
@@ -599,8 +606,8 @@ sub _render_blip {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         when ("ATTACHMENT") {
-                            if (0) {
-                            #if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
+                            #if (0) {
+                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
                                 push @{$point{images}}, $thing->{properties};
                             }
                             else {
@@ -765,9 +772,9 @@ sub _render_image {
                     q{ src='/ripple/microwave62s.png'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
+                q{<br />}.
+                $caption.
             q{</a>}.
-            q{<br />}.
-            $caption.
         q{</div>};
 
     return $out;
@@ -786,9 +793,9 @@ sub _render_attachment {
                     q{ src='}.$icon_path.$icon.q{'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
+                q{<br />}.
+                $caption.
             q{</a>}.
-            q{<br />}.
-            $caption.
         q{</div>};
 }
 
