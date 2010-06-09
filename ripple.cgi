@@ -131,6 +131,7 @@ sub do_wave {
         search   => \&action_search,
         read     => \&action_read,
         redirect => \&action_redirect,
+        reply    => \&action_reply,
         test     => \&action_test,
     );
 
@@ -235,6 +236,33 @@ sub action_redirect {
     return;
 }
 
+sub action_reply {
+    my $wave_id        = $q->param("w");
+    my $wavelet_id     = $q->param("wl");
+    my $parent_blip_id = $q->param("b");
+
+    my $blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
+
+    my $data = _wave_request({
+        id     => "reply1",
+        method => "wave.blip.createChild",
+        params => {
+            waveId    => $wave_id,
+            waveletId => $wavelet_id,
+            blipId    => $parent_blip_id,
+            blipData  => {
+                waveId       => $wave_id,
+                waveletId    => $wavelet_id,
+                blipId       => $blip_id,
+                parentBlipId => $parent_blip_id,
+                content      => '',
+            },
+        },
+    });
+
+    return q{<pre>}.Dumper($data).q{</pre>};
+}
+
 # waveletdata
 # {
 #   'waveletId': 'eatenbyagrue.org!conv+root',
@@ -292,8 +320,6 @@ sub action_test {
     });
 
     return q{<pre>}.Dumper($data).q{</pre>};
-
-    return;
 }
 
 =pod
