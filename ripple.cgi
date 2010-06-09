@@ -31,12 +31,9 @@ my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 
 my $base_uri = "http://junai/ripple/ripple.cgi";
 
-my $icon_path = q{file:///usr/share/icons/gnome/48x48/mimetypes/};
+my $icon_path = q{/ripple/icons/};
 
 my %icon_type_map = (
-    'image/png'  => 'image.png',
-    'image/gif'  => 'image.png',
-    'image/jpeg' => 'image.png',
     '_unknown'   => 'unknown.png',
 );
 
@@ -407,18 +404,14 @@ div.blip-reply textarea {
     width: 100%;
 }
 
-div.image {
-    padding: 2px;
+div.image, div.attachment {
+    display: table-cell;
+    padding: 5px;
+    border: solid #999999 1px;
+    background-color: #ffff99;
 }
 
 div.gadget {
-    border: dashed #666666 3px;
-    background-color: #ffff99;
-    font-family: monospace;
-    padding: 2px;
-}
-
-div.attachment {
     border: dashed #666666 3px;
     background-color: #ffff99;
     font-family: monospace;
@@ -606,7 +599,8 @@ sub _render_blip {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         when ("ATTACHMENT") {
-                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
+                            if (0) {
+                            #if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
                                 push @{$point{images}}, $thing->{properties};
                             }
                             else {
@@ -767,7 +761,8 @@ sub _render_image {
         q{<div class='image'>}.
             q{<a href='}.$properties->{attachmentUrl}.q{'}.
                 q{<img}.
-                    q{ src='}.$properties->{attachmentUrl}.q{'}.
+                    #q{ src='}.$properties->{attachmentUrl}.q{'}.
+                    q{ src='/ripple/microwave62s.png'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
             q{</a>}.
@@ -785,7 +780,7 @@ sub _render_attachment {
     my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
 
     my $out =
-        q{<div class='image'>}.
+        q{<div class='attachment'>}.
             q{<a href='}.$properties->{attachmentUrl}.q{'}.
                 q{<img}.
                     q{ src='}.$icon_path.$icon.q{'}.
