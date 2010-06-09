@@ -127,10 +127,11 @@ sub do_logout {
 
 sub do_wave {
     my %action_handler = (
-        inbox  => \&action_inbox,
-        search => \&action_search,
-        read   => \&action_read,
-        test   => \&action_test,
+        inbox    => \&action_inbox,
+        search   => \&action_search,
+        read     => \&action_read,
+        redirect => \&action_redirect,
+        test     => \&action_test,
     );
 
     my $out = '';
@@ -227,6 +228,11 @@ sub action_read {
     $out .= q{<pre>}.Dumper($data).q{</pre>};
 
     return $out;
+}
+
+sub action_redirect {
+    print $q->redirect(-uri => $q->param("u"));
+    return;
 }
 
 # waveletdata
@@ -420,7 +426,7 @@ div.image > a, div.attachment > a {
 
 div.gadget {
     border: dashed #666666 3px;
-    background-color: #ffff99;
+    background-color: #99ff99;
     font-family: monospace;
     padding: 2px;
 }
@@ -556,7 +562,7 @@ sub _render_blip {
 
                         when (m{^link/(?:manual|auto)}) {
                             next if $start{link};
-                            $start{link} = $thing->{value};
+                            $start{link} = _build_internal_uri(a => 'redirect', u => uri_escape($thing->{value}));
                         }
                         when ("link/wave") {
                             next if $start{link};
