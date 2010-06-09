@@ -31,6 +31,15 @@ my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 
 my $base_uri = "http://junai/ripple/ripple.cgi";
 
+my $icon_path = q{file:///usr/share/icons/gnome/48x48/mimetypes/};
+
+my %icon_type_map = (
+    'image/png'  => 'image.png',
+    'image/gif'  => 'image.png',
+    'image/jpeg' => 'image.png',
+    '_unknown'   => 'unknown.png',
+);
+
 my $q = CGI->new;
 
 my $LOCAL = 0;
@@ -597,7 +606,8 @@ sub _render_blip {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         when ("ATTACHMENT") {
-                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
+                            if (0) {
+                            #if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
                                 push @{$point{images}}, $thing->{properties};
                             }
                             else {
@@ -637,7 +647,7 @@ sub _render_blip {
 
             $out .= _render_image($_) for @{$point{images}};
             $out .= _render_gadget($_) for @{$point{gadgets}};
-            $out .= _render_attachment($_) for @{$point{attachment}};
+            $out .= _render_attachment($_) for @{$point{attachments}};
             $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
 
             # range start
@@ -752,24 +762,40 @@ sub _reply_textarea {
 sub _render_image {
     my ($properties) = @_;
 
+    my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
+
     my $out =
         q{<div class='image'>}.
-            #q{IMAGE: [}.encode_entities($properties->{attachmentId}).q{]};
             q{<a href='}.$properties->{attachmentUrl}.q{'}.
-                q{<img src='}.$properties->{attachmentUrl}.q{'};
-
-    $out .= q{ alt='}.$properties->{caption}.q{'} if exists $properties->{caption};
-
-    $out .=
+                q{<img}.
+                    q{ src='}.$properties->{attachmentUrl}.q{'}.
+                    q{ alt='}.$caption.q{'}.
                 q{ />}.
             q{</a>}.
-            q{<br />};
-
-    $out .= q{<caption>}.encode_entities($properties->{caption}).q{</caption>} if exists $properties->{caption};
-    
-    $out .= q{</div>};
+            q{<br />}.
+            q{<caption>}.$caption.q{</a>}.
+        q{</div>};
 
     return $out;
+}
+
+sub _render_attachment {
+    my ($properties) = @_;
+
+    my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
+    my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
+
+    my $out =
+        q{<div class='image'>}.
+            q{<a href='}.$properties->{attachmentUrl}.q{'}.
+                q{<img}.
+                    q{ src='}.$icon_path.$icon.q{'}.
+                    q{ alt='}.$caption.q{'}.
+                q{ />}.
+            q{</a>}.
+            q{<br />}.
+            q{<caption>}.$caption.q{</a>}.
+        q{</div>};
 }
 
 sub _render_gadget {
@@ -778,14 +804,5 @@ sub _render_gadget {
     return
         q{<div class='gadget'>}.
             q{GADGET: }.encode_entities($properties->{url}).
-        q{</div>};
-}
-
-sub _render_attachment {
-    my ($properties) = @_;
-
-    return
-        q{<div class='attachment'>}.
-            q{ATTACHMENT: }.encode_entities($properties->{url}).
         q{</div>};
 }
