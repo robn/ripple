@@ -606,8 +606,7 @@ sub _render_blip {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
                         when ("ATTACHMENT") {
-                            if (0) {
-                            #if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
+                            if ($thing->{properties}->{mimeType} =~ m{^image/(?:png|gif|jpeg)$}) {
                                 push @{$point{images}}, $thing->{properties};
                             }
                             else {
@@ -773,7 +772,7 @@ sub _render_image {
                 q{ />}.
             q{</a>}.
             q{<br />}.
-            q{<caption>}.$caption.q{</a>}.
+            $caption.
         q{</div>};
 
     return $out;
@@ -794,7 +793,7 @@ sub _render_attachment {
                 q{ />}.
             q{</a>}.
             q{<br />}.
-            q{<caption>}.$caption.q{</a>}.
+            $caption.
         q{</div>};
 }
 
