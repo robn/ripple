@@ -243,8 +243,8 @@ sub action_reply {
 
     my $blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
 
-    my $data = _wave_request({
-        id     => "reply1",
+    my $data = _wave_request([{
+        id     => "create1",
         method => "wave.blip.createChild",
         params => {
             waveId    => $wave_id,
@@ -258,7 +258,21 @@ sub action_reply {
                 content      => '',
             },
         },
-    });
+    }, {
+        id     => "append1",
+        method => "wave.document.modify",
+        params => {
+            waveId       => $wave_id,
+            waveletId    => $wavelet_id,
+            blipId       => $blip_id,
+            modifyAction => {
+                modifyHow => "REPLACE",
+                values    => [
+                    $q->param("r"),
+                ],
+            },
+        },
+    }]);
 
     return q{<pre>}.Dumper($data).q{</pre>};
 }
