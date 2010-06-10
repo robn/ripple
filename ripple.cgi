@@ -274,13 +274,7 @@ sub action_reply {
         },
     }]);
 
-    return q{<pre>}.Dumper($data).q{</pre>};
-
-    # XXX
-
-    my $new_blip_id = $data->{blipId};
-
-    return $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id, '#' => $new_blip_id));
+    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
 }
 
 # waveletdata
