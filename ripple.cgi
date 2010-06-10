@@ -174,18 +174,33 @@ sub action_search {
         id     => "op1",
         method => "wave.robot.search",
         params => {
-            query => $q->param("q"),
+            query      => $q->param("q"),
+            index      => $q->param("i") // 0,
+            numResults => 10,
         },
     });
+
+    if ($data->{data}->{searchResults}->{numResults} == 0) {
+        return "aww, no more...";
+    }
 
     my $out = '';
     for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
         $out .=
-            q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
-                q{<b>}.encode_entities($digest->{title}).q{</b>}.
-                q{ }.encode_entities($digest->{snippet}).
-            q{</a><br />};
+            q{<div class='search-item'>}.
+                q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
+                    q{<h1>}.encode_entities($digest->{title}).q{</h1>}.
+                    encode_entities($digest->{snippet}).
+                q{</a>}.
+            q{</div>};
     }
+
+    $out .= _form_wrap(
+        [qw(hidden q), $q->param("q")],
+        [qw(hidden i), ($q->param("i") // 0) + 10],
+        [qw(hidden a search)],
+        [q{submit}, undef, q{find more...}],
+    );
 
     return $out;
 }
@@ -402,6 +417,23 @@ img {
     border: none;
 }
 
+div.search-item {
+    margin: 2px;
+    padding: 2px;
+    border: solid black 1px;
+    background-color: #ffff99;
+}
+div.search-item h1 {
+    margin: 0;
+    padding: 0;
+    font-size: larger;
+}
+div.search-item > a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
 /* root blip */
 body > div.blip {
     margin: 5px;
@@ -512,10 +544,16 @@ sub _form_wrap {
         my ($type, $name, $value) = @$element;
         $value ||= '';
         if ($type eq 'textarea') {
-            $out .= q{<textarea name='}.$name.q{'>}.$value.q{</textarea>};
+            $out .=
+                q{<textarea}.
+                ($name ? q{ name='}.$name.q{'} : q{}).
+                q{>}.$value.q{</textarea>};
         }
         else {
-            $out .= q{<input type='}.$type.q{' name='}.$name.q{' value='}.$value.q{' />};
+            $out .=
+                q{<input type='}.$type.q{'}.
+                ($name ? q{ name='}.$name.q{'} : q{}).
+                q{ value='}.$value.q{' />};
         }
     }
 
