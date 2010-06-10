@@ -268,13 +268,19 @@ sub action_reply {
             modifyAction => {
                 modifyHow => "REPLACE",
                 values    => [
-                    $q->param("r"),
+                    "\n".$q->param("r"),
                 ],
             },
         },
     }]);
 
     return q{<pre>}.Dumper($data).q{</pre>};
+
+    # XXX
+
+    my $new_blip_id = $data->{blipId};
+
+    return $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id, '#' => $new_blip_id));
 }
 
 # waveletdata
@@ -488,9 +494,11 @@ HTML_FOOTER
 sub _build_internal_uri {
     my (%args) = @_;
 
+    my $fragment = delete $args{'#'};
+
     $args{l} = 1 if $LOCAL and !exists $args{l};
 
-    return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{});
+    return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
 }
 
 sub _form_wrap {
