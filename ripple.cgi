@@ -132,7 +132,6 @@ sub do_wave {
         read     => \&action_read,
         redirect => \&action_redirect,
         reply    => \&action_reply,
-        test     => \&action_test,
     );
 
     my $out = '';
@@ -294,81 +293,6 @@ sub action_reply {
 
     print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
 }
-
-# waveletdata
-# {
-#   'waveletId': 'eatenbyagrue.org!conv+root',
-#   'waveId': 'eatenbyagrue.org!TBD_0x4c8cad8a',
-#   'rootBlipId': 'TBD_eatenbyagrue.org!conv+root_0x401c33cd',
-#   'participants': set(['rob@eatenbyagrue.org'])
-# }
-# blipdata
-# {
-#   'waveletId': 'eatenbyagrue.org!conv+root',
-#   'blipId': 'TBD_eatenbyagrue.org!conv+root_0x401c33cd',
-#   'waveId': 'eatenbyagrue.org!TBD_0x4c8cad8a',
-#   'content': '',
-#   'parentBlipId': None}
-# }
-#
-# operation
-# {
-#   'id': 'op1'
-#   'method': 'robot.createWavelet',
-#   'params': {
-#     'waveId': 'eatenbyagrue.org!TBD_0x16348be1'
-#     'waveletId': 'eatenbyagrue.org!conv+root', 
-#     'waveletData': {
-#       'waveletId': 'eatenbyagrue.org!conv+root', 
-#       'waveId': 'eatenbyagrue.org!TBD_0x16348be1',
-#       'rootBlipId': 'TBD_eatenbyagrue.org!conv+root_0x4b666aa8',
-#       'participants': [
-#         'rob@eatenbyagrue.org'
-#       ]
-#     },
-#   },
-# }
-
-sub action_test {
-    my $wave_id = sprintf q{eatenbyagrue.org!TBD_0x%08x}, int rand 4294967296;
-    my $wavelet_id = q{eatenbyagrue.org!conv+root};
-    my $root_blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
-
-    my $data = _wave_request({
-        id => "test1",
-        method => "wave.robot.createWavelet",
-        params => {
-            waveId => $wave_id,
-            waveletId => $wavelet_id,
-            waveletData => {
-                waveId => $wave_id,
-                waveletId => $wavelet_id,
-                rootBlipId => $root_blip_id,
-                participants => [
-                    q{rob@eatenbyagrue.org},
-                ],
-            },
-        },
-    });
-
-    return q{<pre>}.Dumper($data).q{</pre>};
-}
-
-=pod
-sub action_test {
-    my $data = _wave_request({
-        id => "test1",
-        method => "wave.robot.fetchWave",
-        params => {
-            waveId => q{ga-staff-dev.monash.edu!w+Zgx9msiJA},
-            waveletId => q{ga-staff-dev.monash.edu!conv+root},
-        },
-    });
-
-    print $q->header("text/plain");
-    print Dumper $data;
-}
-=cut
 
 sub _wave_request {
     my ($rpc) = @_;
