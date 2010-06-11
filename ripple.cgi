@@ -1,5 +1,9 @@
 #!/usr/bin/env perl
 
+# ripple - pure-html wave client
+# Robert Norris <rob@eatenbyagrue.org> - June 2010
+# Apache license: http://www.apache.org/licenses/LICENSE-2.0.html
+
 use 5.010;
 
 use warnings;
@@ -111,7 +115,7 @@ images, attachments and most rich-text, and post simple plaintext replies.
 </p>
 
 <p>
-The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is Perl. License is AGPL v3. Contributions are very welcome.
+The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is Perl. License is Apache v2. Contributions are very welcome.
 </p>
 
 <p>
