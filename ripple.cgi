@@ -437,6 +437,9 @@ div.search-item {
     border: solid black 1px;
     background-color: #ffff99;
 }
+div.search-item:hover {
+    background-color: #999999;
+}
 div.search-item h1 {
     margin: 0;
     padding: 0;
@@ -824,13 +827,13 @@ sub _render_blip {
         }
     }
 
-    # top blips...
-    # top blips get a reply box after all their thread blips
+    # end of a top blip
     if ($distance == 1) {
-        # get a reply box
-        $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id);
+        # get a reply box after all their thread blips.  the reply gets added
+        # to the final thread blip though. more conversation model hack
+        $out .= _reply_textarea($wave_id, $wavelet_id, @{$blip->{childBlipIds}} ? $blip->{childBlipIds}->[-1] : $blip_id);
 
-        # and then they're done
+        # and that's that
         $out .= q{</div>} if $distance == 1;
     }
 
