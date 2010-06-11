@@ -324,7 +324,7 @@ sub action_read {
     my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
     my $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
 
-    $out .= q{<pre>}.Dumper($data).q{</pre>};
+    #$out .= q{<pre>}.Dumper($data).q{</pre>};
 
     return $out;
 }
