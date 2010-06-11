@@ -43,17 +43,23 @@ my $LOCAL = 0;
 $LOCAL = 1 if $q->param("l");
 
 if (!$LOCAL) {
-    if ($q->param("s") eq "callback") {
-        do_callback();
-    }
-    elsif ($q->param("s") eq "logout") {
-        do_logout();
-    }
-    elsif ($q->cookie("token") && $q->cookie("secret")) {
-        do_wave();
-    }
-    else {
-        do_login();
+    given ($q->param("s")) {
+        when ("login") {
+            do_login();
+        }
+        when ("callback") {
+            do_callback();
+        }
+        when ("logout") {
+            do_logout();
+        }
+        default {
+            if ($q->cookie("token") && $q->cookie("secret")) {
+                do_wave();
+            } else {
+                do_splash();
+            }
+        }
     }
 }
 
@@ -62,6 +68,85 @@ else {
 }
 
 exit 0;
+
+sub do_splash {
+    print
+        $q->header,
+
+        _html_header(),
+
+        <<SPLASH
+<h1>welcome to ripple</h1>
+
+<p>
+<b>ripple</b> is prototype pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>,
+built using the <a href='http://code.google.com/apis/wave/extensions/wavedataapi/'>Wave Data API</a>.
+Its purpose is to demonstrate that a useful Wave client can be built without the need for any advanced
+browser features, and to eventually inform the development of a truly accessible Wave client.
+</p>
+
+<p>
+Its currently possible to use it to search for and read waves, included
+images, attachments and most rich-text, and post simple plaintext replies.
+</p>
+
+<p>
+<b>Getting started:</b>
+</p>
+
+<ol>
+  <li>Click "login" below</li>
+  <li>Choose the Google account you use to access Wave (you might not be offered a choice if you only have one Google account)</li>
+  <li>Allow ripple to access Wave on your behalf. ripple is not currently registered with Google, so you'll see a recommendation
+      that you deny access. Its your call, but we can't do much without access. The access tokens returned by Google are never
+      stored by the ripple server; instead they get saved in your browser cookies.</li>
+  <li>Play!</li>
+</ol>
+
+<p>
+<b>Limitations:</b>
+</p>
+
+<ul>
+  <li>A <a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>bug in the Data API</a> means that you can only read waves that you are a participant of.</li>
+  <li>The data API does not (yet) expose the conversation model (that is, the tree structure of blips in the wave) so ripple has to guess when rendering the wave and posting replies. Things often come out out-of-order, but you can usually still see what's going on. Google promise this is coming "soon".</li>
+  <li>No ability to make new waves. That's a slight lie - its actually easy to create new waves, but because Google doesn't expose the identiy of an OAuth user, its impossible to know which domain to create the wave in. Google are aware of the issue and hope to include something in the upcoming Wave Profile API.</li>
+  <li>Speaking of profiles, user profile support isnt' available. That mostly means no pretty user pictures.</li>
+  <li>No gadget support. ripple does not implement a gadget container. You'll see a placeholders where gadgets would normally go.</li>
+</ul>
+
+<p>
+<b>Development</b>
+</p>
+
+<p>
+The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is Perl. License is AGPL v3. Contributions are very welcome.
+</p>
+
+<p>
+<b>Acknowledgements</b>
+</p>
+
+<p>
+Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Pamela Fox and antimatter15. You all did something, even if you don't me and/or don't remember what you did :)
+</p>
+
+<p>
+<b>Me</b>
+</p>
+
+<p>
+I'm <a href='http://eatenbyagrue.org/'>Robert Norris</a>, a random programmer. My address is <a href='mailto:rob\@eatenbyagrue.org'>rob\@eatenbyagrue.org</a> on mail, Jabber and Wave. Say hi sometime!
+</p>
+
+SPLASH
+,
+        _form_wrap(
+            [qw(submit s login)],
+        ),
+
+        _html_footer();
+}
 
 sub do_login {
     my $oa_req = Net::OAuth->request("request token")->new(
