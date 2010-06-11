@@ -123,7 +123,7 @@ The code is available at <a href='http://github.com/robn/ripple'>http://github.c
 </p>
 
 <p>
-Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Pamela Fox and antimatter15. You all did something, even if you don't me and/or don't remember what you did :)
+Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
 </p>
 
 <p>
