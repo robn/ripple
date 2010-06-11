@@ -236,12 +236,32 @@ sub action_read {
     }
 
     my $out;
-    if (my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId}) {
-        $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
+
+    if ($data->{error}) {
+        $out .=
+            q{<p>}.
+                q{<b>Error loading wave:</b><br />}.
+                q{<code>}.$data->{error}->{message}.q{</code>}.
+            q{</p>};
+
+        if ($data->{error}->{message} =~ m/is not a participant/) {
+            $out .=
+                q{<p>}.
+                    q{Note: There's currently a bug on Google's side that }.
+                    q{stops you seeing waves you're not an explicit }.
+                    q{participant in, even if the wave is public. }.
+                    q{<a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>}.
+                    q{Google are aware of the bug}.
+                    q{</a> }.
+                    q{and should have a fix available soon. Sorry!}.
+                q{</p>}
+        }
+
+        return $out;
     }
-    else {
-        $out = '<p>no root blip?</p>';
-    }
+
+    my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
+    my $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
 
     $out .= q{<pre>}.Dumper($data).q{</pre>};
 
