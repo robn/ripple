@@ -149,7 +149,6 @@ sub do_wave {
 
             _form_wrap(
                 [qw(submit a inbox)],
-                [qw(submit a test)],
                 [qw(submit s logout)],
             ),
 
