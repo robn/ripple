@@ -143,24 +143,27 @@ sub do_wave {
     }
 
     if (defined $out) {
-        print $q->header("text/html");
+        print
+            $q->header("text/html"),
 
-        print _html_header();
+            _html_header(),
 
-        print _form_wrap(
-            [qw(submit a inbox)],
-            [qw(submit a test)],
-            [qw(submit s logout)],
-        );
+            _form_wrap(
+                [qw(submit a inbox)],
+                [qw(submit a test)],
+                [qw(submit s logout)],
+            ),
 
-        print _form_wrap(
-            [qw(text q), $q->param("q")],
-            [qw(submit a search)],
-        );
+            q{<div class='search-box'>},
+                _form_wrap(
+                    [qw(text q), $q->param("q")],
+                    [qw(submit a search)],
+                ),
+            q{</div>},
 
-        print $out;
+            $out,
 
-        print _html_footer();
+            _html_footer();
     }
 }
 
@@ -417,6 +420,17 @@ img {
     border: none;
 }
 
+div.search-box {
+    padding: 0 5px 0 5px;
+}
+div.search-box input[type=text] {
+    width: 100%;
+}
+div.search-box input[type=submit] {
+    position: absolute;
+    right: 10px;
+}
+
 div.search-item {
     margin: 2px;
     padding: 2px;
@@ -478,6 +492,9 @@ div.blip-content h1 {
 div.blip-reply {
     padding: 5px;
 }
+div.blip-reply form {
+    display: inline;
+}
 div.blip-reply textarea {
     width: 100%;
 }
@@ -534,9 +551,7 @@ sub _form_wrap {
     $opts //= {};
     $opts->{'method'} ||= 'get';
 
-    my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'};
-    $out .= q{ style='}.$opts->{style}.q{'} if exists $opts->{style};
-    $out .= q{>};
+    my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'>};
 
     $out .= q{<input type='hidden' name='l' value='1' />} if $LOCAL;
 
@@ -827,7 +842,7 @@ sub _reply_textarea {
 
     return
         q{<div class='blip-reply'>}.
-            _form_wrap( { method => 'post', style  => 'display: inline;' },
+            _form_wrap( { method => 'post' },
                [qw(hidden w),  $wave_id],
                [qw(hidden wl), $wavelet_id],
                [qw(hidden b),  $blip_id],
