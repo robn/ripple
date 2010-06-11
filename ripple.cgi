@@ -39,32 +39,23 @@ my %icon_type_map = (
 
 my $q = CGI->new;
 
-my $LOCAL = 0;
-$LOCAL = 1 if $q->param("l");
-
-if (!$LOCAL) {
-    given ($q->param("s")) {
-        when ("login") {
-            do_login();
-        }
-        when ("callback") {
-            do_callback();
-        }
-        when ("logout") {
-            do_logout();
-        }
-        default {
-            if ($q->cookie("token") && $q->cookie("secret")) {
-                do_wave();
-            } else {
-                do_splash();
-            }
+given ($q->param("s")) {
+    when ("login") {
+        do_login();
+    }
+    when ("callback") {
+        do_callback();
+    }
+    when ("logout") {
+        do_logout();
+    }
+    default {
+        if ($q->cookie("token") && $q->cookie("secret")) {
+            do_wave();
+        } else {
+            do_splash();
         }
     }
-}
-
-else {
-    do_wave();
 }
 
 exit 0;
@@ -296,28 +287,14 @@ sub action_read {
     my ($wavelet_id) = $wave_id =~ m/^([^!]+)/;
     $wavelet_id .= q{!conv+root};
 
-    my $data;
-    if ($LOCAL) {
-        $data = do {
-            no strict;
-            eval do { local (@ARGV, $/) = ('/home/rob/code/wave/ripple/waves/wave_'.$wave_id); <> };
-        };
-    }
-
-    else {
-        $data = _wave_request({
-            id     => "read1",
-            method => "wave.robot.fetchWave",
-            params => {
-                waveId    => $wave_id,
-                waveletId => $wavelet_id,
-            },
-        });
-
-        open my $fh, '>', '/home/rob/code/wave/ripple/waves/wave_'.$wave_id;
-        print $fh Dumper $data;
-        close $fh;
-    }
+    my $data = _wave_request({
+        id     => "read1",
+        method => "wave.robot.fetchWave",
+        params => {
+            waveId    => $wave_id,
+            waveletId => $wavelet_id,
+        },
+    });
 
     my $out;
 
@@ -570,8 +547,6 @@ sub _build_internal_uri {
 
     my $fragment = delete $args{'#'};
 
-    $args{l} = 1 if $LOCAL and !exists $args{l};
-
     return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
 }
 
@@ -583,8 +558,6 @@ sub _form_wrap {
     $opts->{'method'} ||= 'get';
 
     my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'>};
-
-    $out .= q{<input type='hidden' name='l' value='1' />} if $LOCAL;
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
