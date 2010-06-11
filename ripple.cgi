@@ -604,11 +604,11 @@ sub _render_blip {
             q{</b>};
     }
 
-    $out .= 
-        q{<div class='blip-debug'>}.
-            q{blip: }.$blip_id.q{<br />}.
-            q{parent: }.$blip->{parentBlipId}.q{<br />}.
-        q{</div>};
+#    $out .= 
+#        q{<div class='blip-debug'>}.
+#            q{blip: }.$blip_id.q{<br />}.
+#            q{parent: }.$blip->{parentBlipId}.q{<br />}.
+#        q{</div>};
 
     $out .=
         q{<div class='blip-content'>};
