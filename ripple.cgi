@@ -413,8 +413,7 @@ sub _form_wrap {
         }
     }
 
-    $out .= q{</form>}
-    ;
+    $out .= q{</form>};
 }
 
 sub _render_blip {
@@ -449,8 +448,7 @@ sub _render_blip {
             q{</div>};
     }
 
-    $out .=
-        q{<div class='blip-content'>};
+    $out .= q{<div class='blip-content'>};
 
     # 0 - end annotation
     # 1 - element
