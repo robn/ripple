@@ -192,7 +192,7 @@ sub action_inbox {
 
 sub action_search {
     my $data = _wave_request({
-        id     => "op1",
+        id     => "search1",
         method => "wave.robot.search",
         params => {
             query      => $q->param("q"),
