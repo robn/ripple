@@ -2,7 +2,7 @@
 
 # ripple - pure-html wave client
 # Robert Norris <rob@eatenbyagrue.org> - June 2010
-# Apache license: http://www.apache.org/licenses/LICENSE-2.0.html
+# Artistic license 2.0: http://www.opensource.org/licenses/artistic-license-2.0.php
 
 use 5.010;
 
@@ -120,7 +120,7 @@ images, attachments and most rich-text, and post simple plaintext replies.
 </p>
 
 <p>
-The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is Perl. License is Apache v2. Contributions are very welcome.
+The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is <a href='http://www.perl.org/'>Perl</a>. License is <a href='http://www.opensource.org/licenses/artistic-license-2.0.php'>Artistic v2</a>. Contributions are very welcome.
 </p>
 
 <p>
