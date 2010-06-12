@@ -12,7 +12,7 @@ use strict;
 use URI::Escape;
 use Crypt::OpenSSL::RSA;
 use CGI::Carp qw(fatalsToBrowser);
-use Net::OAuth;
+use Net::OAuth 0.25;
 use Data::Random qw(rand_chars);
 use LWP::UserAgent;
 use CGI ();
