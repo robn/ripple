@@ -273,27 +273,41 @@ sub action_search {
         },
     });
 
+    my $out;
+
     if ($data->{data}->{searchResults}->{numResults} == 0) {
-        return "aww, no more...";
+        $out =
+            q{<p>aww, no more...</p>};
     }
 
-    my $out = '';
-    for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
+    else {
+        $out = '';
+        for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
+            $out .=
+                q{<div class='search-item'>}.
+                    q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
+                        q{<h1>}.encode_entities($digest->{title}).q{</h1>}.
+                        encode_entities($digest->{snippet}).
+                    q{</a>}.
+                q{</div>};
+        }
+
+        $out .= _form_wrap(
+            [qw(hidden q), $q->param("q")],
+            [qw(hidden i), ($q->param("i") // 0) + 10],
+            [qw(hidden a search)],
+            [q{submit}, undef, q{find more...}],
+        );
+    }
+
+    if ($q->param("d")) {
         $out .=
-            q{<div class='search-item'>}.
-                q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
-                    q{<h1>}.encode_entities($digest->{title}).q{</h1>}.
-                    encode_entities($digest->{snippet}).
-                q{</a>}.
+            q{<div class='protocol-debug'>}.
+                q{<pre>}.
+                    Dumper($data).
+                q{</pre>}.
             q{</div>};
     }
-
-    $out .= _form_wrap(
-        [qw(hidden q), $q->param("q")],
-        [qw(hidden i), ($q->param("i") // 0) + 10],
-        [qw(hidden a search)],
-        [q{submit}, undef, q{find more...}],
-    );
 
     return $out;
 }
@@ -340,7 +354,14 @@ sub action_read {
     my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
     $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
 
-    #$out .= q{<pre>}.Dumper($data).q{</pre>};
+    if ($q->param("d")) {
+        $out .=
+            q{<div class='protocol-debug'>}.
+                q{<pre>}.
+                    Dumper($data).
+                q{</pre>}.
+            q{</div>};
+    }
 
     return $out;
 }
@@ -543,6 +564,14 @@ div.gadget {
     font-family: monospace;
     padding: 2px;
 }
+
+div.protocol-debug {
+    border: solid black 1px;
+    background-color: #cccccc;
+}
+div.protocol-debug > pre {
+    margin: 5px;
+}
 </style>
 </head>
 <body>
@@ -561,6 +590,8 @@ HTML_FOOTER
 sub _build_internal_uri {
     my (%args) = @_;
 
+    $args{d} = 1 if $q->param("d");
+
     my $fragment = delete $args{'#'};
 
     return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
@@ -574,6 +605,8 @@ sub _form_wrap {
     $opts->{'method'} ||= 'get';
 
     my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'>};
+
+    push @elements, [qw(hidden d 1)] if $q->param("d");
 
     for my $element (@elements) {
         my ($type, $name, $value) = @$element;
@@ -620,11 +653,13 @@ sub _render_blip {
             q{</b>};
     }
 
-#    $out .= 
-#        q{<div class='blip-debug'>}.
-#            q{blip: }.$blip_id.q{<br />}.
-#            q{parent: }.$blip->{parentBlipId}.q{<br />}.
-#        q{</div>};
+    if ($q->param("d")) {
+        $out .= 
+            q{<div class='blip-debug'>}.
+                q{blip: }.$blip_id.q{<br />}.
+                q{parent: }.$blip->{parentBlipId}.q{<br />}.
+            q{</div>};
+    }
 
     $out .=
         q{<div class='blip-content'>};
