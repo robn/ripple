@@ -20,11 +20,11 @@ use HTML::Entities;
 use Date::Format;
 use Data::Dumper;
 
-# uri to the script
-my $base_uri = "http://junai/ripple/ripple.cgi";
+# uri to the script. you can hard code this if you like, otherwise this will try to infer it
+my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME};
 
 # uri path to icons
-my $icon_path = q{/ripple/icons/};
+my $icon_path = ($ENV{SCRIPT_NAME} =~ m{^(.*/)})[0] . "icons/";
 
 # icons for attachments. key is the mime type, value is the file under $icon_path
 my %icon_type_map = (
