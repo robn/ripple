@@ -103,8 +103,8 @@ sub do_login {
     my $oa_res = Net::OAuth->response("request token")->from_post_body($res->content);
 
     $oa_req = Net::OAuth->request("user auth")->new(
-        token        => $oa_res->token,
-        callback     => _build_internal_uri(s => 'callback'),
+        token    => $oa_res->token,
+        callback => _build_internal_uri(s => 'callback'),
     );
 
     my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
