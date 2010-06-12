@@ -375,223 +375,6 @@ sub _default_request_params {
     );
 }
 
-sub _html_header {
-    return <<HTML_HEADER
-<html>
-<head>
-<title>ripple</title>
-<style type="text/css">
-body {
-    font-family: sans-serif;
-    font-size: smaller;
-}
-
-img {
-    border: none;
-}
-
-div.search-box {
-    padding: 0 5px 0 5px;
-}
-div.search-box input[type=text] {
-    width: 100%;
-}
-div.search-box input[type=submit] {
-    position: absolute;
-    right: 10px;
-}
-
-div.search-item {
-    margin: 2px;
-    padding: 2px;
-    border: solid black 1px;
-    background-color: #ffff99;
-}
-div.search-item:hover {
-    background-color: #999999;
-}
-div.search-item h1 {
-    margin: 0;
-    padding: 0;
-    font-size: larger;
-}
-div.search-item > a {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-}
-
-/* root blip */
-body > div.blip {
-    margin: 5px;
-    padding: 5px;
-    background-color: #9999ff;
-    border: solid black 1px;
-}
-
-/* normal blip */
-div.blip > div.blip {
-    margin: 5px;
-    padding: 5px;
-    background-color: #9999ff;
-}
-
-/* inline blip */
-div.blip-content > div.blip {
-    margin: 5px;
-    padding: 5px;
-    background-color: #9999ff;
-    border: solid black 1px;
-}
-
-div.blip-debug {
-    float: right;
-    margin-right: 5px;
-    padding: 2px;
-    border: solid black 1px;
-    background-color: #ffff99;
-    font-family: monospace;
-}
-
-div.blip-content {
-    padding: 5px;
-    background-color: #ffffff;
-    border: solid black 1px;
-}
-div.blip-content h1 {
-    display: inline;
-}
-
-div.blip-reply {
-    padding: 5px;
-}
-div.blip-reply form {
-    display: inline;
-}
-div.blip-reply textarea {
-    width: 100%;
-}
-
-div.image, div.attachment {
-    display: table-cell;
-    border: solid #999999 1px;
-    background-color: #ffff99;
-    margin: 0;
-    padding: 0;
-}
-div.image > a, div.attachment > a {
-    display: block;
-    padding: 5px;
-    color: inherit;
-    text-decoration: none;
-}
-
-div.gadget {
-    border: dashed #666666 3px;
-    background-color: #99ff99;
-    font-family: monospace;
-    padding: 2px;
-}
-
-div.protocol-debug {
-    border: solid black 1px;
-    background-color: #cccccc;
-}
-div.protocol-debug > pre {
-    margin: 5px;
-}
-</style>
-</head>
-<body>
-HTML_HEADER
-;
-}
-
-sub _html_footer {
-    return <<HTML_FOOTER
-</body>
-</html>
-HTML_FOOTER
-;
-}
-
-sub _html_splash {
-    return <<HTML_SPLASH
-<h1>welcome to ripple</h1>
-
-<p>
-<b>ripple</b> is prototype pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>,
-built using the <a href='http://code.google.com/apis/wave/extensions/wavedataapi/'>Wave Data API</a>.
-Its purpose is to demonstrate that a useful Wave client can be built without the need for any advanced
-browser features, and to eventually inform the development of a truly accessible Wave client.
-</p>
-
-<p>
-Its currently possible to use it to search for and read waves, included
-images, attachments and most rich-text, and post simple plaintext replies.
-</p>
-
-<p>
-<b>Getting started:</b>
-</p>
-
-<ol>
-  <li>Click "login" below</li>
-  <li>Choose the Google account you use to access Wave (you might not be offered a choice if you only have one Google account)</li>
-  <li>Allow ripple to access Wave on your behalf. ripple is not currently registered with Google, so you'll see a recommendation
-      that you deny access. Its your call, but we can't do much without access. The access tokens returned by Google are never
-      stored by the ripple server; instead they get saved in your browser cookies.</li>
-  <li>Play!</li>
-</ol>
-
-<p>
-<b>Limitations:</b>
-</p>
-
-<ul>
-  <li>A <a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>bug in the Data API</a> means that you can only read waves that you are a participant of.</li>
-  <li>The data API does not (yet) expose the conversation model (that is, the tree structure of blips in the wave) so ripple has to guess when rendering the wave and posting replies. Things often come out out-of-order, but you can usually still see what's going on. Google promise this is coming "soon".</li>
-  <li>No ability to make new waves. That's a slight lie - its actually easy to create new waves, but because Google doesn't expose the identiy of an OAuth user, its impossible to know which domain to create the wave in. Google are aware of the issue and hope to include something in the upcoming Wave Profile API.</li>
-  <li>Speaking of profiles, user profile support isn't available. That mostly means no pretty user pictures.</li>
-  <li>No gadget support. ripple does not implement a gadget container. You'll see placeholders where gadgets would normally go.</li>
-  <li>Some formatting elements (headings, bullets, indents and alignments) aren't rendered. Its not hard, I just haven't done the code yet. Coming soon!</li>
-</ul>
-
-<p>
-<b>Development</b>
-</p>
-
-<p>
-The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is <a href='http://www.perl.org/'>Perl</a>. License is <a href='http://www.opensource.org/licenses/artistic-license-2.0.php'>Artistic v2</a>. Contributions are very welcome.
-</p>
-
-<p>
-<b>Discuss</b>
-</p>
-
-<p>
-We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenbyagrue.org/w+0DauPtxSI'>this discussion wave</a>.
-</p>
-
-<p>
-<b>Acknowledgements</b>
-</p>
-
-<p>
-Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
-</p>
-
-<p>
-<b>Me</b>
-</p>
-
-<p>
-I'm <a href='http://eatenbyagrue.org/'>Robert Norris</a>, a random programmer. My address is <a href='mailto:rob\@eatenbyagrue.org'>rob\@eatenbyagrue.org</a> on mail, Jabber and Wave. Say hi sometime!
-</p>
-HTML_SPLASH
-;
-}
-
 sub _build_internal_uri {
     my (%args) = @_;
 
@@ -944,3 +727,221 @@ sub _render_gadget {
             q{GADGET: }.encode_entities($properties->{url}).
         q{</div>};
 }
+
+sub _html_header {
+    return <<HTML_HEADER
+<html>
+<head>
+<title>ripple</title>
+<style type="text/css">
+body {
+    font-family: sans-serif;
+    font-size: smaller;
+}
+
+img {
+    border: none;
+}
+
+div.search-box {
+    padding: 0 5px 0 5px;
+}
+div.search-box input[type=text] {
+    width: 100%;
+}
+div.search-box input[type=submit] {
+    position: absolute;
+    right: 10px;
+}
+
+div.search-item {
+    margin: 2px;
+    padding: 2px;
+    border: solid black 1px;
+    background-color: #ffff99;
+}
+div.search-item:hover {
+    background-color: #999999;
+}
+div.search-item h1 {
+    margin: 0;
+    padding: 0;
+    font-size: larger;
+}
+div.search-item > a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* root blip */
+body > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+    border: solid black 1px;
+}
+
+/* normal blip */
+div.blip > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+}
+
+/* inline blip */
+div.blip-content > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+    border: solid black 1px;
+}
+
+div.blip-debug {
+    float: right;
+    margin-right: 5px;
+    padding: 2px;
+    border: solid black 1px;
+    background-color: #ffff99;
+    font-family: monospace;
+}
+
+div.blip-content {
+    padding: 5px;
+    background-color: #ffffff;
+    border: solid black 1px;
+}
+div.blip-content h1 {
+    display: inline;
+}
+
+div.blip-reply {
+    padding: 5px;
+}
+div.blip-reply form {
+    display: inline;
+}
+div.blip-reply textarea {
+    width: 100%;
+}
+
+div.image, div.attachment {
+    display: table-cell;
+    border: solid #999999 1px;
+    background-color: #ffff99;
+    margin: 0;
+    padding: 0;
+}
+div.image > a, div.attachment > a {
+    display: block;
+    padding: 5px;
+    color: inherit;
+    text-decoration: none;
+}
+
+div.gadget {
+    border: dashed #666666 3px;
+    background-color: #99ff99;
+    font-family: monospace;
+    padding: 2px;
+}
+
+div.protocol-debug {
+    border: solid black 1px;
+    background-color: #cccccc;
+}
+div.protocol-debug > pre {
+    margin: 5px;
+}
+</style>
+</head>
+<body>
+HTML_HEADER
+;
+}
+
+sub _html_footer {
+    return <<HTML_FOOTER
+</body>
+</html>
+HTML_FOOTER
+;
+}
+
+sub _html_splash {
+    return <<HTML_SPLASH
+<h1>welcome to ripple</h1>
+
+<p>
+<b>ripple</b> is prototype pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>,
+built using the <a href='http://code.google.com/apis/wave/extensions/wavedataapi/'>Wave Data API</a>.
+Its purpose is to demonstrate that a useful Wave client can be built without the need for any advanced
+browser features, and to eventually inform the development of a truly accessible Wave client.
+</p>
+
+<p>
+Its currently possible to use it to search for and read waves, included
+images, attachments and most rich-text, and post simple plaintext replies.
+</p>
+
+<p>
+<b>Getting started:</b>
+</p>
+
+<ol>
+  <li>Click "login" below</li>
+  <li>Choose the Google account you use to access Wave (you might not be offered a choice if you only have one Google account)</li>
+  <li>Allow ripple to access Wave on your behalf. ripple is not currently registered with Google, so you'll see a recommendation
+      that you deny access. Its your call, but we can't do much without access. The access tokens returned by Google are never
+      stored by the ripple server; instead they get saved in your browser cookies.</li>
+  <li>Play!</li>
+</ol>
+
+<p>
+<b>Limitations:</b>
+</p>
+
+<ul>
+  <li>A <a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>bug in the Data API</a> means that you can only read waves that you are a participant of.</li>
+  <li>The data API does not (yet) expose the conversation model (that is, the tree structure of blips in the wave) so ripple has to guess when rendering the wave and posting replies. Things often come out out-of-order, but you can usually still see what's going on. Google promise this is coming "soon".</li>
+  <li>No ability to make new waves. That's a slight lie - its actually easy to create new waves, but because Google doesn't expose the identiy of an OAuth user, its impossible to know which domain to create the wave in. Google are aware of the issue and hope to include something in the upcoming Wave Profile API.</li>
+  <li>Speaking of profiles, user profile support isn't available. That mostly means no pretty user pictures.</li>
+  <li>No gadget support. ripple does not implement a gadget container. You'll see placeholders where gadgets would normally go.</li>
+  <li>Some formatting elements (headings, bullets, indents and alignments) aren't rendered. Its not hard, I just haven't done the code yet. Coming soon!</li>
+</ul>
+
+<p>
+<b>Development</b>
+</p>
+
+<p>
+The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is <a href='http://www.perl.org/'>Perl</a>. License is <a href='http://www.opensource.org/licenses/artistic-license-2.0.php'>Artistic v2</a>. Contributions are very welcome.
+</p>
+
+<p>
+<b>Discuss</b>
+</p>
+
+<p>
+We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenbyagrue.org/w+0DauPtxSI'>this discussion wave</a>.
+</p>
+
+<p>
+<b>Acknowledgements</b>
+</p>
+
+<p>
+Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
+</p>
+
+<p>
+<b>Me</b>
+</p>
+
+<p>
+I'm <a href='http://eatenbyagrue.org/'>Robert Norris</a>, a random programmer. My address is <a href='mailto:rob\@eatenbyagrue.org'>rob\@eatenbyagrue.org</a> on mail, Jabber and Wave. Say hi sometime!
+</p>
+HTML_SPLASH
+;
+}
+
