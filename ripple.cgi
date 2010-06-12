@@ -21,25 +21,30 @@ use HTML::Entities;
 use Date::Format;
 use Data::Dumper;
 
-my $consumer_key     = "anonymous";
-my $consumer_secret  = "anonymous";
+# uri to the script
+my $base_uri = "http://junai/ripple/ripple.cgi";
 
-my $scope = q{http://wave.googleusercontent.com/api/rpc};
+# uri path to icons
+my $icon_path = q{/ripple/icons/};
 
-my $oa_req_uri    = q{https://www.google.com/accounts/OAuthGetRequestToken?scope=}.uri_escape($scope);
+# icons for attachments. key is the mime type, value is the file under $icon_path
+my %icon_type_map = (
+    '_unknown'   => 'unknown.png',
+);
+
+# oauth key and secret. if you change these you'll need to register your app with Google
+my $consumer_key    = "anonymous";
+my $consumer_secret = "anonymous";
+
+# you shouldn't need to change anything under here
+
+my $oa_scope = q{http://wave.googleusercontent.com/api/rpc};
+
+my $oa_req_uri    = q{https://www.google.com/accounts/OAuthGetRequestToken?scope=}.uri_escape($oa_scope);
 my $oa_auth_uri   = q{https://www.google.com/accounts/OAuthAuthorizeToken};
 my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
 
 my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
-
-
-my $base_uri = "http://junai/ripple/ripple.cgi";
-
-my $icon_path = q{/ripple/icons/};
-
-my %icon_type_map = (
-    '_unknown'   => 'unknown.png',
-);
 
 my $q = CGI->new;
 
@@ -148,7 +153,7 @@ sub do_login {
         _default_request_params(),
         request_url => $oa_req_uri,
         extra_params => {
-            scope => $scope,
+            scope => $oa_scope,
         },
     );
     $oa_req->sign;
