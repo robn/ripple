@@ -124,6 +124,14 @@ The code is available at <a href='http://github.com/robn/ripple'>http://github.c
 </p>
 
 <p>
+<b>Discuss</b>
+</p>
+
+<p>
+We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenbyagrue.org/w+0DauPtxSI'>this discussion wave</a>.
+</p>
+
+<p>
 <b>Acknowledgements</b>
 </p>
 
