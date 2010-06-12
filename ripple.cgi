@@ -739,11 +739,11 @@ sub _render_blip {
                         }
 
                         when (m{^link/}) {
-                            $end{link} = 1;
+                            $end{link}++;
                         }
 
                         when (m{^style/}) {
-                            $end{style} = 1;
+                            $end{style}++;
                         }
 
                         default {
@@ -776,11 +776,11 @@ sub _render_blip {
 
             # range end
             if ($end{style}) {
-                $out .= q{</span>};
+                $out .= q{</span>} x $end{style};
             }
 
             if ($end{link}) {
-                $out .= q{</a>};
+                $out .= q{</a>} x $end{link};
             }
 
             for my $elem (@{$end{elements}}) {
