@@ -343,7 +343,8 @@ sub _wave_request {
     $oa_req->sign;
 
     my $ua = LWP::UserAgent->new;
-    my $res = $ua->post($oa_req->to_url, Content_type => "application/json", Content => encode_json($rpc));
+    $ua->default_header(Authorization => $oa_req->to_authorization_header);
+    my $res = $ua->post($oa_req->request_url, Content_type => "application/json", Content => encode_json($rpc));
 
     if (!$res->is_success) {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
