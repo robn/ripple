@@ -851,6 +851,10 @@ HTML_HEADER
 
 sub _html_footer {
      return <<HTML_FOOTER
+<p>
+<a href='http://eatenbyagrue.org/a/ripple'>ripple</a> &copy; 2010 <a href='mailto:rob\@eatenbyagrue.org'>Robert Norris</a>
+</p>
+
 </body>
 </html>
 HTML_FOOTER
