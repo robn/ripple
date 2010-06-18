@@ -915,7 +915,7 @@ We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenby
 </p>
 
 <p>
-Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
+Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Gian Wild, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
 </p>
 
 <p>
