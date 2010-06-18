@@ -19,9 +19,13 @@ use JSON qw(decode_json encode_json);
 use HTML::Entities;
 use Date::Format;
 use Data::Dumper;
+use File::Basename;
 
 # uri to the script. you can hard code this if you like, otherwise this will try to infer it
 my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME};
+
+# path to splash screen file
+my $splash_file = (fileparse($ENV{SCRIPT_FILENAME}))[1]."splash.html";
 
 # uri path to icons
 my $icon_path = ($ENV{SCRIPT_NAME} =~ m{^(.*/)})[0] . "icons/";
@@ -846,7 +850,7 @@ HTML_HEADER
 }
 
 sub _html_footer {
-    return <<HTML_FOOTER
+     return <<HTML_FOOTER
 </body>
 </html>
 HTML_FOOTER
@@ -854,78 +858,20 @@ HTML_FOOTER
 }
 
 sub _html_splash {
-    return <<HTML_SPLASH
-<h1>welcome to ripple</h1>
+    my $html = eval {
+        do { local (@ARGV, $/) = ($splash_file); <ARGV> };
+    };
+    if (!$html) {
+        $html = <<HTML_SPLASH
+<h1>ripple</h1>
 
 <p>
-<b>ripple</b> is prototype pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>,
-built using the <a href='http://code.google.com/apis/wave/extensions/wavedataapi/'>Wave Data API</a>.
-Its purpose is to demonstrate that a useful Wave client can be built without the need for any advanced
-browser features, and to eventually inform the development of a truly accessible Wave client.
-</p>
-
-<p>
-Its currently possible to use it to search for and read waves, included
-images, attachments and most rich-text, and post simple plaintext replies.
-</p>
-
-<p>
-<b>Getting started:</b>
-</p>
-
-<ol>
-  <li>Click "login" below</li>
-  <li>Choose the Google account you use to access Wave (you might not be offered a choice if you only have one Google account)</li>
-  <li>Allow ripple to access Wave on your behalf. ripple is not currently registered with Google, so you'll see a recommendation
-      that you deny access. Its your call, but we can't do much without access. The access tokens returned by Google are never
-      stored by the ripple server; instead they get saved in your browser cookies.</li>
-  <li>Play!</li>
-</ol>
-
-<p>
-<b>Limitations:</b>
-</p>
-
-<ul>
-  <li>The data API does not (yet) expose the conversation model (that is, the tree structure of blips in the wave) so ripple has to guess when rendering the wave and posting replies. Things often come out out-of-order, but you can usually still see what's going on. Google promise this is coming "soon".</li>
-  <li>No ability to make new waves. That's a slight lie - its actually easy to create new waves, but because Google doesn't expose the identiy of an OAuth user, its impossible to know which domain to create the wave in. Google are aware of the issue and hope to include something in the upcoming Wave Profile API.</li>
-  <li>Speaking of profiles, user profile support isn't available. That mostly means no pretty user pictures.</li>
-  <li>No gadget support. ripple does not implement a gadget container. You'll see placeholders where gadgets would normally go.</li>
-  <li>Some formatting elements (headings, bullets, indents and alignments) aren't rendered. Its not hard, I just haven't done the code yet. Coming soon!</li>
-</ul>
-
-<p>
-<b>Development</b>
-</p>
-
-<p>
-The code is available at <a href='http://github.com/robn/ripple'>http://github.com/robn/ripple</a>. Language is <a href='http://www.perl.org/'>Perl</a>. License is <a href='http://www.opensource.org/licenses/artistic-license-2.0.php'>Artistic v2</a>. Contributions are very welcome.
-</p>
-
-<p>
-<b>Discuss</b>
-</p>
-
-<p>
-We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenbyagrue.org/w+0DauPtxSI'>this discussion wave</a>.
-</p>
-
-<p>
-<b>Acknowledgements</b>
-</p>
-
-<p>
-Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Gian Wild, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
-</p>
-
-<p>
-<b>Me</b>
-</p>
-
-<p>
-I'm <a href='http://eatenbyagrue.org/'>Robert Norris</a>, a random programmer. My address is <a href='mailto:rob\@eatenbyagrue.org'>rob\@eatenbyagrue.org</a> on mail, Jabber and Wave. Say hi sometime!
+A pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>.
 </p>
 HTML_SPLASH
 ;
+    }
+
+    return $html;
 }
 
