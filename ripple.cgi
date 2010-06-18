@@ -263,19 +263,6 @@ sub action_read {
                 q{<code>}.$data->{error}->{message}.q{</code>}.
             q{</p>};
 
-        if ($data->{error}->{message} =~ m/is not a participant/) {
-            $out .=
-                q{<p>}.
-                    q{Note: There's currently a bug on Google's side that }.
-                    q{stops you seeing waves you're not an explicit }.
-                    q{participant in, even if the wave is public. }.
-                    q{<a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>}.
-                    q{Google are aware of the bug}.
-                    q{</a> }.
-                    q{and should have a fix available soon. Sorry!}.
-                q{</p>}
-        }
-
         return $out;
     }
 
@@ -900,7 +887,6 @@ images, attachments and most rich-text, and post simple plaintext replies.
 </p>
 
 <ul>
-  <li>A <a href='http://code.google.com/p/google-wave-resources/issues/detail?id=787'>bug in the Data API</a> means that you can only read waves that you are a participant of.</li>
   <li>The data API does not (yet) expose the conversation model (that is, the tree structure of blips in the wave) so ripple has to guess when rendering the wave and posting replies. Things often come out out-of-order, but you can usually still see what's going on. Google promise this is coming "soon".</li>
   <li>No ability to make new waves. That's a slight lie - its actually easy to create new waves, but because Google doesn't expose the identiy of an OAuth user, its impossible to know which domain to create the wave in. Google are aware of the issue and hope to include something in the upcoming Wave Profile API.</li>
   <li>Speaking of profiles, user profile support isn't available. That mostly means no pretty user pictures.</li>
