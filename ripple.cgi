@@ -712,10 +712,23 @@ sub _render_attachment {
 sub _render_gadget {
     my ($properties) = @_;
 
-    return
+    my $out =
         q{<div class='gadget'>}.
-            q{GADGET: }.encode_entities($properties->{url}).
+            q{GADGET: }.encode_entities($properties->{url});
+
+    if ($q->param("d")) {
+        $out .=
+            q{<div class='protocol-debug'>}.
+                q{<pre>}.
+                    Dumper($properties).
+                q{</pre>}.
+            q{</div>};
+    }
+
+    $out .=
         q{</div>};
+
+    return $out;
 }
 
 sub _html_header {
