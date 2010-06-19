@@ -267,6 +267,16 @@ sub action_read {
                 q{<code>}.$data->{error}->{message}.q{</code>}.
             q{</p>};
 
+        if ($data->{error}->{message} =~ m/is not a participant/) {
+            $out .=
+                q{<p>}.
+                    q{Note: There's currently a bug on Google's side that }.
+                    q{sometimes stops you seeing waves you're not an }.
+                    q{explicit participant in. Google are aware of the bug }.
+                    q{and should have a fix available soon. Sorry!}.
+                q{</p>}
+        }
+
         return $out;
     }
 
