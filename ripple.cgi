@@ -811,9 +811,11 @@ sub _render_gadget_yesnomaybe {
     };
 
     my $out =
-        $render_list->("yes",   @yes).
-        $render_list->("no",    @no).
-        $render_list->("maybe", @maybe);
+        q{<div class='gadget-yesnomaybe'>}.
+            $render_list->("yes",   @yes).
+            $render_list->("no",    @no).
+            $render_list->("maybe", @maybe).
+        q{</div>};
 
     return $out;
 }
@@ -939,6 +941,15 @@ div.gadget {
     border: dashed #666666 3px;
     background-color: #99ff99;
     padding: 2px;
+}
+
+div.gadget-yesnomaybe {
+    display: table;
+}
+
+div.gadget-yesnomaybe-list {
+    display: table-cell;
+    width: 33%;
 }
 
 div.protocol-debug {
