@@ -51,6 +51,11 @@ my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 
 my $q = CGI->new;
 
+if ($q->param("l")) {
+    do_wave();
+    exit 0;
+}
+
 given ($q->param("s")) {
     when ("login") {
         do_login();
@@ -343,6 +348,21 @@ sub action_reply {
 
 sub _wave_request {
     my ($rpc) = @_;
+
+    if ($q->param("l")) {
+        my $ops = ref $rpc eq "HASH" ? [$rpc] : $rpc;
+        my @data;
+        for my $id (map { $_->{id} } @$ops) {
+            my $file = (fileparse($ENV{SCRIPT_FILENAME}))[1].q{l/}.$id;
+            {
+                no strict 'vars';
+                push @data, eval do { (@ARGV, $/) = ($file); <> };
+                die "error reading $file: $!" if $!;
+                die $@ if $@;
+            }
+        }
+        return ref $rpc eq "HASH" ? shift @data : \@data;
+    }
 
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
