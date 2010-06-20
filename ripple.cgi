@@ -479,7 +479,7 @@ sub _render_blip {
     }
 
     if (!keys %$blipmeta) {
-        $out .= $blip->content;
+        $out .= $blip->{content};
     }
 
     else {
