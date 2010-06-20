@@ -39,6 +39,7 @@ my %icon_type_map = (
 my $consumer_key    = "anonymous";
 my $consumer_secret = "anonymous";
 
+
 # you shouldn't need to change anything under here
 
 my $oa_scope = q{http://wave.googleusercontent.com/api/rpc};
@@ -48,6 +49,12 @@ my $oa_auth_uri   = q{https://www.google.com/accounts/OAuthAuthorizeToken};
 my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
 
 my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
+
+my %gadget_handler_map = (
+    "http://wave-api.appspot.com/public/gadgets/areyouin/gadget.xml" => \&_render_gadget_yesnomaybe,
+    "_unknown"                                                       => \&_render_gadget_unknown,
+);
+
 
 my $q = CGI->new;
 
@@ -742,9 +749,11 @@ sub _render_attachment {
 sub _render_gadget {
     my ($properties) = @_;
 
+    my $renderer = $gadget_handler_map{$properties->{url}} ? $gadget_handler_map{$properties->{url}} : $gadget_handler_map{_unknown};
+
     my $out =
         q{<div class='gadget'>}.
-            q{GADGET: }.encode_entities($properties->{url});
+        $renderer->($properties);
 
     if ($q->param("d")) {
         $out .=
@@ -759,6 +768,16 @@ sub _render_gadget {
         q{</div>};
 
     return $out;
+}
+
+sub _render_gadget_yesnomaybe {
+    goto \&_render_gadget_unknown;
+}
+
+sub _render_gadget_unknown {
+    my ($properties) = @_;
+
+    return q{GADGET: }.encode_entities($properties->{url});
 }
 
 sub _html_header {
