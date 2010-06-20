@@ -771,7 +771,51 @@ sub _render_gadget {
 }
 
 sub _render_gadget_yesnomaybe {
-    goto \&_render_gadget_unknown;
+    my ($properties) = @_;
+
+    my @users = map { m/^(.*):answer$/ } keys %$properties;
+
+    my $user_sorter = sub {
+        return $properties->{"$a:order"} <=> $properties->{"$b:order"};
+    };
+
+    my @yes   = sort $user_sorter grep { $properties->{"$_:answer"} eq 'y' } @users;
+    my @no    = sort $user_sorter grep { $properties->{"$_:answer"} eq 'n' } @users;
+    my @maybe = sort $user_sorter grep { $properties->{"$_:answer"} eq 'm' } @users;
+
+    my $render_list = sub {
+        my ($name, @users) = @_;
+
+        my $out =
+            q{<div class='gadget-yesnomaybe-list'>}.
+                q{<b>}.$name.q{</b>}.
+                q{<ul>};
+        ;
+
+        for my $user (@users) {
+            $out .=
+                q{<li>}.
+                $user;
+
+            $out .= q{ - }.$properties->{"$user:status"} if $properties->{"$user:status"};
+
+            $out .=
+                q{</li>};
+        }
+
+        $out .=
+                q{</ul>}.
+            q{</div>};
+
+        return $out;
+    };
+
+    my $out =
+        $render_list->("yes",   @yes).
+        $render_list->("no",    @no).
+        $render_list->("maybe", @maybe);
+
+    return $out;
 }
 
 sub _render_gadget_unknown {
@@ -894,7 +938,6 @@ div.image > a, div.attachment > a {
 div.gadget {
     border: dashed #666666 3px;
     background-color: #99ff99;
-    font-family: monospace;
     padding: 2px;
 }
 
