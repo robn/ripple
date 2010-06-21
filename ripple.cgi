@@ -123,9 +123,13 @@ sub do_login {
         callback => _build_internal_uri(s => 'callback'),
     );
 
-    my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
 
-    print $q->redirect(-uri => $oa_req->to_url($oa_auth_uri), -cookie => [$secret_cookie]);
+    print $q->redirect(
+        -uri => $oa_req->to_url($oa_auth_uri),
+        -cookie => [
+            $q->cookie(-name => "secret", -value => $oa_res->token_secret),
+        ]
+    );
 }
 
 sub do_callback {
@@ -151,9 +155,9 @@ sub do_callback {
     print $q->redirect(
         -uri => _build_internal_uri(), 
         -cookie => [
-            $q->cookie(-name => "token",   -value => $oa_res->token),
-            $q->cookie(-name => "secret",  -value => $oa_res->token_secret),
-            $q->cookie(-name => "identity" -value => _identify_user($oa_res->token, $oa_res->token_secret)),
+            $q->cookie(-name => "token",    -value => $oa_res->token),
+            $q->cookie(-name => "secret",   -value => $oa_res->token_secret),
+            $q->cookie(-name => "identity", -value => _identify_user($oa_res->token, $oa_res->token_secret)),
         ]
     );
 }
@@ -162,9 +166,9 @@ sub do_logout {
     print $q->redirect(
         -uri => _build_internal_uri(), 
         -cookie => [
-            $q->cookie(-name => "token",   -value => ""),
-            $q->cookie(-name => "secret",  -value => ""),
-            $q->cookie(-name => "identity" -value => ""),
+            $q->cookie(-name => "token",    -value => "", -expires => "-1d"),
+            $q->cookie(-name => "secret",   -value => "", -expires => "-1d"),
+            $q->cookie(-name => "identity", -value => "", -expires => "-1d"),
         ]
     );
 }
@@ -431,8 +435,8 @@ sub _identify_user {
     # by antimatter15 for microwave: try to fetch a wave we know we can't
     # access, and then extract our name from the error message
     
-    my $wave_id    = "googlewave.com!w+abc123"; # XXX
-    my $wavelet_id = "googlewave.com!conv+root";
+    my $wave_id    = "googlewave.com!w+bWEBb5mBA";
+    my $wavelet_id = "googlewave.com!conv+nothing";
 
     my $data = _wave_request({
         id     => "read1",
@@ -447,11 +451,11 @@ sub _identify_user {
     });
 
     if ($data->{error}) {
-        my ($identity) = $data->{error}->{message} =~ m/'([^']+) is not a participant/; ###
+        my ($identity) = $data->{error}->{message} =~ m/(\S+) is not a participant/;
         return $identity if $identity;
     }
 
-    die "couldn't determine use identity";
+    die "couldn't determine user identity";
 }
 
 sub _form_wrap {
