@@ -159,10 +159,14 @@ sub do_callback {
 }
 
 sub do_logout {
-    my $token_cookie = $q->cookie(-name => "token", -value => "");
-    my $secret_cookie = $q->cookie(-name => "secret", -value => "");
-
-    print $q->redirect(-uri => _build_internal_uri(), -cookie => [$token_cookie, $secret_cookie]);
+    print $q->redirect(
+        -uri => _build_internal_uri(), 
+        -cookie => [
+            $q->cookie(-name => "token",   -value => ""),
+            $q->cookie(-name => "secret",  -value => ""),
+            $q->cookie(-name => "identity" -value => ""),
+        ]
+    );
 }
 
 sub do_wave {
