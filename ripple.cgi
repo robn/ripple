@@ -180,6 +180,7 @@ sub do_wave {
         read     => \&action_read,
         redirect => \&action_redirect,
         reply    => \&action_reply,
+        new      => \&action_new,
     );
 
     my $out = '';
@@ -201,6 +202,7 @@ sub do_wave {
 
             _form_wrap(
                 [qw(submit a inbox)],
+                [qw(submit a new)],
                 [qw(submit s logout)],
             ),
 
@@ -367,6 +369,76 @@ sub action_reply {
     }]);
 
     print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
+}
+
+sub action_new {
+    my $title = $q->param("t");
+
+    if (!$title) {
+        return
+            q{<h1>create new wave</h1>}.
+            q{<form class='new-wave-form' action='}._build_internal_uri().q{' method='post'>}.
+                q{<p>}.
+                    q{Wave title:<br />}.
+                    q{<input type='text' name='t' />}.
+                q{</p>}.
+                q{<p>}.
+                    q{Text:<br />}.
+                    q{<textarea name='c'></textarea>}.
+                q{</p>}.
+                q{<input type='hidden' name='a' value='new' />}.
+                q{<input type='submit' value='create new wave' />}.
+            q{</form>};
+    }
+
+    my $content = $q->param("c");
+ 
+    my ($domain) = $q->cookie("identity") =~ m/@(.*)$/;
+
+    my $wave_id = sprintf q{%s!TBD_0x%08x}, $domain, int rand 4294967296;
+    my $wavelet_id = sprintf q{%s!conv+root}, $domain;
+    my $root_blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
+
+    my $data = _wave_request([{
+        id => "create1",
+        method => "wave.robot.createWavelet",
+        params => {
+            waveId => $wave_id,
+            waveletId => $wavelet_id,
+            waveletData => {
+                waveId => $wave_id,
+                waveletId => $wavelet_id,
+                rootBlipId => $root_blip_id,
+                participants => [
+                    $q->cookie("identity"),
+                ],
+            },
+        },
+    }, {
+        id     => "insert1",
+        method => "wave.document.modify",
+        params => {
+            waveId       => $wave_id,
+            waveletId    => $wavelet_id,
+            blipId       => $root_blip_id,
+            modifyAction => {
+                modifyHow => "INSERT",
+                values    => [
+                    "\n".$q->param("c"),
+                ],
+            },
+        },
+    }, {
+        id     => "title1",
+        method => "wave.wavelet.setTitle",
+        params => {
+            waveId       => $wave_id,
+            waveletId    => $wavelet_id,
+            waveletTitle => $q->param("t"),
+        },
+    }]);
+
+    return q{<pre>}.Dumper($data).q{</pre>};
 }
 
 sub _wave_request {
@@ -1038,6 +1110,13 @@ div.protocol-debug {
 }
 div.protocol-debug > pre {
     margin: 5px;
+}
+
+form.new-wave-form input[type=text] {
+    width: 100%;
+}
+form.new-wave-form textarea {
+    width: 100%;
 }
 </style>
 </head>
