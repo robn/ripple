@@ -788,9 +788,10 @@ sub _render_gadget_yesnomaybe {
 
         my $out =
             q{<div class='gadget-yesnomaybe-list'>}.
-                q{<b>}.$name.q{</b>}.
+                q{<div class='gadget-yesnomaybe-}.$name.q{'>}.
+                    $name.
+                q{</div>}.
                 q{<ul>};
-        ;
 
         for my $user (@users) {
             $out .=
@@ -945,11 +946,30 @@ div.gadget {
 
 div.gadget-yesnomaybe {
     display: table;
+    width: 100%;
 }
-
-div.gadget-yesnomaybe-list {
+div.gadget-yesnomaybe > div {
     display: table-cell;
     width: 33%;
+}
+div.gadget-yesnomaybe > div > div {
+    border: solid black 1px;
+    margin: 2px;
+    padding: 3px;
+    font-weight: bold;
+    text-align: center;
+}
+div.gadget-yesnomaybe-yes {
+    background-color: #33ff33;
+}
+div.gadget-yesnomaybe-no {
+    background-color: #ff3333;
+}
+div.gadget-yesnomaybe-maybe {
+    background-color: #ffff33;
+}
+div.gadget-yesnomaybe > div > ul {
+    margin: 0;
 }
 
 div.protocol-debug {
