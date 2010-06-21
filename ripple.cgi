@@ -148,10 +148,14 @@ sub do_callback {
 
     $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
 
-    my $token_cookie = $q->cookie(-name => "token", -value => $oa_res->token);
-    my $secret_cookie = $q->cookie(-name => "secret", -value => $oa_res->token_secret);
-
-    print $q->redirect(-uri => _build_internal_uri(), -cookie => [$token_cookie, $secret_cookie]);
+    print $q->redirect(
+        -uri => _build_internal_uri(), 
+        -cookie => [
+            $q->cookie(-name => "token",   -value => $oa_res->token),
+            $q->cookie(-name => "secret",  -value => $oa_res->token_secret),
+            $q->cookie(-name => "identity" -value => _identify_user($oa_res->token, $oa_res->token_secret)),
+        ]
+    );
 }
 
 sub do_logout {
@@ -354,7 +358,8 @@ sub action_reply {
 }
 
 sub _wave_request {
-    my ($rpc) = @_;
+    my ($rpc, $opts) = @_;
+    $opts //= {};
 
     if ($q->param("l")) {
         my $ops = ref $rpc eq "HASH" ? [$rpc] : $rpc;
@@ -374,8 +379,8 @@ sub _wave_request {
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
         request_url  => $rpc_uri,
-        token        => $q->cookie("token"),
-        token_secret => $q->cookie("secret"),
+        token        => $opts->{token}  // $q->cookie("token"),
+        token_secret => $opts->{secret} // $q->cookie("secret"),
     );
     $oa_req->sign;
 
@@ -412,6 +417,37 @@ sub _build_internal_uri {
     my $fragment = delete $args{'#'};
 
     return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
+}
+
+sub _identify_user {
+    my ($token, $secret) = @_;
+
+    # the data api doesn't currently give us a way to get the identity
+    # of the current user, so instead we use a hilarious hack discovered
+    # by antimatter15 for microwave: try to fetch a wave we know we can't
+    # access, and then extract our name from the error message
+    
+    my $wave_id    = "googlewave.com!w+abc123"; # XXX
+    my $wavelet_id = "googlewave.com!conv+root";
+
+    my $data = _wave_request({
+        id     => "read1",
+        method => "wave.robot.fetchWave",
+        params => {
+            waveId    => $wave_id,
+            waveletId => $wavelet_id,
+        },
+    }, {
+        token  => $token,
+        secret => $secret,
+    });
+
+    if ($data->{error}) {
+        my ($identity) = $data->{error}->{message} =~ m/'([^']+) is not a participant/; ###
+        return $identity if $identity;
+    }
+
+    die "couldn't determine use identity";
 }
 
 sub _form_wrap {
