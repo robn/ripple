@@ -195,6 +195,10 @@ sub do_wave {
 
             _html_header(),
 
+            q{<div class='identity'>},
+                q{Logged in as: <b>}.$q->cookie("identity").q{</b>},
+            q{</div>},
+
             _form_wrap(
                 [qw(submit a inbox)],
                 [qw(submit s logout)],
@@ -881,6 +885,12 @@ body {
 
 img {
     border: none;
+}
+
+div.identity {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 div.search-box {
