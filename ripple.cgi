@@ -829,9 +829,9 @@ sub _render_gadget_yesnomaybe {
         my ($name, @users) = @_;
 
         my $out =
-            q{<div class='gadget-yesnomaybe-list'>}.
+            q{<div class='gadget-yesnomaybe-list gadget-yesnomaybe-}.$name.q{'>}.
                 q{<div class='gadget-yesnomaybe-}.$name.q{'>}.
-                    $name.
+                    sprintf("%s (%d)", $name, scalar @users).
                 q{</div>}.
                 q{<ul>};
 
@@ -999,25 +999,34 @@ div.gadget-yesnomaybe {
     display: table;
     width: 100%;
 }
-div.gadget-yesnomaybe > div {
+div.gadget-yesnomaybe-list {
     display: table-cell;
     width: 33%;
 }
-div.gadget-yesnomaybe > div > div {
+div.gadget-yesnomaybe-list > div {
     border: solid black 1px;
     margin: 2px;
     padding: 3px;
     font-weight: bold;
     text-align: center;
 }
-div.gadget-yesnomaybe-yes {
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-yes {
     background-color: #33ff33;
 }
-div.gadget-yesnomaybe-no {
+div.gadget-yesnomaybe-yes {
+    background-color: #ccffcc;
+}
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-no {
     background-color: #ff3333;
 }
-div.gadget-yesnomaybe-maybe {
+div.gadget-yesnomaybe-no {
+    background-color: #ffcccc;
+}
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-maybe {
     background-color: #ffff33;
+}
+div.gadget-yesnomaybe-maybe {
+    background-color: #ffffcc;
 }
 div.gadget-yesnomaybe > div > ul {
     margin: 0;
