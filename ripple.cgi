@@ -208,7 +208,7 @@ sub do_wave {
 
             q{<div class='search-box'>},
                 _form_wrap(
-                    [qw(text q), $q->param("q")],
+                    [qw(text q), $q->param("q") || "in:inbox" ],
                     [qw(submit a search)],
                 ),
             q{</div>},
