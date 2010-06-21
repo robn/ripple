@@ -750,10 +750,7 @@ sub _render_gadget {
     my ($properties) = @_;
 
     my $renderer = $gadget_handler_map{$properties->{url}} ? $gadget_handler_map{$properties->{url}} : $gadget_handler_map{_unknown};
-
-    my $out =
-        q{<div class='gadget'>}.
-        $renderer->($properties);
+    my $out = $renderer->($properties);
 
     if ($q->param("d")) {
         $out .=
@@ -763,9 +760,6 @@ sub _render_gadget {
                 q{</pre>}.
             q{</div>};
     }
-
-    $out .=
-        q{</div>};
 
     return $out;
 }
@@ -824,7 +818,10 @@ sub _render_gadget_yesnomaybe {
 sub _render_gadget_unknown {
     my ($properties) = @_;
 
-    return q{GADGET: }.encode_entities($properties->{url});
+    return
+        q{<div class='gadget-unknown'>}.
+            q{GADGET: }.encode_entities($properties->{url}).
+        q{</div>};
 }
 
 sub _html_header {
@@ -938,7 +935,7 @@ div.image > a, div.attachment > a {
     text-decoration: none;
 }
 
-div.gadget {
+div.gadget-unknown {
     border: dashed #666666 3px;
     background-color: #99ff99;
     padding: 2px;
