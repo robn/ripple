@@ -325,7 +325,7 @@ sub action_read {
                 ).
             q{</div>}.
             q{In this wave: }.
-            q{<b>}.join(q{</b>, <b>}, @{$data->{data}->{waveletData}->{participants}}).q{</b>}.
+            q{<b>}.join(q{</b>, <b>}, _pretty_names(@{$data->{data}->{waveletData}->{participants}})).q{</b>}.
         q{</div>};
 
     my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
@@ -638,10 +638,10 @@ sub _render_blip {
 
     my $out =
         q{<div class='blip' id='}.$blip_id.q{'>}.
-            q{<b>}.$blip->{creator}.q{</b>}.
+            q{<b>}._pretty_name($blip->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
 
-    my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
+    my @contributors = grep { $_ ne $blip->{creator} } _pretty_names(@{$blip->{contributors}});
     if (@contributors) {
         $out .=
             q{<br />}.
@@ -893,6 +893,16 @@ sub _render_blip {
     }
 
     return $out;
+}
+
+sub _pretty_name {
+    my ($name) = @_;
+    $name =~ s{\@googlewave.com$}{};
+    return $name;
+}
+
+sub _pretty_names {
+    return map { _pretty_name($_) } @_;
 }
 
 sub _reply_textarea {
