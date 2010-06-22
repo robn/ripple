@@ -181,6 +181,7 @@ sub do_wave {
         redirect => \&action_redirect,
         reply    => \&action_reply,
         new      => \&action_new,
+        add      => \&action_add,
     );
 
     my $out = '';
@@ -444,6 +445,27 @@ sub action_new {
     return;
 }
 
+sub action_add {
+    if (!$q->param("r")) {
+        return
+            q{<h1>add recipients</h1>}.
+            q{<form class='add-recipients-form' action='}._build_internal_uri().q{' method='post'>}.
+                q{<p>}.
+                    q{Enter addresses (one per line):<br />}.
+                    q{<textarea name='r'></textarea>}.
+                q{</p>}.
+                q{<input type='hidden' name='a' value='add' />}.
+                q{<input type='hidden' name='w' value='}.$q->param("w").q{' />}.
+                q{<input type='hidden' name='wl' value='}.$q->param("wl").q{' />}.
+                q{<input type='submit' value='add people' />}.
+            q{</form>};
+    }
+
+    my @recipients = split /[\r\n]+/, $q->param("r");
+
+    return q{<pre>}.Dumper(\@recipients).q{</pre>};
+}
+
 sub _wave_request {
     my ($rpc, $opts) = @_;
     $opts //= {};
@@ -587,7 +609,7 @@ sub _render_blip {
                     [qw(hidden w), $wave_id],
                     [qw(hidden wl), $wavelet_id],
                     [qw(hidden a add)],
-                    [qw(submit), undef, q{add recipients}],
+                    [qw(submit), undef, q{add people}],
                 ).
             q{</div>};
     }
@@ -1143,6 +1165,10 @@ form.new-wave-form input[type=text] {
     width: 100%;
 }
 form.new-wave-form textarea {
+    width: 100%;
+}
+
+form.add-recipients-form textarea {
     width: 100%;
 }
 </style>
