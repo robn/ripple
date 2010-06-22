@@ -672,9 +672,10 @@ sub _render_blip {
         # check each annotation to see if there is one of these elements
         # inside it. if there is, we create two or more annotations such that
         # they sit between each element in the range
-        my @element_positions = grep { $_ > $annotation->{range}->{start} && 
-                                       $_ < $annotation->{range}->{end}   &&
-                                       $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|ATTACHMENT|GADGET)$/ } keys %{$blip->{elements}};
+        my @element_positions = grep {
+            $_ > $annotation->{range}->{start} &&
+            $_ < $annotation->{range}->{end}   &&
+            $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|IMAGE|ATTACHMENT|GADGET)$/ } keys %{$blip->{elements}};
 
         push @{$blipmeta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
         for my $element_position (@element_positions) {
@@ -760,7 +761,7 @@ sub _render_blip {
                         when ("INLINE_BLIP") {
                             push @{$point{blips}}, $thing->{properties}->{id};
                         }
-                        when ("ATTACHMENT") {
+                        when (/IMAGE|ATTACHMENT/) {
                             push @{$point{attachments}}, $thing->{properties};
                         }
                         when ("GADGET") {
@@ -913,13 +914,15 @@ sub _render_attachment {
     my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
     my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
 
-    my $type = $properties->{mimeType} =~ m{^image/(?:png|gif|jpeg)$} ? "image" : "attachment";
+    my $type = !exists $properties->{mimeType} || $properties->{mimeType} =~ m{^image/(?:png|gif|jpeg)$} ? "image" : "attachment";
+
+    my $url = $properties->{attachmentUrl} || $properties->{url};
 
     my $out =
         q{<div class='}.$type.q{'>}.
-            q{<a href='}.$properties->{attachmentUrl}.q{'}.
+            q{<a href='}.$url.q{'}.
                 q{<img}.
-                    q{ src='}.($type eq "image" ? $properties->{attachmentUrl} : $icon_path.$icon).q{'}.
+                    q{ src='}.($type eq "image" ? $url : $icon_path.$icon).q{'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
                 q{<br />}.
