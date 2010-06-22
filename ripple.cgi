@@ -678,7 +678,8 @@ sub _render_blip {
         my @element_positions = grep {
             $_ > $annotation->{range}->{start} &&
             $_ < $annotation->{range}->{end}   &&
-            $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|IMAGE|ATTACHMENT|GADGET)$/ } keys %{$blip->{elements}};
+            $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|IMAGE|ATTACHMENT|GADGET)$/
+        } keys %{$blip->{elements}};
 
         push @{$blipmeta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
         for my $element_position (@element_positions) {
