@@ -246,11 +246,14 @@ sub action_search {
     else {
         $out = '';
         for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
+            my $title   = $digest->{title}   || "(no title)";
+            my $snippet = $digest->{snippet} || "";
+
             $out .=
                 q{<div class='search-item'>}.
                     q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
-                        q{<h1>}.encode_entities($digest->{title}).q{</h1>}.
-                        encode_entities($digest->{snippet}).
+                        q{<h1>}.encode_entities($title).q{</h1>}.
+                        encode_entities($snippet).
                     q{</a>}.
                 q{</div>};
         }
