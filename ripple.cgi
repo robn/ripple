@@ -577,9 +577,22 @@ sub _render_blip {
     my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
     delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
 
-    my $out = '';
+    my $out =
+        q{<div class='blip' id='}.$blip_id.q{'>};
+
+    if ($distance == 0) {
+        $out .=
+            q{<div class='wave-action-box'>}.
+                _form_wrap(
+                    [qw(hidden w), $wave_id],
+                    [qw(hidden wl), $wavelet_id],
+                    [qw(hidden a add)],
+                    [qw(submit), undef, q{add recipients}],
+                ).
+            q{</div>};
+    }
+
     $out .=
-        q{<div class='blip' id='}.$blip_id.q{'>}.
         q{<b>}.$blip->{creator}.q{</b>}.
         time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
 
@@ -1000,6 +1013,14 @@ div.search-item > a {
     text-decoration: none;
 }
 
+div.wave-action-box {
+    float: right;
+}
+div.wave-action-box > form {
+    padding: 0;
+    margin: 0;
+}
+
 /* root blip */
 body > div.blip {
     margin: 5px;
@@ -1024,6 +1045,7 @@ div.blip-content > div.blip {
 }
 
 div.blip-debug {
+    clear: both;
     float: right;
     margin-right: 5px;
     padding: 2px;
@@ -1033,6 +1055,7 @@ div.blip-debug {
 }
 
 div.blip-content {
+    clear: both;
     padding: 5px;
     background-color: #ffffff;
     border: solid black 1px;
