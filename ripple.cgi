@@ -311,8 +311,22 @@ sub action_read {
         return $out;
     }
 
+    $out =
+        q{<div class='wave'>}.
+            q{<div class='wave-action-box'>}.
+                _form_wrap(
+                    [qw(hidden w), $wave_id],
+                    [qw(hidden wl), $wavelet_id],
+                    [qw(hidden a add)],
+                    [qw(submit), undef, q{add people}],
+                ).
+            q{</div>}.
+            q{In this wave: }.
+            q{<b>}.join(q{</b>, <b>}, @{$data->{data}->{waveletData}->{participants}}).q{</b>}.
+        q{</div>};
+
     my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
-    $out = _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
+    $out .= _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
 
     if ($q->param("d")) {
         $out .=
@@ -620,23 +634,9 @@ sub _render_blip {
     delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
 
     my $out =
-        q{<div class='blip' id='}.$blip_id.q{'>};
-
-    if ($distance == 0) {
-        $out .=
-            q{<div class='wave-action-box'>}.
-                _form_wrap(
-                    [qw(hidden w), $wave_id],
-                    [qw(hidden wl), $wavelet_id],
-                    [qw(hidden a add)],
-                    [qw(submit), undef, q{add people}],
-                ).
-            q{</div>};
-    }
-
-    $out .=
-        q{<b>}.$blip->{creator}.q{</b>}.
-        time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
+        q{<div class='blip' id='}.$blip_id.q{'>}.
+            q{<b>}.$blip->{creator}.q{</b>}.
+            time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
 
     my @contributors = grep { $_ ne $blip->{creator} } @{$blip->{contributors}};
     if (@contributors) {
@@ -1068,6 +1068,13 @@ div.wave-action-box > form {
     margin: 0;
 }
 
+div.wave {
+    margin: 5px;
+    padding: 5px;
+    background-color: #ff9999;
+    border: solid black 1px;
+}
+
 /* root blip */
 body > div.blip {
     margin: 5px;
@@ -1092,7 +1099,6 @@ div.blip-content > div.blip {
 }
 
 div.blip-debug {
-    clear: both;
     float: right;
     margin-right: 5px;
     padding: 2px;
@@ -1102,7 +1108,6 @@ div.blip-debug {
 }
 
 div.blip-content {
-    clear: both;
     padding: 5px;
     background-color: #ffffff;
     border: solid black 1px;
