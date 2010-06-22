@@ -597,6 +597,7 @@ sub _render_blip {
             q{<div class='blip-debug'>}.
                 q{blip: }.$blip_id.q{<br />}.
                 q{parent: }.$blip->{parentBlipId}.q{<br />}.
+                q{distance: }.$distance.q{<br />}.
             q{</div>};
     }
 
