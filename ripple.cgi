@@ -686,7 +686,12 @@ sub _render_blip {
 
                         when (m{^link/(?:manual|auto)}) {
                             next if $start{link};
-                            $start{link} = _build_internal_uri(a => 'redirect', u => uri_escape($thing->{value}));
+                            if (my ($waveid) = $thing->{value} =~ m{^waveid://(.*)}) {
+                                $waveid =~ s{/}{!};
+                                $start{link} = _build_internal_uri(a => 'read', w => uri_escape($waveid));
+                            } else {
+                                $start{link} = _build_internal_uri(a => 'redirect', u => uri_escape($thing->{value}));
+                            }
                         }
                         when ("link/wave") {
                             next if $start{link};
