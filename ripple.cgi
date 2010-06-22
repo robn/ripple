@@ -641,7 +641,7 @@ sub _render_blip {
             q{<b>}._pretty_name($blip->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
 
-    my @contributors = grep { $_ ne $blip->{creator} } _pretty_names(@{$blip->{contributors}});
+    my @contributors = _pretty_names(grep { $_ ne $blip->{creator} } @{$blip->{contributors}});
     if (@contributors) {
         $out .=
             q{<br />}.
