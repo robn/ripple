@@ -438,7 +438,10 @@ sub action_new {
         },
     }]);
 
-    return q{<pre>}.Dumper($data).q{</pre>};
+    my $new_wave_id = $data->[0]->{data}->{waveId};
+    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $new_wave_id));
+
+    return;
 }
 
 sub _wave_request {
