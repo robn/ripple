@@ -461,9 +461,29 @@ sub action_add {
             q{</form>};
     }
 
+    my $wave_id = $q->param("w");
+    my $wavelet_id = $q->param("wl");
+
     my @recipients = split /[\r\n]+/, $q->param("r");
 
-    return q{<pre>}.Dumper(\@recipients).q{</pre>};
+    my @ops;
+    for my $i (0 .. $#recipients) {
+        push @ops, {
+            id     => "add".($i+1),
+            method => "wave.wavelet.participant.add",
+            params => {
+                waveId        => $wave_id,
+                waveletId     => $wavelet_id,
+                participantId => $recipients[$i],
+            }
+        };
+    }
+
+    my $data = _wave_request(\@ops);
+
+    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
+
+    return;
 }
 
 sub _wave_request {
