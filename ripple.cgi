@@ -1293,6 +1293,16 @@ package ripple::line;
 
 use base qw(Class::Accessor);
 
+__PACKAGE__->mk_accessor(qw(start end linetype));
+
+sub new {
+    my ($class, $args) = @_;
+
+    $args->{linetype} //= $args->{properties}->{lineType};
+
+    return $class->SUPER::new($args);
+}
+
 
 package ripple::annotations;
 
