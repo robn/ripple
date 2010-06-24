@@ -667,26 +667,33 @@ sub _render_blip {
             q{</div>};
     }
 
-    $out .= q{<div class='blip-content'>};
+    my $r = ripple::renderer->new({ content => $blip->{content} });
 
-    my @lines;
-    {
-        my @line_positions = sort { $a <=> $b } grep { $blip->{elements}->{$_}->{type} eq "LINE" } keys %{$blip->{elements}};
-        for my $i (0 .. $#line_positions) {
-            my $start = $line_positions[$i];
-            my $end   = $i == $#line_positions ? length $blip->{content} : $line_positions[$i+1];
+    my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
+    for my $i (0 .. $#element_positions) {
+        my $start = $element_positions[$i];
+        my $end   = $i == $#element_positions ? length $blip->{content} : $element_positions[$i+1];
 
-            push @lines, ripple::line->new({
-                start      => $start,
-                end        => $end,
-                properties => $blip->{elements}->{$start}->{properties},
-            });
-        }
+        $r->add_element(ripple::element->new({
+            start      => $start,
+            end        => $end,
+            properties => $blip->{elements}->{$start}->{properties},
+        }));
     }
 
-    $out .= q{<pre>}.Dumper(\@lines).q{</pre>};
+    for my $annotation (@{$blip->{annotations}}) {
+        $r->add_annotation({
+            start => $annotation->{range}->{start},
+            end   => $annotation->{range}->{end},
+            name  => $annotation->{name},
+            value => $annotation->{value},
+        });
+    }
 
-    $out .= q{</div>};
+    $out .=
+        q{<div class='blip-content'>}.
+            $r->render.
+        q{</div>};
 
     return $out;
 
@@ -1289,21 +1296,31 @@ HTML_SPLASH
 }
 
 
-package ripple::line;
+package ripple::renderer;
 
 use base qw(Class::Accessor);
 
-__PACKAGE__->mk_accessor(qw(start end linetype));
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(content));
+}
 
-sub new {
-    my ($class, $args) = @_;
+sub add_element {
+}
 
-    $args->{linetype} //= $args->{properties}->{lineType};
+sub add_annotation {
+}
 
-    return $class->SUPER::new($args);
+sub render {
+    my ($self) = @_;
+    return q{<pre>}.$self->content.q{</pre>};
 }
 
 
-package ripple::annotations;
+package ripple::element;
+
+use base qw(Class::Accessor);
+
+
+package ripple::annotation;
 
 use base qw(Class::Accessor);
