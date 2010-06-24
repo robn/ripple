@@ -1263,3 +1263,12 @@ HTML_SPLASH
     return $html;
 }
 
+
+package ripple::line;
+
+use base qw(Class::Accessor);
+
+
+package ripple::annotations;
+
+use base qw(Class::Accessor);
