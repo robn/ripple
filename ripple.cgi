@@ -669,6 +669,31 @@ sub _render_blip {
 
     $out .= q{<div class='blip-content'>};
 
+    my @lines;
+    {
+        my @line_positions = sort { $a <=> $b } grep { $blip->{elements}->{$_}->{type} eq "LINE" } keys %{$blip->{elements}};
+        for my $i (0 .. $#line_positions) {
+            my $start = $line_positions[$i];
+            my $end   = $i == $#line_positions ? length $blip->{content} : $line_positions[$i+1];
+
+            push @lines, ripple::line->new({
+                start      => $start,
+                end        => $end,
+                properties => $blip->{elements}->{$start}->{properties},
+            });
+        }
+    }
+
+    $out .= q{<pre>}.Dumper(\@lines).q{</pre>};
+
+    $out .= q{</div>};
+
+    return $out;
+
+
+
+
+
     # 0 - end annotation
     # 1 - element
     # 2 - start annotation
