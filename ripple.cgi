@@ -1330,13 +1330,25 @@ sub render {
         }
 
         else {
-            $out .= $linegroup->render;
+            $out .= $linegroup->start_html;
+            for my $element ($linegroup->elements) {
+                $out .=
+                    $linegroup->start_element_html.
+                    $self->content_range($element->start, $element->end).
+                    $linegroup->end_element_html;
+            }
+            $out .= $linegroup->end_html;
         }
     }
 
     return $out;
 }
 
+sub content_range {
+    my ($self, $start, $end) = @_;
+
+    return substr $self->content, $start, $end-$start;
+}
 
 package ripple::element;
 
@@ -1360,6 +1372,7 @@ sub new {
 package ripple::line;
 
 use base qw(ripple::element);
+
 
 
 package ripple::linegroup;
