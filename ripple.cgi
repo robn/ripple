@@ -671,24 +671,33 @@ sub _render_blip {
 
     my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
     for my $i (0 .. $#element_positions) {
-        my $start = $element_positions[$i];
-        my $end   = $i == $#element_positions ? length $blip->{content} : $element_positions[$i+1];
+        my $position = $element_positions[$i];
 
-        $r->add_element(ripple::element->new({
-            start      => $start,
-            end        => $end,
-            type       => $blip->{elements}->{$start}->{type},
-            properties => $blip->{elements}->{$start}->{properties},
-        }));
+        given ($blip->{elements}->{$position}->{type}) {
+            when ("LINE") {
+                $r->add_line({
+                    start      => $position,
+                    end        => $i == $#element_positions ? length $blip->{content} : $element_positions[$i+1],
+                    properties => $blip->{elements}->{$position}->{properties},
+                });
+            }
+            default {
+                $r->add_element({
+                    position   => $position,
+                    type       => $blip->{elements}->{$position}->{type},
+                    properties => $blip->{elements}->{$position}->{properties},
+                });
+            }
+        }
     }
 
     for my $annotation (@{$blip->{annotations}}) {
-        $r->add_annotation(ripple::annotation->new({
+        $r->add_annotation({
             start => $annotation->{range}->{start},
             end   => $annotation->{range}->{end},
             name  => $annotation->{name},
             value => $annotation->{value},
-        }));
+        });
     }
 
     $out .=
@@ -1297,6 +1306,7 @@ HTML_SPLASH
 }
 
 
+
 package ripple::renderer;
 
 use base qw(Class::Accessor);
@@ -1305,14 +1315,22 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw(content));
 }
 
+sub add_line {
+    my ($self, $args) = @_;
+
+    push @{$self->{lines}}, ripple::line->new({ renderer => $self, %$args });
+}
+
 sub add_element {
-    my ($self, $element) = @_;
-    push @{$self->{elements}}, $element;
+    my ($self, $args) = @_;
+
+    push @{$self->{elements}}, ripple::element->new({ renderer => $self, %$args });
 }
 
 sub add_annotation {
-    my ($self, $annotation) = @_;
-    push @{$self->{annotations}};
+    my ($self, $args) = @_;
+
+    push @{$self->{annotations}}, ripple::annotation->new({ renderer => $self, %$args });
 }
 
 sub render {
@@ -1350,28 +1368,34 @@ sub content_range {
     return substr $self->content, $start, $end-$start;
 }
 
+
+package ripple::line;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(renderer start end properties));
+}
+
+
+
 package ripple::element;
 
 use base qw(Class::Accessor);
 
-__PACKAGE__->mk_accessors(qw(start end type));
-
-sub new {
-    my ($class, $args) = @_;
-
-    given ($args->{type}) {
-        when ("LINE") {
-            return bless $class->SUPER::new($args), "ripple::line";
-        }
-    };
-
-    return $class->SUPER::new($args);
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(renderer position type properties));
 }
 
 
-package ripple::line;
 
-use base qw(ripple::element);
+package ripple::annotation;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(renderer start end name value));
+}
 
 
 
@@ -1394,10 +1418,5 @@ sub render {
 
     return '';
 }
-
-
-package ripple::annotation;
-
-use base qw(Class::Accessor);
 
 
