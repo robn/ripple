@@ -677,6 +677,7 @@ sub _render_blip {
         $r->add_element(ripple::element->new({
             start      => $start,
             end        => $end,
+            type       => $blip->{elements}->{$start}->{type},
             properties => $blip->{elements}->{$start}->{properties},
         }));
     }
@@ -1305,14 +1306,35 @@ BEGIN {
 }
 
 sub add_element {
+    my ($self, $element) = @_;
+    push @{$self->{elements}}, $element;
 }
 
 sub add_annotation {
+    my ($self, $annotation) = @_;
+    push @{$self->{annotations}};
 }
 
 sub render {
     my ($self) = @_;
-    return q{<pre>}.$self->content.q{</pre>};
+
+    my $out = '';
+
+    my $linegroup = ripple::linegroup->new;
+
+    for my $element (@{$self->{elements}}) {
+        next if ! $element->isa("ripple::line");
+
+        if ($linegroup->can_add($element)) {
+            $linegroup->add($element);
+        }
+
+        else {
+            $out .= $linegroup->render;
+        }
+    }
+
+    return $out;
 }
 
 
@@ -1320,7 +1342,49 @@ package ripple::element;
 
 use base qw(Class::Accessor);
 
+__PACKAGE__->mk_accessors(qw(start end type));
+
+sub new {
+    my ($class, $args) = @_;
+
+    given ($args->{type}) {
+        when ("LINE") {
+            return bless $class->SUPER::new($args), "ripple::line";
+        }
+    };
+
+    return $class->SUPER::new($args);
+}
+
+
+package ripple::line;
+
+use base qw(ripple::element);
+
+
+package ripple::linegroup;
+
+use base qw(Class::Accessor);
+
+sub can_add {
+    my ($self, $element) = @_;
+
+    return 1;
+}
+
+sub add {
+    my ($self, $element) = @_;
+}
+
+sub render {
+    my ($self) = @_;
+
+    return '';
+}
+
 
 package ripple::annotation;
 
 use base qw(Class::Accessor);
+
+
