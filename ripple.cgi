@@ -1338,26 +1338,20 @@ sub render {
 
     my $out = '';
 
-    my $linegroup = ripple::linegroup->new;
+    my $linegroup = ripple::linegroup->new({ renderer => $self });
 
-    for my $element (@{$self->{elements}}) {
-        next if ! $element->isa("ripple::line");
-
-        if ($linegroup->can_add($element)) {
-            $linegroup->add($element);
+    for my $line (@{$self->{lines}}) {
+        if ($linegroup->can_add($line)) {
+            $linegroup->add($line);
         }
 
         else {
-            $out .= $linegroup->start_html;
-            for my $element ($linegroup->elements) {
-                $out .=
-                    $linegroup->start_element_html.
-                    $self->content_range($element->start, $element->end).
-                    $linegroup->end_element_html;
-            }
-            $out .= $linegroup->end_html;
+            $out .= $linegroup->render;
+            $linegroup = ripple::linegroup->new({ renderer => $self });
         }
     }
+
+    $out .= $linegroup->render;
 
     return $out;
 }
@@ -1415,6 +1409,17 @@ sub add {
 
 sub render {
     my ($self) = @_;
+
+=pod
+            $out .= $linegroup->start_html;
+            for my $element ($linegroup->elements) {
+                $out .=
+                    $linegroup->start_element_html.
+                    $self->content_range($element->start, $element->end).
+                    $linegroup->end_element_html;
+            }
+            $out .= $linegroup->end_html;
+=cut
 
     return '';
 }
