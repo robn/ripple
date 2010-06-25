@@ -682,12 +682,12 @@ sub _render_blip {
     }
 
     for my $annotation (@{$blip->{annotations}}) {
-        $r->add_annotation({
+        $r->add_annotation(ripple::annotation->new({
             start => $annotation->{range}->{start},
             end   => $annotation->{range}->{end},
             name  => $annotation->{name},
             value => $annotation->{value},
-        });
+        }));
     }
 
     $out .=
