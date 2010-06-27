@@ -20,6 +20,7 @@ use HTML::Entities;
 use Date::Format;
 use Data::Dumper;
 use File::Basename;
+use Data::Compare ();
 
 # uri to the script. you can hard code this if you like, otherwise this will try to infer it
 my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME};
@@ -1397,14 +1398,24 @@ package ripple::linegroup;
 
 use base qw(Class::Accessor);
 
-sub can_add {
-    my ($self, $element) = @_;
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(properties));
+}
 
-    return 1;
+sub can_add {
+    my ($self, $line) = @_;
+
+    return 1 if !exists $self->{lines};
+
+    return Data::Compare::Compare($self->properties, $line->properties);
 }
 
 sub add {
-    my ($self, $element) = @_;
+    my ($self, $line) = @_;
+
+    if ((push @{$self->{lines}}, $line) == 1) {
+        $self->properties($line->properties);
+    }
 }
 
 sub render {
