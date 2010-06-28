@@ -1424,7 +1424,7 @@ BEGIN {
 sub can_add {
     my ($self, $line) = @_;
 
-    return 1 if !exists $self->{lines};
+    return 1 if !exists $self->{objects};
 
     return Data::Compare::Compare($self->properties, $line->properties);
 }
@@ -1432,7 +1432,7 @@ sub can_add {
 sub add {
     my ($self, $line) = @_;
 
-    if ((push @{$self->{lines}}, $line) == 1) {
+    if ((push @{$self->{objects}}, $line) == 1) {
         $self->properties($line->properties);
     }
 }
@@ -1440,13 +1440,13 @@ sub add {
 sub count {
     my ($self) = @_;
 
-    return scalar @{$self->{lines} || []};
+    return scalar @{$self->{objects} || []};
 }
 
 sub render {
     my ($self) = @_;
 
-    return '' if !exists $self->{lines};
+    return '' if !exists $self->{objects};
 
     my $out = '';
 
@@ -1456,7 +1456,7 @@ sub render {
         }
     }
 
-    $out .= $_->render for @{$self->{lines}};
+    $out .= $_->render for @{$self->{objects}};
 
     given ($self->properties->{lineType}) {
         when ("li") {
