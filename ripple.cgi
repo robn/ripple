@@ -708,6 +708,8 @@ sub _render_blip {
             $r->render.
         q{</div>};
 
+    $out .= q{</div>};
+
     return $out;
 
 
