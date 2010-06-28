@@ -572,24 +572,32 @@ sub _identify_user {
     # of the current user, so instead we use a hilarious hack discovered
     # by antimatter15 for microwave: try to fetch a wave we know we can't
     # access, and then extract our name from the error message
+    #
+    # this happens to be a convenient place to set the protocol version too
     
     my $wave_id    = "googlewave.com!w+bWEBb5mBA";
     my $wavelet_id = "googlewave.com!conv+nothing";
 
-    my $data = _wave_request({
+    my $data = _wave_request([{
+        id     => "caps1",
+        method => "wave.robot.notifyCapabilitiesHash",
+        params => {
+            protocolVersion => "0.22",
+        },
+    }, {
         id     => "read1",
         method => "wave.robot.fetchWave",
         params => {
             waveId    => $wave_id,
             waveletId => $wavelet_id,
         },
-    }, {
+    }], {
         token  => $token,
         secret => $secret,
     });
 
-    if ($data->{error}) {
-        my ($identity) = $data->{error}->{message} =~ m/(\S+) is not a participant/;
+    if ($data->[1]->{error}) {
+        my ($identity) = $data->[1]->{error}->{message} =~ m/(\S+) is not a participant/;
         return $identity if $identity;
     }
 
