@@ -1430,7 +1430,25 @@ sub count {
 sub render {
     my ($self) = @_;
 
-    return sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
+    my $out = '';
+
+    given ($self->properties->{lineType}) {
+        when ("li") {
+            $out .= q{<ul>};
+        }
+    }
+
+    # XXX render lines
+
+    given ($self->properties->{lineType}) {
+        when ("li") {
+            $out .= q{</ul>};
+        }
+    }
+
+    $out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
+
+    return $out;
 
 =pod
             $out .= $linegroup->start_html;
@@ -1442,8 +1460,4 @@ sub render {
             }
             $out .= $linegroup->end_html;
 =cut
-
-    return '';
 }
-
-
