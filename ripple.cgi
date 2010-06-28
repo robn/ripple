@@ -1500,6 +1500,11 @@ sub render {
         when ("li") {
             $out .= q{<ul>};
         }
+        default {
+            if ($self->{properties}->{indent}) {
+                $out .= q{<blockquote>};
+            }
+        }
     }
 
     $out .= $_->render for @{$self->{objects}};
@@ -1507,6 +1512,11 @@ sub render {
     given ($self->properties->{lineType}) {
         when ("li") {
             $out .= q{</ul>};
+        }
+        default {
+            if ($self->{properties}->{indent}) {
+                $out .= q{</blockquote>};
+            }
         }
     }
 
