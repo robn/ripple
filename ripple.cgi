@@ -1367,12 +1367,19 @@ sub content_range {
 }
 
 
+
 package ripple::line;
 
 use base qw(Class::Accessor);
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer start end properties));
+}
+
+sub render {
+    my ($self) = @_;
+
+    return 'line<br/>';
 }
 
 
@@ -1430,6 +1437,8 @@ sub count {
 sub render {
     my ($self) = @_;
 
+    return '' if !exists $self->{lines};
+
     my $out = '';
 
     given ($self->properties->{lineType}) {
@@ -1438,7 +1447,7 @@ sub render {
         }
     }
 
-    # XXX render lines
+    $out .= $_->render for @{$self->{lines}};
 
     given ($self->properties->{lineType}) {
         when ("li") {
