@@ -582,7 +582,7 @@ sub _identify_user {
         id     => "caps1",
         method => "wave.robot.notifyCapabilitiesHash",
         params => {
-            protocolVersion => "0.22",
+            protocolVersion => "0.21",
         },
     }, {
         id     => "read1",
