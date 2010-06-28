@@ -1381,7 +1381,7 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
-    my $content = substr $self->renderer->content, $self->start, $self->end - $self->start;
+    my $content = $self->renderer->content_range($self->start, $self->end);
 
     my $properties = $self->properties;
 
@@ -1521,8 +1521,6 @@ sub render {
             }
         }
     }
-
-    $out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
     return $out;
 
