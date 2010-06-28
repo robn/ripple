@@ -1349,6 +1349,7 @@ sub render {
         else {
             $out .= $linegroup->render;
             $linegroup = ripple::linegroup->new({ renderer => $self });
+            $linegroup->add($line);
         }
     }
 
