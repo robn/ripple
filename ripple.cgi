@@ -1379,7 +1379,16 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
-    return 'line<br/>';
+    my $content = substr $self->renderer->content, $self->start, $self->end - $self->start;
+
+    my $properties = $self->properties;
+
+    return $content.q{<br />} if !exists $properties->{lineType};
+
+    return
+        q{<}.$properties->{lineType}.q{>}.
+        $content.
+        q{</}.$properties->{lineType}.q{>};
 }
 
 
