@@ -1432,24 +1432,47 @@ sub can_add {
 sub add {
     my ($self, $line) = @_;
 
+    # if this is the first object, just add it
     if ($self->count == 0) {
         $self->_add_internal($line);
-        return;
+        return 1;
     }
 
-    my $group = $self->{subgroup} || $self;
-
-    if ((!exists $group->properties->{indent} && !exists $line->properties->{indent}) ||
-        ($group->properties->{indent} == $line->properties->{indent})) {
-
-        $group->_add_internal($line);
+    # if there's a subgroup, try to add it to that
+    if (exists $self->{subgroup}) {
+        return 1 if $self->{subgroup}->add($line);
     }
 
-    else {
-        my $subgroup = ripple::linegroup->new({ renderer => $self->renderer });
-        $subgroup->add($line);
-        $group->_add_internal($subgroup);
+    # it either didn't go in, or we don't have a subgroup
+
+    # if it looks like us, just add it here
+    if ((!exists $self->properties->{indent} && !exists $line->properties->{indent}) ||
+        ($self->properties->{indent} == $line->properties->{indent})) {
+        $self->_add_internal($line);
+        return 1;
     }
+
+    # it doesn't look like us. if there was a subgroup the we've got something
+    # its never seen before, so we can roll it up and call it done.
+    if (exists $self->{subgroup}) {
+        $self->_add_internal($self->{subgroup});
+        delete $self->{subgroup};
+    }
+
+    my $self_indent = $self->properties->{indent} // 0;
+    my $line_indent = $line->properties->{indent} // 0;
+
+    # if we're further down the tree (greater indent level), the our group
+    # is finished
+    if ($self_indent > $line_indent) {
+        return 0;
+    }
+
+    # otherwise we're going down the tree
+    $self->{subgroup} = ripple::linegroup->new({ renderer => $self->renderer });
+    $self->{subgroup}->add($line);
+
+    return 1;
 }
 
 sub _add_internal {
