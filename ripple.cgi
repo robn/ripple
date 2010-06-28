@@ -57,6 +57,8 @@ my %gadget_handler_map = (
 );
 
 
+local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
+
 my $q = CGI->new;
 
 if ($q->param("l")) {
