@@ -1418,7 +1418,7 @@ package ripple::linegroup;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(properties));
+    __PACKAGE__->mk_accessors(qw(renderer properties));
 }
 
 sub can_add {
@@ -1426,15 +1426,38 @@ sub can_add {
 
     return 1 if !exists $self->{objects};
 
-    return Data::Compare::Compare($self->properties, $line->properties);
+    return $self->properties->{lineType} eq $line->properties->{lineType};
 }
 
 sub add {
     my ($self, $line) = @_;
 
-    if ((push @{$self->{objects}}, $line) == 1) {
-        $self->properties($line->properties);
+    if ($self->count == 0) {
+        $self->_add_internal($line);
+        return;
     }
+
+    my $group = $self->{subgroup} || $self;
+
+    if ((!exists $group->properties->{indent} && !exists $line->properties->{indent}) ||
+        ($group->properties->{indent} == $line->properties->{indent})) {
+
+        $group->_add_internal($line);
+    }
+
+    else {
+        my $subgroup = ripple::linegroup->new({ renderer => $self->renderer });
+        $subgroup->add($line);
+        $group->_add_internal($subgroup);
+    }
+}
+
+sub _add_internal {
+    my ($self, $object) = @_;
+
+    push @{$self->{objects}}, $object;
+
+    $self->properties($object->properties) if $self->count == 1;
 }
 
 sub count {
