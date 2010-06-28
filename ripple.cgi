@@ -1418,8 +1418,16 @@ sub add {
     }
 }
 
+sub count {
+    my ($self) = @_;
+
+    return scalar @{$self->{lines} || []};
+}
+
 sub render {
     my ($self) = @_;
+
+    return sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
 =pod
             $out .= $linegroup->start_html;
