@@ -1206,6 +1206,9 @@ div.blip-content {
 div.blip-content h1 {
     display: inline;
 }
+div.blip-content div.indent {
+    margin-left: 3em;
+}
 
 div.blip-reply {
     padding: 5px;
@@ -1531,7 +1534,7 @@ sub render {
         }
         default {
             if ($self->{properties}->{indent}) {
-                $out .= q{<blockquote>};
+                $out .= q{<div class='indent'>};
             }
         }
     }
@@ -1546,7 +1549,7 @@ sub render {
         }
         default {
             if ($self->{properties}->{indent}) {
-                $out .= q{</blockquote>};
+                $out .= q{</div>};
             }
         }
     }
