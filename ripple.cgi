@@ -1209,9 +1209,6 @@ div.blip-content h1 {
 div.blip-content div.indent {
     margin-left: 3em;
 }
-div.blip-content div.rtl {
-    direction: rtl
-}
 
 div.blip-reply {
     padding: 5px;
@@ -1529,20 +1526,37 @@ sub render {
 
     return '' if !exists $self->{objects};
 
+    my $props = $self->properties;
+
     my $out = '';
 
-    given ($self->properties->{lineType}) {
+    given ($props->{lineType}) {
         when ("li") {
             $out .= q{<ul>};
         }
         default {
-            my @class;
+            my (@class, @style);
 
-            push @class, "indent" if $self->properties->{indent};
-            push @class, "rtl"    if exists $self->properties->{direction} && $self->properties->{direction} eq 'r';
+            push @class, "indent" if $props->{indent};
 
-            if (@class) {
-                $out .= q{<div class='}.join(' ', @class).q{'>};
+            push @style, "direction: rtl" if exists $props->{direction} && $props->{direction} eq 'r';
+
+            push @style, "text-align: ".($props->{alignment} eq 'c' ? "center"  :
+                                         $props->{alignment} eq 'r' ? "right"   :
+                                         $props->{alignment} eq 'j' ? "justify" :
+                                                                      "left") if exists $props->{alignment} && $props->{alignment} ne 'l';
+
+            if (@class || @style) {
+                $out .= q{<div};
+                if (@class) {
+                    $out .= q{ class='}.join(' ', @class).q{'};
+                }
+                if (@style) {
+                    $out .= q{ style='}.join('; ', @style).q{;'};
+                }
+                $out .= q{>};
+
+                $props->{_div} = 1;
             }
         }
     }
@@ -1551,14 +1565,12 @@ sub render {
         $out .= $object->render;
     }
 
-    given ($self->properties->{lineType}) {
+    given ($props->{lineType}) {
         when ("li") {
             $out .= q{</ul>};
         }
         default {
-            if ($self->properties->{indent} or
-                exists $self->properties->{direction} && $self->properties->{direction} eq 'r') {
-
+            if ($props->{_div}) {
                 $out .= q{</div>};
             }
         }
