@@ -1443,9 +1443,11 @@ sub add {
     # if there's a subgroup, try to add it to that
     if (exists $self->{subgroup}) {
         return 1 if $self->{subgroup}->add($line);
-    }
 
-    # it either didn't go in, or we don't have a subgroup
+        # if the subgroup didn't like it then its finished here
+        $self->_add_internal($self->{subgroup});
+        delete $self->{subgroup};
+    }
 
     # if it looks like us, just add it here
     if ((!exists $self->properties->{indent} && !exists $line->properties->{indent}) ||
@@ -1454,17 +1456,13 @@ sub add {
         return 1;
     }
 
-    # it doesn't look like us. if there was a subgroup the we've got something
-    # its never seen before, so we can roll it up and call it done.
-    if (exists $self->{subgroup}) {
-        $self->_add_internal($self->{subgroup});
-        delete $self->{subgroup};
-    }
-
+    # it doesn't look like us, so we either need to make a new subgroup or
+    # tell the parent that we're finished, because we can't handle it
+ 
     my $self_indent = $self->properties->{indent} // 0;
     my $line_indent = $line->properties->{indent} // 0;
 
-    # if we're further down the tree (greater indent level), the our group
+    # if we're further down the tree (greater indent level), our group
     # is finished
     if ($self_indent > $line_indent) {
         return 0;
@@ -1509,7 +1507,9 @@ sub render {
         }
     }
 
-    $out .= $_->render for @{$self->{objects}};
+    for my $object (@{$self->{objects}}) {
+        $out .= $object->render;
+    }
 
     given ($self->properties->{lineType}) {
         when ("li") {
