@@ -1377,7 +1377,9 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
-    my $out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
+    my $out = '';
+
+    #$out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
     my $content = $self->renderer->content_range($self->start, $self->end);
     my $properties = $self->properties;
@@ -1528,7 +1530,7 @@ sub render {
         }
     }
 
-    $out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
+    #$out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
     return $out;
 
