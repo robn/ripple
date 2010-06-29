@@ -1387,6 +1387,11 @@ sub content_range {
     return substr $self->content, $start, $end-$start;
 }
 
+sub annotated_content_range {
+    my ($self, $start, $end) = @_;
+    goto \&content_range;
+}
+
 
 
 package ripple::line;
@@ -1406,7 +1411,7 @@ sub render {
 
     #$out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
-    my $content = $self->renderer->content_range($self->start, $self->end);
+    my $content = $self->renderer->annotated_content_range($self->start, $self->end);
     my $properties = $self->properties;
 
     if (!exists $properties->{lineType}) {
