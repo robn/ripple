@@ -1460,6 +1460,12 @@ sub add {
         return 1;
     }
 
+    # if its exactly the same as us, we can add it
+    if (Data::Compare::Compare($self->properties, $line->properties)) {
+        $self->_add_internal($line);
+        return 1;
+    }
+
     # if its not the same kind of thing as us then we can't go any further
     if ((!$self->properties->{lineType} && !$line->properties->{lineType}) ||
         $self->properties->{lineType} ne $line->properties->{lineType}) {
