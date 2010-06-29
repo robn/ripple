@@ -1209,6 +1209,9 @@ div.blip-content h1 {
 div.blip-content div.indent {
     margin-left: 3em;
 }
+div.blip-content div.rtl {
+    direction: rtl
+}
 
 div.blip-reply {
     padding: 5px;
@@ -1533,8 +1536,13 @@ sub render {
             $out .= q{<ul>};
         }
         default {
-            if ($self->{properties}->{indent}) {
-                $out .= q{<div class='indent'>};
+            my @class;
+
+            push @class, "indent" if $self->properties->{indent};
+            push @class, "rtl"    if exists $self->properties->{direction} && $self->properties->{direction} eq 'r';
+
+            if (@class) {
+                $out .= q{<div class='}.join(' ', @class).q{'>};
             }
         }
     }
@@ -1548,7 +1556,9 @@ sub render {
             $out .= q{</ul>};
         }
         default {
-            if ($self->{properties}->{indent}) {
+            if ($self->properties->{indent} or
+                exists $self->properties->{direction} && $self->properties->{direction} eq 'r') {
+
                 $out .= q{</div>};
             }
         }
