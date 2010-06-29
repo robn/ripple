@@ -1377,16 +1377,22 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
-    my $content = $self->renderer->content_range($self->start, $self->end);
+    my $out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
+    my $content = $self->renderer->content_range($self->start, $self->end);
     my $properties = $self->properties;
 
-    return $content.q{<br />} if !exists $properties->{lineType};
+    if (!exists $properties->{lineType}) {
+        $out .= $content.q{<br />};
+    }
+    else {
+        $out .=
+            q{<}.$properties->{lineType}.q{>}.
+            $content.
+            q{</}.$properties->{lineType}.q{>};
+    }
 
-    return
-        q{<}.$properties->{lineType}.q{>}.
-        $content.
-        q{</}.$properties->{lineType}.q{>};
+    return $out;
 }
 
 
