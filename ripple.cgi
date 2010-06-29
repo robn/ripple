@@ -273,7 +273,7 @@ sub action_search {
         $out .=
             q{<div class='protocol-debug'>}.
                 q{<pre>}.
-                    Dumper($data).
+                    encode_entities(Dumper($data)).
                 q{</pre>}.
             q{</div>};
     }
@@ -338,7 +338,7 @@ sub action_read {
         $out .=
             q{<div class='protocol-debug'>}.
                 q{<pre>}.
-                    Dumper($data).
+                    encode_entities(Dumper($data)).
                 q{</pre>}.
             q{</div>};
     }
@@ -1012,7 +1012,7 @@ sub _render_gadget {
         $out .=
             q{<div class='protocol-debug'>}.
                 q{<pre>}.
-                    Dumper($properties).
+                    encode_entities(Dumper($properties)).
                 q{</pre>}.
             q{</div>};
     }
@@ -1370,6 +1370,8 @@ package ripple::line;
 
 use base qw(Class::Accessor);
 
+use HTML::Entities;
+
 BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer start end properties));
 }
@@ -1385,12 +1387,12 @@ sub render {
     my $properties = $self->properties;
 
     if (!exists $properties->{lineType}) {
-        $out .= $content.q{<br />};
+        $out .= encode_entities($content).q{<br />};
     }
     else {
         $out .=
             q{<}.$properties->{lineType}.q{>}.
-            $content.
+            encode_entities($content).
             q{</}.$properties->{lineType}.q{>};
     }
 
