@@ -1522,6 +1522,8 @@ sub render {
         }
     }
 
+    $out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
+
     return $out;
 
 =pod
