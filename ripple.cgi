@@ -694,20 +694,21 @@ sub _render_blip {
     my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
     for my $i (0 .. $#element_positions) {
         my $position = $element_positions[$i];
+        my $element = $blip->{elements}->{$position};
 
-        given ($blip->{elements}->{$position}->{type}) {
+        given ($element->{type}) {
             when ("LINE") {
                 $r->add_line({
                     start      => $position,
                     end        => $i == $#element_positions ? length $blip->{content} : $element_positions[$i+1],
-                    properties => $blip->{elements}->{$position}->{properties},
+                    properties => $element->{properties},
                 });
             }
             default {
                 $r->add_element({
                     position   => $position,
-                    type       => $blip->{elements}->{$position}->{type},
-                    properties => $blip->{elements}->{$position}->{properties},
+                    type       => $element->{type},
+                    properties => $element->{properties},
                 });
             }
         }
