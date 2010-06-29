@@ -1487,6 +1487,11 @@ sub count {
 sub render {
     my ($self) = @_;
 
+    if (exists $self->{subgroup}) {
+        $self->_add_internal($self->{subgroup});
+        delete $self->{subgroup};
+    }
+
     return '' if !exists $self->{objects};
 
     my $out = '';
