@@ -541,7 +541,26 @@ sub _wave_request {
         die "could not do rpc call: ".$res->status_line."\n".$res->content;
     }
 
-    return decode_json($res->content);
+    my $data = decode_json($res->content);
+
+#    if (ref $rpc eq "HASH" && $rpc->{id} eq "read1") {
+#        _save_raw_data($rpc->{params}->{waveId}, $data);
+#    }
+    
+    return $data;
+}
+
+# a utility function that I use from time to time to save the json locally so
+# I can hack on ripple when I don't have network
+sub _save_raw_data {
+    my ($name, $data) = @_;
+
+    my $filename = (fileparse($ENV{SCRIPT_FILENAME}))[1].q{l/}.$name;
+
+    if (open my $fh, ">", $filename) {
+        print $fh Dumper $data;
+        close $fh;
+    }
 }
 
 sub _default_request_params {
