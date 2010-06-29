@@ -1346,11 +1346,7 @@ sub render {
     my $linegroup = ripple::linegroup->new({ renderer => $self });
 
     for my $line (@{$self->{lines}}) {
-        if ($linegroup->can_add($line)) {
-            $linegroup->add($line);
-        }
-
-        else {
+        if (! $linegroup->add($line)) {
             $out .= $linegroup->render;
             $linegroup = ripple::linegroup->new({ renderer => $self });
             $linegroup->add($line);
@@ -1423,14 +1419,6 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer properties));
 }
 
-sub can_add {
-    my ($self, $line) = @_;
-
-    return 1 if !exists $self->{objects};
-
-    return $self->properties->{lineType} eq $line->properties->{lineType};
-}
-
 sub add {
     my ($self, $line) = @_;
 
@@ -1438,6 +1426,13 @@ sub add {
     if ($self->count == 0) {
         $self->_add_internal($line);
         return 1;
+    }
+
+    # if its not the same kind of thing as us then we can't go any further
+    if ((!$self->properties->{lineType} && !$line->properties->{lineType}) ||
+        $self->properties->{lineType} ne $line->properties->{lineType}) {
+
+        return 0;
     }
 
     # if there's a subgroup, try to add it to that
