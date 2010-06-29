@@ -1449,7 +1449,7 @@ package ripple::linegroup;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(renderer properties));
+    __PACKAGE__->mk_accessors(qw(renderer properties _div_close));
 }
 
 sub add {
@@ -1563,7 +1563,7 @@ sub render {
                 }
                 $out .= q{>};
 
-                $props->{_div} = 1;
+                $self->_div_close(1);
             }
         }
     }
@@ -1577,8 +1577,9 @@ sub render {
             $out .= q{</ul>};
         }
         default {
-            if ($props->{_div}) {
+            if ($self->_div_close) {
                 $out .= q{</div>};
+                $self->_div_close(0);
             }
         }
     }
