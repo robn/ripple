@@ -1432,9 +1432,12 @@ sub annotated_content_range {
     }
 
     # loop over the boundary positions and produce appropriate output for each
+    my @positions = sort { $a <=> $b } keys %boundaries;
     my $content = '';
-    for my $position (sort { $a <=> $b } keys %boundaries) {
-
+    for my $i (0 .. $#positions) {
+        if ($i < $#positions) {
+            $content .= "[$positions[$i]] ".$self->content_range($positions[$i], $positions[$i+1])." [$positions[$i+1]] ";
+        }
     }
 
     return $content;
