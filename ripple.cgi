@@ -1426,7 +1426,13 @@ sub annotated_content_range {
         push @{$boundaries{$boundary_end}}  , $annotation;
     }
 
-    return "($start $end)".join(q{}, map { sprintf "[%d %d %s %s]", $_->start, $_->end, $_->name, $_->value } @annotations).$self->content_range($start, $end);
+    # loop over the boundary positions and produce appropriate output for each
+    my $content = '';
+    for my $position (sort { $a <=> $b } keys %boundaries) {
+
+    }
+
+    return $content;
 }
 
 
