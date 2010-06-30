@@ -1415,6 +1415,17 @@ sub annotated_content_range {
         ($_->start >= $start && $_->start < $end) || ($_->end > $start && $_->end <= $end) || ($_->start < $start && $_->end > $end)
     } @{$self->{annotations}};
 
+    # figure out the annotation boundaries and the list of annotations that
+    # are active at those positions
+    my %boundaries;
+    for my $annotation (@annotations) {
+        my $boundary_start = $annotation->start < $start ? $start : $annotation->start;
+        my $boundary_end   = $annotation->end   < $end   ? $end   : $annotation->end;
+
+        push @{$boundaries{$boundary_start}}, $annotation;
+        push @{$boundaries{$boundary_end}}  , $annotation;
+    }
+
     return "($start $end)".join(q{}, map { sprintf "[%d %d %s %s]", $_->start, $_->end, $_->name, $_->value } @annotations).$self->content_range($start, $end);
 }
 
