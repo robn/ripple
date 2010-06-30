@@ -1420,7 +1420,7 @@ sub annotated_content_range {
     my %boundaries;
     for my $annotation (@annotations) {
         my $boundary_start = $annotation->start < $start ? $start : $annotation->start;
-        my $boundary_end   = $annotation->end   < $end   ? $end   : $annotation->end;
+        my $boundary_end   = $annotation->end   > $end   ? $end   : $annotation->end;
 
         push @{$boundaries{$boundary_start}}, $annotation;
         push @{$boundaries{$boundary_end}}  , $annotation;
