@@ -1427,17 +1427,47 @@ sub annotated_content_range {
         my $boundary_start = $annotation->start < $start ? $start : $annotation->start;
         my $boundary_end   = $annotation->end   > $end   ? $end   : $annotation->end;
 
-        push @{$boundaries{$boundary_start}}, $annotation;
-        push @{$boundaries{$boundary_end}}  , $annotation;
+        # creating a new annotation object here makes the maths easier later
+        my $split_annotation = ripple::annotation->new({
+            start => $boundary_start,
+            end   => $boundary_end,
+            name  => $annotation->name,
+            value => $annotation->value,
+        });
+
+        push @{$boundaries{$boundary_start}}, $split_annotation;
+        push @{$boundaries{$boundary_end}}  , $split_annotation;
     }
 
     # loop over the boundary positions and produce appropriate output for each
     my @positions = sort { $a <=> $b } keys %boundaries;
     my $content = '';
     for my $i (0 .. $#positions) {
-        if ($i < $#positions) {
-            $content .= "[$positions[$i]] ".$self->content_range($positions[$i], $positions[$i+1])." [$positions[$i+1]] ";
+        my $position = $positions[$i];
+
+        my @start_annotations = grep { $_->start == $position } @{$boundaries{$position}};
+        my @end_annotations   = grep { $_->end   == $position } @{$boundaries{$position}};
+
+        if (@end_annotations) {
+            $content .= "[END $position:";
+            for my $annotation (@end_annotations) {
+                $content .= ' '.$annotation->name;
+            }
+            $content .= ']';
         }
+
+        if (@start_annotations) {
+            $content .= "[START $position:";
+            for my $annotation (@start_annotations) {
+                $content .= ' '.$annotation->name;
+            }
+            $content .= ']';
+        }
+
+        if ($i < $#positions) {
+            $content .= $self->content_range($position, $positions[$i+1]);
+        }
+
     }
 
     return $content;
