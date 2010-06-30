@@ -1389,7 +1389,33 @@ sub content_range {
 
 sub annotated_content_range {
     my ($self, $start, $end) = @_;
-    goto \&content_range;
+
+    # what we want to do here is find any annotations that are either
+    # completely or partially inside the range. then we convert them into
+    # linear set of elements (eg anchors or styled spans) such that none of
+    # them overlap.
+    #
+    # that is, given the following content range:
+    #
+    #            |========== content range ==========|
+    #
+    # and a set of annotations over that range:
+    #
+    #       |----- A -----|
+    #                 |------ B ------|
+    #          |----------- C -----------|
+    #                                        |-- D --|
+    #
+    # produce the following set of spans:
+    #
+    #            | AC |ABC|---- BC ---|C |   |-- D --|
+
+    # find the annotations
+    my @annotations = grep {
+        ($_->start >= $start && $_->start < $end) || ($_->end > $start && $_->end <= $end) || ($_->start < $start && $_->end > $end)
+    } @{$self->{annotations}};
+
+    return "($start $end)".join(q{}, map { sprintf "[%d %d %s %s]", $_->start, $_->end, $_->name, $_->value } @annotations).$self->content_range($start, $end);
 }
 
 
