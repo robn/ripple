@@ -1415,6 +1415,11 @@ sub annotated_content_range {
         ($_->start >= $start && $_->start < $end) || ($_->end > $start && $_->end <= $end) || ($_->start < $start && $_->end > $end)
     } @{$self->{annotations}};
 
+    # if there's no annotations then the raw content is all we need
+    if (!@annotations) {
+        return $self->content_range($start, $end);
+    }
+
     # figure out the annotation boundaries and the list of annotations that
     # are active at those positions
     my %boundaries;
