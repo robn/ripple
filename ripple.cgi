@@ -1845,8 +1845,15 @@ package ripple::gadget;
 
 use base qw(ripple::element);
 
+use HTML::Entities;
+
 sub render {
     my ($self) = @_;
 
-    return $q->pre(q{GADGET});
+    my $props = $self->properties;
+
+    return
+        q{<div class='gadget-unknown'>}.
+            q{GADGET: }.encode_entities($props->{url}).
+        q{</div>};
 }
