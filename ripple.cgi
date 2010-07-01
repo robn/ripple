@@ -1734,15 +1734,4 @@ sub render {
     #$out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
     return $out;
-
-=pod
-            $out .= $linegroup->start_html;
-            for my $element ($linegroup->elements) {
-                $out .=
-                    $linegroup->start_element_html.
-                    $self->content_range($element->start, $element->end).
-                    $linegroup->end_element_html;
-            }
-            $out .= $linegroup->end_html;
-=cut
 }
