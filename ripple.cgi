@@ -624,249 +624,6 @@ sub _form_wrap {
     $out .= q{</form>};
 }
 
-=pod
-sub _render_blip {
-
-
-
-
-
-    # 0 - end annotation
-    # 1 - element
-    # 2 - start annotation
-
-    my $blipmeta = {};
-    for my $pos (keys %{$blip->{elements}}) {
-        push @{$blipmeta->{$pos}}, [ 1, $blip->{elements}->{$pos} ];
-    }
-    for my $annotation (@{$blip->{annotations}}) {
-        # certain elements render strangely if rendered "inside" some ranges
-        # (eg an inline blip inside an link range). to get around this we
-        # check each annotation to see if there is one of these elements
-        # inside it. if there is, we create two or more annotations such that
-        # they sit between each element in the range
-        my @element_positions = grep {
-            $_ > $annotation->{range}->{start} &&
-            $_ < $annotation->{range}->{end}   &&
-            $blip->{elements}->{$_}->{type} =~ m/^(?:INLINE_BLIP|IMAGE|ATTACHMENT|GADGET)$/
-        } keys %{$blip->{elements}};
-
-        push @{$blipmeta->{$annotation->{range}->{start}}}, [ 2, $annotation ];
-        for my $element_position (@element_positions) {
-            push @{$blipmeta->{$element_position}},         [ 0, $annotation ];
-            push @{$blipmeta->{$element_position}},         [ 2, $annotation ];
-        }
-        push @{$blipmeta->{$annotation->{range}->{end}}},   [ 0, $annotation ];
-    }
-
-    if (!keys %$blipmeta) {
-        $out .= $blip->{content};
-    }
-
-    else {
-        my @positions = sort { $a <=> $b } keys %$blipmeta;
-        for my $i (0 .. $#positions) {
-            my $position = $positions[$i];
-
-            my (%start, %end, %point);
-
-            for my $meta (sort { $a <=> $b } @{$blipmeta->{$position}}) {
-                my ($type, $thing) = @$meta;
-
-                if ($type == 2) {
-                    given ($thing->{name}) {
-                        when ("conv/title") {
-                            push @{$start{elements}}, [qw(h1)];
-                        }
-
-                        when (m{^link/(?:manual|auto)}) {
-                            next if $start{link};
-                            if (my ($waveid) = $thing->{value} =~ m{^waveid://(.*)}) {
-                                $waveid =~ s{/}{!};
-                                $start{link} = _build_internal_uri(a => 'read', w => uri_escape($waveid));
-                            } else {
-                                $start{link} = _build_internal_uri(a => 'redirect', u => uri_escape($thing->{value}));
-                            }
-                        }
-                        when ("link/wave") {
-                            next if $start{link};
-                            $start{link} = _build_internal_uri(a => 'read', w => $thing->{value});
-                        }
-
-                        when (m{^style/(.*)}) {
-                            my $name = $1;
-                            $name =~ s/([A-Z])/q{-}.lc($1)/e;
-                            $start{style}->{$name} = $thing->{value};
-                        }
-
-                        default {
-                            #$out .= q{<span style='background-color: #000066; color: #ffffff;'>}.$thing->{name}.q{</span>};
-                        }
-                    }
-
-                }
-
-                elsif ($type == 0) {
-                    given ($thing->{name}) {
-                        when ("conv/title") {
-                            push @{$end{elements}}, qw(h1);
-                        }
-
-                        when (m{^link/}) {
-                            $end{link}++;
-                        }
-
-                        when (m{^style/}) {
-                            $end{style}++;
-                        }
-
-                        default {
-                            #$out .= q{<span style='background-color: #006600; color: #ffffff;'>}.$thing->{name}.q{</span>};
-                        }
-                    }
-
-                }
-
-                elsif ($type == 1) {
-                    given ($thing->{type}) {
-                        when ("LINE") {
-                            push @{$point{elements}}, [q{br}] if $positions[$i] != 0;
-                        }
-                        when ("INLINE_BLIP") {
-                            push @{$point{blips}}, $thing->{properties}->{id};
-                        }
-                        when (/IMAGE|ATTACHMENT/) {
-                            push @{$point{attachments}}, $thing->{properties};
-                        }
-                        when ("GADGET") {
-                            push @{$point{gadgets}}, $thing->{properties};
-                        }
-                        default {
-                            #$out .= q{<span style='background-color: #660000; color: #ffffff;'>}.$thing->{type}.q{</span>};
-                        }
-                    }
-                }
-            }
-
-            # range end
-            if ($end{style}) {
-                $out .= q{</span>} x $end{style};
-            }
-
-            if ($end{link}) {
-                $out .= q{</a>} x $end{link};
-            }
-
-            for my $elem (@{$end{elements}}) {
-                $out .= q{</}.$elem.q{>};
-            }
-
-            # points
-            for my $elem (@{$point{elements}}) {
-                my ($tag, %attrs) = @$elem;
-                $out .= q{<}.$tag;
-                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
-                $out .= q{ />};
-            }
-
-            $out .= _render_attachment($_) for @{$point{attachments}};
-            $out .= _render_gadget($_) for @{$point{gadgets}};
-            $out .= _render_blip($wave_id, $wavelet_id, $_, $blips, 1) for @{$point{blips}};
-
-            # range start
-            for my $elem (@{$start{elements}}) {
-                my ($tag, %attrs) = @$elem;
-                $out .= q{<}.$tag;
-                $out .= q{ }.$_.q{='}.$attrs{$_}.q{'} for keys %attrs;
-                $out .= q{>};
-            }
-
-            if ($start{link}) {
-                $out .= q{<a href='}.$start{link}.q{'>};
-            }
-
-            if (keys %{$start{style}}) {
-                $out .= q{<span style='};
-                $out .= $_.q{: }.$start{style}->{$_}.q{;} for keys %{$start{style}};
-                $out .= q{'>};
-            }
-
-
-            # blip content
-            #$out .= q{<span style='background-color: #000000; color: #ffffff'>}.$position.q{ - }.($i < $#positions ? $positions[$i+1] : length $blip->{content}).q{</span>};
-
-            $out .= encode_entities(substr ($blip->{content},
-                                            $position,
-                                            ($i < $#positions ? $positions[$i+1] : length $blip->{content}) - $position));
-        }
-    }
-
-    $out .= q{</div>};
-
-    #
-    # that's the blip rendered. now for the stuff under it. this happens
-    # slightly differently depending on what kind of blip it is.
-    #
-    # since we don't have access to the conversation model, we have to infer
-    # things a bit. this results it a structure that isn't strictly correct
-    # but there's limits to what we can do
-    #
-    # we define three blip types: root, top and thread, as follows
-    #
-    # root
-    # top
-    #   thread
-    #   thread
-    #   thread
-    # top
-    #   thread
-    # top
-    # top
-    #   thread
-    #   thread
-    #
-    # replies to thread blips appear underneath as more thread blips (this is
-    # where the lack of the conversation model hurts). a reply box is added to
-    # the root and every top blip
-    #
-    # inline blips are just top blips rendered inside the blip content
-    #
-    # the distance is the how far away we are from the root. because of the
-    # way children are defined are setup in the wave json, we can infer the
-    # following from the blip distance:
-    #
-    # 0: root
-    # 1: top
-    # 2+ thread
-    #
-
-    # root blip gets a reply box
-    $out .= _reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance == 0;
-
-    # the root and thread blips don't have any other blips inside them
-    $out .= q{</div>} if $distance != 1;
-
-    # render the child blips
-    if (@{$blip->{childBlipIds}}) {
-        for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, $distance+1);
-        }
-    }
-
-    # end of a top blip
-    if ($distance == 1) {
-        # get a reply box after all their thread blips.  the reply gets added
-        # to the final thread blip though. more conversation model hack
-        $out .= _reply_textarea($wave_id, $wavelet_id, @{$blip->{childBlipIds}} ? $blip->{childBlipIds}->[-1] : $blip_id);
-
-        # and that's that
-        $out .= q{</div>} if $distance == 1;
-    }
-
-    return $out;
-}
-=cut
-
 sub _pretty_name {
     my ($name) = @_;
     $name =~ s{\@googlewave.com$}{};
@@ -1218,16 +975,17 @@ sub render {
     my ($self) = @_;
 
 =pod
-    my ($wave_id, $wavelet_id, $blip_id, $blips, $distance) = @_;
-    $distance ||= 0;
-=cut
-
-=pod
     my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
     delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
 =cut
 
     my $data = $self->data;
+
+    my $distance = 0;
+    while (state $blip = $self) {
+        $blip = $self->wavelet->blip($blip->data->{parentBlipId});
+        $distance++ if $blip;
+    }
 
     my $out =
         q{<div class='blip' id='}.$self->blip_id.q{'>}.
@@ -1248,7 +1006,7 @@ sub render {
             q{<div class='blip-debug'>}.
                 q{blip: }.$self->blip_id.q{<br />}.
                 q{parent: }.$data->{parentBlipId}.q{<br />}.
-                #q{distance: }.$distance.q{<br />}.
+                q{distance: }.$distance.q{<br />}.
             q{</div>};
     }
 
@@ -1311,6 +1069,68 @@ sub render {
     $out .= $linegroup->render;
 
     $out .= q{</div>}.q{</div>};
+
+    #
+    # that's the blip rendered. now for the stuff under it. this happens
+    # slightly differently depending on what kind of blip it is.
+    #
+    # since we don't have access to the conversation model, we have to infer
+    # things a bit. this results it a structure that isn't strictly correct
+    # but there's limits to what we can do
+    #
+    # we define three blip types: root, top and thread, as follows
+    #
+    # root
+    # top
+    #   thread
+    #   thread
+    #   thread
+    # top
+    #   thread
+    # top
+    # top
+    #   thread
+    #   thread
+    #
+    # replies to thread blips appear underneath as more thread blips (this is
+    # where the lack of the conversation model hurts). a reply box is added to
+    # the root and every top blip
+    #
+    # inline blips are just top blips rendered inside the blip content
+    #
+    # the distance is the how far away we are from the root. because of the
+    # way children are defined are setup in the wave json, we can infer the
+    # following from the blip distance:
+    #
+    # 0: root
+    # 1: top
+    # 2+ thread
+    #
+
+=pod
+    # root blip gets a reply box
+    $out .= main::_reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance == 0;
+
+    # the root and thread blips don't have any other blips inside them
+    $out .= q{</div>} if $distance != 1;
+
+    # render the child blips
+    if (@{$blip->{childBlipIds}}) {
+        for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
+            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, $distance+1);
+        }
+    }
+
+    # end of a top blip
+    if ($distance == 1) {
+        # get a reply box after all their thread blips.  the reply gets added
+        # to the final thread blip though. more conversation model hack
+        $out .= _reply_textarea($wave_id, $wavelet_id, @{$blip->{childBlipIds}} ? $blip->{childBlipIds}->[-1] : $blip_id);
+
+        # and that's that
+        $out .= q{</div>} if $distance == 1;
+    }
+=cut
 
     return $out;
     #return main::_render_blip($self->wave->wave_id, $self->wave->wavelet_id, $self->data->{blipId}, $self->wave->data->{blips});
