@@ -315,7 +315,7 @@ sub action_read {
         return $out;
     }
 
-    my $wave = ripple::wave->new({ data => $data->{data}, debug => $q->param("d") });
+    my $wave = ripple::wavelet->new({ data => $data->{data}, debug => $q->param("d") });
     return $wave->render;
 }
 
@@ -1307,7 +1307,7 @@ HTML_SPLASH
 }
 
 
-package ripple::wave;
+package ripple::wavelet;
 
 use base qw(Class::Accessor);
 
@@ -1318,13 +1318,21 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id));
 }
 
+sub new {
+    my ($class, $args) = @_;
+
+    my $self = $class->SUPER::new($args);
+
+    $self->wave_id($self->data->{waveletData}->{waveId});
+    $self->wavelet_id($self->data->{waveletData}->{waveletId});
+
+    return $self;
+}
+
 sub render {
     my ($self) = @_;
 
     my $data = $self->data;
-
-    $self->wave_id($data->{waveletData}->{waveId});
-    $self->wavelet_id($data->{waveletData}->{waveletId});
 
     my $out =
         q{<div class='wave'>}.
