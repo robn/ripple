@@ -1296,7 +1296,7 @@ sub blip {
     my $blipdata = $self->data->{blips}->{$blip_id};
     return if not $blipdata;
 
-    return ripple::blip->new({ wave => $self, data => $blipdata });
+    return ripple::blip->new({ wavelet => $self, data => $blipdata });
 }
 
 
@@ -1309,7 +1309,7 @@ use Date::Format;
 use HTML::Entities;
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(wave data blip_id));
+    __PACKAGE__->mk_accessors(qw(wavelet data blip_id));
 }
 
 sub new {
