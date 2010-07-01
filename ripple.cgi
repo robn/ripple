@@ -315,7 +315,7 @@ sub action_read {
         return $out;
     }
 
-    my $wave = ripple::wave->new({ data => $data->{data}, debug => $q->{debug} });
+    my $wave = ripple::wave->new({ data => $data->{data}, debug => $q->param("d") });
     return $wave->render;
 }
 
@@ -1310,6 +1310,9 @@ HTML_SPLASH
 package ripple::wave;
 
 use base qw(Class::Accessor);
+
+use HTML::Entities;
+use Data::Dumper;
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id));
