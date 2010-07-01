@@ -898,31 +898,6 @@ sub _reply_textarea {
     ;
 }
 
-sub _render_attachment {
-    my ($properties) = @_;
-
-    my $caption = $properties->{caption} ? $properties->{caption} : $properties->{attachmentId};
-    my $icon = $icon_type_map{$properties->{mimeType}} ? $icon_type_map{$properties->{mimeType}} : $icon_type_map{_unknown};
-
-    my $type = !exists $properties->{mimeType} || $properties->{mimeType} =~ m{^image/(?:png|gif|jpeg)$} ? "image" : "attachment";
-
-    my $url = $properties->{attachmentUrl} || $properties->{url};
-
-    my $out =
-        q{<div class='}.$type.q{'>}.
-            q{<a href='}.$url.q{'}.
-                q{<img}.
-                    q{ src='}.($type eq "image" ? $url : $icon_path.$icon).q{'}.
-                    q{ alt='}.$caption.q{'}.
-                q{ />}.
-                q{<br />}.
-                $caption.
-            q{</a>}.
-        q{</div>};
-
-    return $out;
-}
-
 sub _render_gadget {
     my ($properties) = @_;
 
@@ -1816,7 +1791,7 @@ use base qw(ripple::element);
 sub render {
     my ($self) = @_;
 
-    return $q->pre(q{IMAGE});
+    return $q->pre(q{ATTACHMENT});
 }
 
 
@@ -1828,8 +1803,30 @@ use base qw(ripple::element);
 sub render {
     my ($self) = @_;
 
-    return $q->pre(q{ATTACHMENT});
+    my $props = $self->properties;
+
+    my $caption = $props->{caption} ? $props->{caption} : $props->{attachmentId};
+    my $icon = $icon_type_map{$props->{mimeType}} ? $icon_type_map{$props->{mimeType}} : $icon_type_map{_unknown};
+
+    my $type = !exists $props->{mimeType} || $props->{mimeType} =~ m{^image/(?:png|gif|jpeg)$} ? "image" : "attachment";
+
+    my $url = $props->{attachmentUrl} || $props->{url};
+
+    my $out =
+        q{<div class='}.$type.q{'>}.
+            q{<a href='}.$url.q{'}.
+                q{<img}.
+                    q{ src='}.($type eq "image" ? $url : $icon_path.$icon).q{'}.
+                    q{ alt='}.$caption.q{'}.
+                q{ />}.
+                q{<br />}.
+                $caption.
+            q{</a>}.
+        q{</div>};
+
+    return $out;
 }
+
 
 
 package ripple::inline_blip;
