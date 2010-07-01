@@ -1367,7 +1367,7 @@ sub render {
 
         given ($element->{type}) {
             when ("LINE") {
-                push @{$self->{lines}}, ripple::line->new({
+                push @{$self->{elements}}, ripple::line->new({
                     blip       => $self,
                     start      => $position,
                     end        => $i == $#element_positions ? length $data->{content} : $element_positions[$i+1],
@@ -1399,11 +1399,20 @@ sub render {
 
     my $linegroup = ripple::linegroup->new({ renderer => $self });
 
-    for my $line (@{$self->{lines}}) {
-        if (! $linegroup->add($line)) {
+    for my $element (@{$self->{elements}}) {
+        if ($element->isa("ripple::line")) {
+            if (! $linegroup->add($element)) {
+                $out .= $linegroup->render;
+                $linegroup = ripple::linegroup->new({ renderer => $self });
+
+                $linegroup->add($element);
+            }
+        }
+        else {
             $out .= $linegroup->render;
             $linegroup = ripple::linegroup->new({ renderer => $self });
-            $linegroup->add($line);
+
+            $out .= $element->render;
         }
     }
 
@@ -1563,6 +1572,12 @@ use base qw(Class::Accessor);
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(blip position type properties));
+}
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{ELEMENT }.$self->type);
 }
 
 
