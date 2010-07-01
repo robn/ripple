@@ -1836,7 +1836,7 @@ use base qw(ripple::element);
 sub render {
     my ($self) = @_;
 
-    return $q->pre(q{INLINE BLIP});
+    return $self->blip->wavelet->blip($self->properties->{id})->render;
 }
 
 
