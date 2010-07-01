@@ -1551,11 +1551,14 @@ sub boundary_marker {
     my $marker = {};
 
     given ($self->name) {
+
         when (m{^style/(.*)}) {
             $marker->{style}->{$1} = $self->value;
         }
+
         when (m{^link/(?:manual|auto)}) {
             my $href;
+
             if (my ($waveid) = $self->value =~ m{^waveid://(.*)}) {
                 $waveid =~ s{/}{!};
                 $href = main::_build_internal_uri(a => 'read', w => uri_escape($waveid));
@@ -1563,6 +1566,7 @@ sub boundary_marker {
             else {
                 $href = main::_build_internal_uri(a => 'redirect', u => uri_escape($self->value));
             }
+
             push @{$marker->{elements}}, {
                 tag => 'a',
                 attrs => {
@@ -1570,6 +1574,7 @@ sub boundary_marker {
                 },
             };
         }
+
         when ("link/wave") {
             push @{$marker->{elements}}, {
                 tag => 'a',
@@ -1578,6 +1583,7 @@ sub boundary_marker {
                 },
             };
         }
+
     }
 
     return $marker;
