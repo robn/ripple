@@ -1675,10 +1675,7 @@ sub new {
     my $type = delete $args->{type};
 
     given ($type) {
-        when ("IMAGE") {
-            return ripple::image->new($args);
-        }
-        when ("ATTACHMENT") {
+        when (m/^(?:IMAGE|ATTACHMENT)$/) {
             return ripple::attachment->new($args);
         }
         when ("INLINE_BLIP") {
@@ -1697,18 +1694,6 @@ sub render {
     my ($self) = @_;
 
     return $q->pre(q{ELEMENT }.$self->type);
-}
-
-
-
-package ripple::image;
-
-use base qw(ripple::element);
-
-sub render {
-    my ($self) = @_;
-
-    return $q->pre(q{ATTACHMENT});
 }
 
 
