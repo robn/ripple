@@ -50,11 +50,6 @@ my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
 
 my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
 
-my %gadget_handler_map = (
-    "http://wave-api.appspot.com/public/gadgets/areyouin/gadget.xml" => \&_render_gadget_yesnomaybe,
-    "_unknown"                                                       => \&_render_gadget_unknown,
-);
-
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
@@ -896,84 +891,6 @@ sub _reply_textarea {
             ).
         q{</div>}
     ;
-}
-
-sub _render_gadget {
-    my ($properties) = @_;
-
-    my $renderer = $gadget_handler_map{$properties->{url}} ? $gadget_handler_map{$properties->{url}} : $gadget_handler_map{_unknown};
-    my $out = $renderer->($properties);
-
-    if ($q->param("d")) {
-        $out .=
-            q{<div class='protocol-debug'>}.
-                q{<pre>}.
-                    encode_entities(Dumper($properties)).
-                q{</pre>}.
-            q{</div>};
-    }
-
-    return $out;
-}
-
-sub _render_gadget_yesnomaybe {
-    my ($properties) = @_;
-
-    my @users = map { m/^(.*):answer$/ } keys %$properties;
-
-    my $user_sorter = sub {
-        return $properties->{"$a:order"} <=> $properties->{"$b:order"};
-    };
-
-    my @yes   = sort $user_sorter grep { $properties->{"$_:answer"} eq 'y' } @users;
-    my @no    = sort $user_sorter grep { $properties->{"$_:answer"} eq 'n' } @users;
-    my @maybe = sort $user_sorter grep { $properties->{"$_:answer"} eq 'm' } @users;
-
-    my $render_list = sub {
-        my ($name, @users) = @_;
-
-        my $out =
-            q{<div class='gadget-yesnomaybe-list gadget-yesnomaybe-}.$name.q{'>}.
-                q{<div class='gadget-yesnomaybe-}.$name.q{'>}.
-                    sprintf("%s (%d)", $name, scalar @users).
-                q{</div>}.
-                q{<ul>};
-
-        for my $user (@users) {
-            $out .=
-                q{<li>}.
-                $user;
-
-            $out .= q{ - }.$properties->{"$user:status"} if $properties->{"$user:status"};
-
-            $out .=
-                q{</li>};
-        }
-
-        $out .=
-                q{</ul>}.
-            q{</div>};
-
-        return $out;
-    };
-
-    my $out =
-        q{<div class='gadget-yesnomaybe'>}.
-            $render_list->("yes",   @yes).
-            $render_list->("no",    @no).
-            $render_list->("maybe", @maybe).
-        q{</div>};
-
-    return $out;
-}
-
-sub _render_gadget_unknown {
-    my ($properties) = @_;
-
-    return
-        q{<div class='gadget-unknown'>}.
-            q{GADGET: }.encode_entities($properties->{url}).
-        q{</div>};
 }
 
 sub _html_header {
@@ -1848,6 +1765,25 @@ use base qw(ripple::element);
 use HTML::Entities;
 use Data::Dumper;
 
+sub new {
+    my ($class, $args) = @_;
+
+    if ($class ne __PACKAGE__) {
+        return $class->SUPER::new($args);
+    }
+
+    # XXX this should be a global
+    my %gadget_classes = (
+        "http://wave-api.appspot.com/public/gadgets/areyouin/gadget.xml" => "ripple::gadget::yesnomaybe",
+    );
+
+    if (my $target_class = $gadget_classes{$args->{properties}->{url}}) {
+        return $target_class->new($args);
+    }
+
+    return $class->SUPER::new($args);
+}
+
 sub render {
     my ($self) = @_;
 
@@ -1869,3 +1805,63 @@ sub render {
 
     return $out;
 }
+
+
+
+package ripple::gadget::yesnomaybe;
+
+use base qw(ripple::gadget);
+
+sub render {
+    my ($self) = @_;
+
+    my $props = $self->properties;
+
+    my @users = map { m/^(.*):answer$/ } keys %$props;
+
+    my $user_sorter = sub {
+        return $props->{"$a:order"} <=> $props->{"$b:order"};
+    };
+
+    my @yes   = sort $user_sorter grep { $props->{"$_:answer"} eq 'y' } @users;
+    my @no    = sort $user_sorter grep { $props->{"$_:answer"} eq 'n' } @users;
+    my @maybe = sort $user_sorter grep { $props->{"$_:answer"} eq 'm' } @users;
+
+    my $render_list = sub {
+        my ($name, @users) = @_;
+
+        my $out =
+            q{<div class='gadget-yesnomaybe-list gadget-yesnomaybe-}.$name.q{'>}.
+                q{<div class='gadget-yesnomaybe-}.$name.q{'>}.
+                    sprintf("%s (%d)", $name, scalar @users).
+                q{</div>}.
+                q{<ul>};
+
+        for my $user (@users) {
+            $out .=
+                q{<li>}.
+                $user;
+
+            $out .= q{ - }.$props->{"$user:status"} if $props->{"$user:status"};
+
+            $out .=
+                q{</li>};
+        }
+
+        $out .=
+                q{</ul>}.
+            q{</div>};
+
+        return $out;
+    };
+
+    my $out =
+        q{<div class='gadget-yesnomaybe'>}.
+            $render_list->("yes",   @yes).
+            $render_list->("no",    @no).
+            $render_list->("maybe", @maybe).
+        q{</div>};
+
+    return $out;
+}
+
