@@ -1246,7 +1246,7 @@ sub render {
     if ($self->wavelet->debug) {
         $out .= 
             q{<div class='blip-debug'>}.
-                q{blip: }.$data.q{<br />}.
+                q{blip: }.$self->blip_id.q{<br />}.
                 q{parent: }.$data->{parentBlipId}.q{<br />}.
                 #q{distance: }.$distance.q{<br />}.
             q{</div>};
