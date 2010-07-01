@@ -1566,22 +1566,6 @@ sub render {
 
 
 
-package ripple::element;
-
-use base qw(Class::Accessor);
-
-BEGIN {
-    __PACKAGE__->mk_accessors(qw(blip position type properties));
-}
-
-sub render {
-    my ($self) = @_;
-
-    return $q->pre(q{ELEMENT }.$self->type);
-}
-
-
-
 package ripple::annotation;
 
 use base qw(Class::Accessor);
@@ -1781,4 +1765,91 @@ sub render {
     #$out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
     return $out;
+}
+
+
+
+package ripple::element;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(blip position type properties));
+}
+
+sub new {
+    my ($class, $args) = @_;
+
+    my $type = delete $args->{type};
+
+    given ($type) {
+        when ("IMAGE") {
+            return ripple::image->new($args);
+        }
+        when ("ATTACHMENT") {
+            return ripple::attachment->new($args);
+        }
+        when ("INLINE_BLIP") {
+            return ripple::inline_blip->new($args);
+        }
+        when ("GADGET") {
+            return ripple::gadget->new($args);
+        }
+        default {
+            return $class->SUPER::new({%$args, type => $type});
+        }
+    }
+}
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{ELEMENT }.$self->type);
+}
+
+
+
+package ripple::image;
+
+use base qw(ripple::element);
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{IMAGE});
+}
+
+
+
+package ripple::attachment;
+
+use base qw(ripple::element);
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{ATTACHMENT});
+}
+
+
+package ripple::inline_blip;
+
+use base qw(ripple::element);
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{INLINE BLIP});
+}
+
+
+
+package ripple::gadget;
+
+use base qw(ripple::element);
+
+sub render {
+    my ($self) = @_;
+
+    return $q->pre(q{GADGET});
 }
