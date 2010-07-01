@@ -17,7 +17,6 @@ use LWP::UserAgent;
 use CGI ();
 use JSON qw(decode_json encode_json);
 use HTML::Entities;
-use Date::Format;
 use Data::Dumper;
 use File::Basename;
 use Data::Compare ();
@@ -630,80 +629,8 @@ sub _form_wrap {
     $out .= q{</form>};
 }
 
+=pod
 sub _render_blip {
-    my ($wave_id, $wavelet_id, $blip_id, $blips, $distance) = @_;
-    $distance ||= 0;
-
-    my $blip = $blips->{$blip_id};
-
-    my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
-    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
-
-    my $out =
-        q{<div class='blip' id='}.$blip_id.q{'>}.
-            q{<b>}._pretty_name($blip->{creator}).q{</b>}.
-            time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $blip->{lastModifiedTime}/1000);
-
-    my @contributors = _pretty_names(grep { $_ ne $blip->{creator} } @{$blip->{contributors}});
-    if (@contributors) {
-        $out .=
-            q{<br />}.
-            q{with <b>}.
-            join (q{</b>, <b>}, @contributors).
-            q{</b>};
-    }
-
-    if ($q->param("d")) {
-        $out .= 
-            q{<div class='blip-debug'>}.
-                q{blip: }.$blip_id.q{<br />}.
-                q{parent: }.$blip->{parentBlipId}.q{<br />}.
-                q{distance: }.$distance.q{<br />}.
-            q{</div>};
-    }
-
-    my $r = ripple::renderer->new({ content => $blip->{content} });
-
-    my @element_positions = sort { $a <=> $b } keys %{$blip->{elements}};
-    for my $i (0 .. $#element_positions) {
-        my $position = $element_positions[$i];
-        my $element = $blip->{elements}->{$position};
-
-        given ($element->{type}) {
-            when ("LINE") {
-                $r->add_line({
-                    start      => $position,
-                    end        => $i == $#element_positions ? length $blip->{content} : $element_positions[$i+1],
-                    properties => $element->{properties},
-                });
-            }
-            default {
-                $r->add_element({
-                    position   => $position,
-                    type       => $element->{type},
-                    properties => $element->{properties},
-                });
-            }
-        }
-    }
-
-    for my $annotation (@{$blip->{annotations}}) {
-        $r->add_annotation({
-            start => $annotation->{range}->{start},
-            end   => $annotation->{range}->{end},
-            name  => $annotation->{name},
-            value => $annotation->{value},
-        });
-    }
-
-    $out .=
-        q{<div class='blip-content'>}.
-            $r->render.
-        q{</div>};
-
-    $out .= q{</div>};
-
-    return $out;
 
 
 
@@ -943,6 +870,7 @@ sub _render_blip {
 
     return $out;
 }
+=cut
 
 sub _pretty_name {
     my ($name) = @_;
@@ -1377,50 +1305,97 @@ package ripple::blip;
 
 use base qw(Class::Accessor);
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw(wave data));
-}
-
-sub render {
-    my ($self) = @_;
-
-    return main::_render_blip($self->wave->wave_id, $self->wave->wavelet_id, $self->data->{blipId}, $self->wave->data->{blips});
-}
-
-
-
-package ripple::renderer;
-
-use base qw(Class::Accessor);
-
+use Date::Format;
 use HTML::Entities;
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(content));
+    __PACKAGE__->mk_accessors(qw(wave data blip_id));
 }
 
-sub add_line {
-    my ($self, $args) = @_;
+sub new {
+    my ($class, $args) = @_;
 
-    push @{$self->{lines}}, ripple::line->new({ renderer => $self, %$args });
-}
+    my $self = $class->SUPER::new($args);
 
-sub add_element {
-    my ($self, $args) = @_;
+    $self->blip_id($self->data->{blipId});
 
-    push @{$self->{elements}}, ripple::element->new({ renderer => $self, %$args });
-}
-
-sub add_annotation {
-    my ($self, $args) = @_;
-
-    push @{$self->{annotations}}, ripple::annotation->new({ renderer => $self, %$args });
+    return $self;
 }
 
 sub render {
     my ($self) = @_;
 
-    my $out = '';
+=pod
+    my ($wave_id, $wavelet_id, $blip_id, $blips, $distance) = @_;
+    $distance ||= 0;
+=cut
+
+=pod
+    my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
+    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
+=cut
+
+    my $data = $self->data;
+
+    my $out =
+        q{<div class='blip' id='}.$self->blip_id.q{'>}.
+            q{<b>}.main::_pretty_name($data->{creator}).q{</b>}.
+            time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
+
+    my @contributors = main::_pretty_names(grep { $_ ne $data->{creator} } @{$data->{contributors}});
+    if (@contributors) {
+        $out .=
+            q{<br />}.
+            q{with <b>}.
+            join (q{</b>, <b>}, @contributors).
+            q{</b>};
+    }
+
+    if ($q->param("d")) {
+        $out .= 
+            q{<div class='blip-debug'>}.
+                q{blip: }.$data.q{<br />}.
+                q{parent: }.$data->{parentBlipId}.q{<br />}.
+                #q{distance: }.$distance.q{<br />}.
+            q{</div>};
+    }
+
+    my @element_positions = sort { $a <=> $b } keys %{$data->{elements}};
+    for my $i (0 .. $#element_positions) {
+        my $position = $element_positions[$i];
+        my $element = $data->{elements}->{$position};
+
+        given ($element->{type}) {
+            when ("LINE") {
+                push @{$self->{lines}}, ripple::line->new({
+                    blip       => $self,
+                    start      => $position,
+                    end        => $i == $#element_positions ? length $data->{content} : $element_positions[$i+1],
+                    properties => $element->{properties},
+                });
+            }
+            default {
+                push @{$self->{elements}}, ripple::element->new({
+                    blip       => $self,
+                    position   => $position,
+                    type       => $element->{type},
+                    properties => $element->{properties},
+                });
+            }
+        }
+    }
+
+    for my $annotation (@{$data->{annotations}}) {
+        push @{$self->{annotations}}, ripple::annotation->new({
+            blip  => $self,
+            start => $annotation->{range}->{start},
+            end   => $annotation->{range}->{end},
+            name  => $annotation->{name},
+            value => $annotation->{value},
+        });
+    }
+
+    $out .= q{<div class='blip-content'>};
 
     my $linegroup = ripple::linegroup->new({ renderer => $self });
 
@@ -1434,13 +1409,16 @@ sub render {
 
     $out .= $linegroup->render;
 
+    $out .= q{</div>}.q{</div>};
+
     return $out;
+    #return main::_render_blip($self->wave->wave_id, $self->wave->wavelet_id, $self->data->{blipId}, $self->wave->data->{blips});
 }
 
 sub content_range {
     my ($self, $start, $end) = @_;
 
-    return encode_entities(substr $self->content, $start, $end-$start);
+    return encode_entities(substr $self->data->{content}, $start, $end-$start);
 }
 
 sub annotated_content_range {
@@ -1551,7 +1529,7 @@ package ripple::line;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(renderer start end properties));
+    __PACKAGE__->mk_accessors(qw(blip start end properties));
 }
 
 sub render {
@@ -1561,7 +1539,7 @@ sub render {
 
     #$out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
-    my $content = $self->renderer->annotated_content_range($self->start, $self->end);
+    my $content = $self->blip->annotated_content_range($self->start, $self->end);
     my $properties = $self->properties;
 
     if (!exists $properties->{lineType}) {
@@ -1584,7 +1562,7 @@ package ripple::element;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(renderer position type properties));
+    __PACKAGE__->mk_accessors(qw(blip position type properties));
 }
 
 
@@ -1596,7 +1574,7 @@ use base qw(Class::Accessor);
 use URI::Escape;
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(renderer start end name value));
+    __PACKAGE__->mk_accessors(qw(blip start end name value));
 }
 
 sub boundary_marker {
@@ -1650,7 +1628,7 @@ package ripple::linegroup;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(renderer properties _div_close));
+    __PACKAGE__->mk_accessors(qw(blip properties _div_close));
 }
 
 sub add {
@@ -1704,7 +1682,7 @@ sub add {
     }
 
     # otherwise we're going down the tree
-    $self->{subgroup} = ripple::linegroup->new({ renderer => $self->renderer });
+    $self->{subgroup} = ripple::linegroup->new({ blip => $self->blip });
     $self->{subgroup}->add($line);
 
     return 1;
