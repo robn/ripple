@@ -1312,7 +1312,7 @@ package ripple::wave;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(data debug));
+    __PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id));
 }
 
 sub render {
@@ -1320,16 +1320,15 @@ sub render {
 
     my $data = $self->data;
 
-    my $wave_id      = $data->{waveletData}->{waveId};
-    my $wavelet_id   = $data->{waveletData}->{waveId};
-    my $root_blip_id = $data->{waveletData}->{rootBlipId};
+    $self->wave_id($data->{waveletData}->{waveId});
+    $self->wavelet_id($data->{waveletData}->{waveletId});
 
     my $out =
         q{<div class='wave'>}.
             q{<div class='wave-action-box'>}.
                 main::_form_wrap(
-                    [qw(hidden w), $wave_id],
-                    [qw(hidden wl), $wavelet_id],
+                    [qw(hidden w), $self->wave_id],
+                    [qw(hidden wl), $self->wavelet_id],
                     [qw(hidden a add)],
                     [qw(submit), undef, q{add people}],
                 ).
@@ -1338,7 +1337,7 @@ sub render {
             q{<b>}.join(q{</b>, <b>}, main::_pretty_names(@{$data->{waveletData}->{participants}})).q{</b>}.
         q{</div>};
 
-    $out .= main::_render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{blips});
+    $out .= $self->blip($data->{waveletData}->{rootBlipId})->render;
 
     if ($self->debug) {
         $out .=
@@ -1350,6 +1349,31 @@ sub render {
     }
 
     return $out;
+}
+
+sub blip {
+    my ($self, $blip_id) = @_;
+
+    my $blipdata = $self->data->{blips}->{$blip_id};
+    return if not $blipdata;
+
+    return ripple::blip->new({ wave => $self, data => $blipdata });
+}
+
+
+
+package ripple::blip;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(wave data));
+}
+
+sub render {
+    my ($self) = @_;
+
+    return main::_render_blip($self->wave->wave_id, $self->wave->wavelet_id, $self->data->{blipId}, $self->wave->data->{blips});
 }
 
 
