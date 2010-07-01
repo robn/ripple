@@ -1071,7 +1071,7 @@ sub render {
 
     $out .= $linegroup->render;
 
-    $out .= q{</div>}.q{</div>};
+    $out .= q{</div>};
 
     #
     # that's the blip rendered. now for the stuff under it. this happens
@@ -1110,13 +1110,11 @@ sub render {
     # 2+ thread
     #
 
-=pod
     # root blip gets a reply box
-    $out .= main::_reply_textarea($wave_id, $wavelet_id, $blip_id) if $distance == 0;
+    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_id) if $distance == 0;
 
     # the root and thread blips don't have any other blips inside them
     $out .= q{</div>} if $distance != 1;
-=cut
 
     # render the child blips
     if (@{$data->{childBlipIds}}) {
@@ -1125,20 +1123,17 @@ sub render {
         }
     }
 
-=pod
     # end of a top blip
     if ($distance == 1) {
         # get a reply box after all their thread blips.  the reply gets added
         # to the final thread blip though. more conversation model hack
-        $out .= _reply_textarea($wave_id, $wavelet_id, @{$blip->{childBlipIds}} ? $blip->{childBlipIds}->[-1] : $blip_id);
+        $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, @{$data->{childBlipIds}} ? $data->{childBlipIds}->[-1] : $self->blip_id);
 
         # and that's that
         $out .= q{</div>} if $distance == 1;
     }
-=cut
 
     return $out;
-    #return main::_render_blip($self->wave->wave_id, $self->wave->wavelet_id, $self->data->{blipId}, $self->wave->data->{blips});
 }
 
 sub content_range {
