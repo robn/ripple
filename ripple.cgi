@@ -974,12 +974,10 @@ sub new {
 sub render {
     my ($self) = @_;
 
-=pod
-    my %children = map { $_ => 1 } @{$blip->{childBlipIds}};
-    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$blip->{elements}};
-=cut
-
     my $data = $self->data;
+
+    my %children = map { $_ => 1 } @{$data->{childBlipIds}};
+    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$data->{elements}};
 
     my $distance = 0;
     while (state $blip = $self) {
@@ -1113,14 +1111,16 @@ sub render {
 
     # the root and thread blips don't have any other blips inside them
     $out .= q{</div>} if $distance != 1;
+=cut
 
     # render the child blips
-    if (@{$blip->{childBlipIds}}) {
-        for my $child_blip_id (grep { exists $children{$_} } @{$blip->{childBlipIds}}) {
-            $out .= _render_blip($wave_id, $wavelet_id, $child_blip_id, $blips, $distance+1);
+    if (@{$data->{childBlipIds}}) {
+        for my $child_blip_id (grep { exists $children{$_} } @{$data->{childBlipIds}}) {
+            $out .= $self->wavelet->blip($child_blip_id)->render;
         }
     }
 
+=pod
     # end of a top blip
     if ($distance == 1) {
         # get a reply box after all their thread blips.  the reply gets added
