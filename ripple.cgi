@@ -1175,27 +1175,50 @@ sub annotated_content_range {
         return $self->content_range($start, $end);
     }
 
-    # figure out the annotation boundaries and the list of annotations that
-    # are active at those positions
+    # loop over the annotations and figure out where all the boundaries are.
+    # while we're at it, build a list of annotations with coerced ranges such
+    # that they always fall inside the wanted range
     my %boundaries;
+    my @coerced_annotations;
     for my $annotation (@annotations) {
         my $boundary_start = $annotation->start < $start ? $start : $annotation->start;
         my $boundary_end   = $annotation->end   > $end   ? $end   : $annotation->end;
 
-        # creating a new annotation object here makes the maths easier later
-        my $split_annotation = ripple::annotation->new({
+        push @coerced_annotations, ripple::annotation->new({
             start => $boundary_start,
             end   => $boundary_end,
             name  => $annotation->name,
             value => $annotation->value,
         });
 
-        push @{$boundaries{$boundary_start}}, $split_annotation;
-        push @{$boundaries{$boundary_end}}  , $split_annotation;
+        $boundaries{$boundary_start} = [];
+        $boundaries{$boundary_end}   = [];
+    }
+
+    # loop over the boundary positions and attach a list of split annotations
+    # that touch that position to each
+    my @positions = sort { $a <=> $b } keys %boundaries;
+    for my $i (0 .. $#positions-1) {
+        my $position = $positions[$i];
+
+        my @touching_annotations = grep {
+            ($_->start <= $position && $_->end > $position) || ($_->end >= $position && $_->start < $position)
+        } @coerced_annotations;
+
+        for my $annotation (@touching_annotations) {
+            my $split_annotation = ripple::annotation->new({
+                start => $position,
+                end   => $positions[$i+1],
+                name  => $annotation->name,
+                value => $annotation->value,
+            });
+
+            push @{$boundaries{$position}}, $split_annotation;
+            push @{$boundaries{$positions[$i+1]}}, $split_annotation;
+        }
     }
 
     # loop over the boundary positions and produce appropriate output for each
-    my @positions = sort { $a <=> $b } keys %boundaries;
     my $content = '';
     for my $i (0 .. $#positions) {
         my $position = $positions[$i];
