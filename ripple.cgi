@@ -295,10 +295,8 @@ sub action_read {
         },
     });
 
-    my $out;
-
     if ($data->{error}) {
-        $out .=
+        my $out =
             q{<p>}.
                 q{<b>Error loading wave:</b><br />}.
                 q{<code>}.$data->{error}->{message}.q{</code>}.
@@ -317,33 +315,8 @@ sub action_read {
         return $out;
     }
 
-    $out =
-        q{<div class='wave'>}.
-            q{<div class='wave-action-box'>}.
-                _form_wrap(
-                    [qw(hidden w), $wave_id],
-                    [qw(hidden wl), $wavelet_id],
-                    [qw(hidden a add)],
-                    [qw(submit), undef, q{add people}],
-                ).
-            q{</div>}.
-            q{In this wave: }.
-            q{<b>}.join(q{</b>, <b>}, _pretty_names(@{$data->{data}->{waveletData}->{participants}})).q{</b>}.
-        q{</div>};
-
-    my $root_blip_id = $data->{data}->{waveletData}->{rootBlipId};
-    $out .= _render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{data}->{blips});
-
-    if ($q->param("d")) {
-        $out .=
-            q{<div class='protocol-debug'>}.
-                q{<pre>}.
-                    encode_entities(Dumper($data)).
-                q{</pre>}.
-            q{</div>};
-    }
-
-    return $out;
+    my $wave = ripple::wave->new({ data => $data->{data}, debug => $q->{debug} });
+    return $wave->render;
 }
 
 sub action_redirect {
@@ -1331,6 +1304,52 @@ HTML_SPLASH
     }
 
     return $html;
+}
+
+
+package ripple::wave;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(data debug));
+}
+
+sub render {
+    my ($self) = @_;
+
+    my $data = $self->data;
+
+    my $wave_id      = $data->{waveletData}->{waveId};
+    my $wavelet_id   = $data->{waveletData}->{waveId};
+    my $root_blip_id = $data->{waveletData}->{rootBlipId};
+
+    my $out =
+        q{<div class='wave'>}.
+            q{<div class='wave-action-box'>}.
+                main::_form_wrap(
+                    [qw(hidden w), $wave_id],
+                    [qw(hidden wl), $wavelet_id],
+                    [qw(hidden a add)],
+                    [qw(submit), undef, q{add people}],
+                ).
+            q{</div>}.
+            q{In this wave: }.
+            q{<b>}.join(q{</b>, <b>}, main::_pretty_names(@{$data->{waveletData}->{participants}})).q{</b>}.
+        q{</div>};
+
+    $out .= main::_render_blip($wave_id, $wavelet_id, $root_blip_id, $data->{blips});
+
+    if ($self->debug) {
+        $out .=
+            q{<div class='protocol-debug'>}.
+                q{<pre>}.
+                    encode_entities(Dumper($data)).
+                q{</pre>}.
+            q{</div>};
+    }
+
+    return $out;
 }
 
 
