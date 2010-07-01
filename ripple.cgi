@@ -1570,6 +1570,14 @@ sub boundary_marker {
                 },
             };
         }
+        when ("link/wave") {
+            push @{$marker->{elements}}, {
+                tag => 'a',
+                attrs => {
+                    href => main::_build_internal_uri(a => 'read', w => uri_escape($self->value)),
+                },
+            };
+        }
     }
 
     return $marker;
