@@ -979,13 +979,18 @@ sub render {
     my %children = map { $_ => 1 } @{$data->{childBlipIds}};
     delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$data->{elements}};
 
+    my $out;
+
     my $distance = 0;
-    while (state $blip = $self) {
-        $blip = $self->wavelet->blip($blip->data->{parentBlipId});
-        $distance++ if $blip;
+    {
+        my $blip = $self;
+        while ($blip) {
+            $blip = $self->wavelet->blip($blip->data->{parentBlipId});
+            $distance++ if $blip;
+        }
     }
 
-    my $out =
+    $out .=
         q{<div class='blip' id='}.$self->blip_id.q{'>}.
             q{<b>}.main::_pretty_name($data->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
