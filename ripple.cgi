@@ -1296,7 +1296,9 @@ sub boundary_marker {
     given ($self->name) {
 
         when (m{^style/(.*)}) {
-            $marker->{style}->{$1} = $self->value;
+            my $name = $1;
+            $name =~ s/([A-Z])/q{-}.lc($1)/e;
+            $marker->{style}->{$name} = $self->value;
         }
 
         when (m{^link/(?:manual|auto)}) {
