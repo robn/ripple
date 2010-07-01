@@ -1,0 +1,190 @@
+body {
+    font-family: sans-serif;
+    font-size: smaller;
+}
+
+img {
+    border: none;
+}
+
+div.identity {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+div.search-box {
+    padding: 0 5px 0 5px;
+}
+div.search-box input[type=text] {
+    width: 100%;
+}
+div.search-box input[type=submit] {
+    position: absolute;
+    right: 10px;
+}
+
+div.search-item {
+    margin: 2px;
+    padding: 2px;
+    border: solid black 1px;
+    background-color: #ffff99;
+}
+div.search-item:hover {
+    background-color: #999999;
+}
+div.search-item h1 {
+    margin: 0;
+    padding: 0;
+    font-size: larger;
+}
+div.search-item > a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+div.wave-action-box {
+    float: right;
+}
+div.wave-action-box > form {
+    padding: 0;
+    margin: 0;
+}
+
+div.wave {
+    margin: 5px;
+    padding: 5px;
+    background-color: #ff9999;
+    border: solid black 1px;
+}
+
+/* root blip */
+body > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+    border: solid black 1px;
+}
+
+/* normal blip */
+div.blip > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+}
+
+/* inline blip */
+div.blip-content > div.blip {
+    margin: 5px;
+    padding: 5px;
+    background-color: #9999ff;
+    border: solid black 1px;
+}
+
+div.blip-debug {
+    float: right;
+    margin-right: 5px;
+    padding: 2px;
+    border: solid black 1px;
+    background-color: #ffff99;
+    font-family: monospace;
+}
+
+div.blip-content {
+    padding: 5px;
+    background-color: #ffffff;
+    border: solid black 1px;
+}
+div.blip-content h1 {
+    display: inline;
+}
+div.blip-content div.indent {
+    margin-left: 3em;
+}
+
+div.blip-reply {
+    padding: 5px;
+}
+div.blip-reply form {
+    display: inline;
+}
+div.blip-reply textarea {
+    width: 100%;
+}
+
+div.image, div.attachment {
+    display: table-cell;
+    border: solid #999999 1px;
+    background-color: #ffff99;
+    margin: 0;
+    padding: 0;
+}
+div.image > a, div.attachment > a {
+    display: block;
+    padding: 5px;
+    color: inherit;
+    text-decoration: none;
+}
+
+div.gadget-unknown {
+    border: dashed #666666 3px;
+    background-color: #99ff99;
+    padding: 2px;
+}
+
+div.gadget-yesnomaybe {
+    display: table;
+    width: 100%;
+}
+div.gadget-yesnomaybe-list {
+    display: table-cell;
+    width: 33%;
+}
+div.gadget-yesnomaybe-list > div {
+    border: solid black 1px;
+    margin: 2px;
+    padding: 3px;
+    font-weight: bold;
+    text-align: center;
+}
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-yes {
+    background-color: #33ff33;
+}
+div.gadget-yesnomaybe-yes {
+    background-color: #ccffcc;
+}
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-no {
+    background-color: #ff3333;
+}
+div.gadget-yesnomaybe-no {
+    background-color: #ffcccc;
+}
+div.gadget-yesnomaybe-list > div.gadget-yesnomaybe-maybe {
+    background-color: #ffff33;
+}
+div.gadget-yesnomaybe-maybe {
+    background-color: #ffffcc;
+}
+div.gadget-yesnomaybe > div > ul {
+    margin: 0;
+}
+
+div.protocol-debug {
+    border: solid black 1px;
+    background-color: #cccccc;
+}
+div.protocol-debug > pre {
+    margin: 5px;
+}
+
+form.new-wave-form input[type=text] {
+    width: 100%;
+}
+form.new-wave-form textarea {
+    width: 100%;
+}
+
+form.add-recipients-form textarea {
+    width: 100%;
+}
