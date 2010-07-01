@@ -1196,16 +1196,14 @@ sub annotated_content_range {
     }
 
     # loop over the boundary positions and attach a list of split annotations
-    # that touch that position to each
+    # that start at that position to each
     my @positions = sort { $a <=> $b } keys %boundaries;
     for my $i (0 .. $#positions-1) {
         my $position = $positions[$i];
 
-        my @touching_annotations = grep {
-            ($_->start <= $position && $_->end > $position) || ($_->end >= $position && $_->start < $position)
-        } @coerced_annotations;
+        my @start_annotations = grep { $_->start <= $position && $_->end > $position } @coerced_annotations;
 
-        for my $annotation (@touching_annotations) {
+        for my $annotation (@start_annotations) {
             my $split_annotation = ripple::annotation->new({
                 start => $position,
                 end   => $positions[$i+1],
