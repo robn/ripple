@@ -1455,10 +1455,10 @@ sub annotated_content_range {
 
             for my $annotation (@end_annotations) {
                 my $marker = $annotation->boundary_marker;
-                push @elems, $marker->{elements}->{tag} for sort keys %{$marker->{elements}};
+                push @elems, $_ for @{$marker->{elements}};
                 $style += keys %{$marker->{style}};
 
-                $content .= q{</}.$_.q{>} for reverse @elems;
+                $content .= q{</}.$_.q{>} for map { $_->{tag} } reverse @elems;
                 $content .= q{</span>} if $style;
             }
         }
@@ -1468,7 +1468,7 @@ sub annotated_content_range {
 
             for my $annotation (@start_annotations) {
                 my $marker = $annotation->boundary_marker;
-                push @elems, $marker->{elements} for sort keys %{$marker->{elements}};
+                push @elems, $_ for @{$marker->{elements}};
                 $style{$_} = $marker->{style}->{$_} for keys %{$marker->{style}};
 
                 $content .= q{<span style='}.join('; ', map { "$_: $style{$_}" } keys %style).q{'>} if keys %style;
@@ -1539,6 +1539,8 @@ package ripple::annotation;
 
 use base qw(Class::Accessor);
 
+use URI::Escape;
+
 BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer start end name value));
 }
@@ -1551,6 +1553,22 @@ sub boundary_marker {
     given ($self->name) {
         when (m{^style/(.*)}) {
             $marker->{style}->{$1} = $self->value;
+        }
+        when (m{^link/(?:manual|auto)}) {
+            my $href;
+            if (my ($waveid) = $self->value =~ m{^waveid://(.*)}) {
+                $waveid =~ s{/}{!};
+                $href = main::_build_internal_uri(a => 'read', w => uri_escape($waveid));
+            }
+            else {
+                $href = main::_build_internal_uri(a => 'redirect', u => uri_escape($self->value));
+            }
+            push @{$marker->{elements}}, {
+                tag => 'a',
+                attrs => {
+                    href => $href,
+                },
+            };
         }
     }
 
