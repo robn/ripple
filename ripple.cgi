@@ -1351,7 +1351,7 @@ sub render {
             q{</b>};
     }
 
-    if ($q->param("d")) {
+    if ($self->wavelet->debug) {
         $out .= 
             q{<div class='blip-debug'>}.
                 q{blip: }.$data.q{<br />}.
