@@ -1846,14 +1846,26 @@ package ripple::gadget;
 use base qw(ripple::element);
 
 use HTML::Entities;
+use Data::Dumper;
 
 sub render {
     my ($self) = @_;
 
     my $props = $self->properties;
 
-    return
+    my $out =
         q{<div class='gadget-unknown'>}.
             q{GADGET: }.encode_entities($props->{url}).
         q{</div>};
+
+    if ($self->blip->wavelet->debug) {
+        $out .=
+            q{<div class='protocol-debug'>}.
+                q{<pre>}.
+                    encode_entities(Dumper($props)).
+                q{</pre>}.
+            q{</div>};
+    }
+
+    return $out;
 }
