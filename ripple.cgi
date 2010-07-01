@@ -1386,7 +1386,7 @@ sub render {
 sub content_range {
     my ($self, $start, $end) = @_;
 
-    return substr $self->content, $start, $end-$start;
+    return encode_entities(substr $self->content, $start, $end-$start);
 }
 
 sub annotated_content_range {
@@ -1482,7 +1482,7 @@ sub annotated_content_range {
         }
 
         if ($i < $#positions) {
-            $content .= encode_entities($self->content_range($position, $positions[$i+1]));
+            $content .= $self->content_range($position, $positions[$i+1]);
         }
 
     }
