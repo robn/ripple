@@ -1339,6 +1339,8 @@ package ripple::renderer;
 
 use base qw(Class::Accessor);
 
+use HTML::Entities;
+
 BEGIN {
     __PACKAGE__->mk_accessors(qw(content));
 }
@@ -1449,23 +1451,38 @@ sub annotated_content_range {
         my @end_annotations   = grep { $_->end   == $position } @{$boundaries{$position}};
 
         if (@end_annotations) {
-            $content .= "[END $position:";
+            my (@elems, $style);
+
             for my $annotation (@end_annotations) {
-                $content .= ' '.$annotation->name;
+                my $marker = $annotation->boundary_marker;
+                push @elems, $marker->{elements}->{tag} for sort keys %{$marker->{elements}};
+                $style += keys %{$marker->{style}};
+
+                $content .= q{</}.$_.q{>} for reverse @elems;
+                $content .= q{</span>} if $style;
             }
-            $content .= ']';
         }
 
         if (@start_annotations) {
-            $content .= "[START $position:";
+            my (@elems, %style);
+
             for my $annotation (@start_annotations) {
-                $content .= ' '.$annotation->name;
+                my $marker = $annotation->boundary_marker;
+                push @elems, $marker->{elements} for sort keys %{$marker->{elements}};
+                $style{$_} = $marker->{style}->{$_} for keys %{$marker->{style}};
+
+                $content .= q{<span style='}.join('; ', map { "$_: $style{$_}" } keys %style).q{'>} if keys %style;
+                for my $elem (@elems) {
+                    $content .=
+                        q{<}.$elem->{tag}.
+                        join(q{}, map { " $_='".encode_entities($elem->{attrs}->{$_})."'" } keys %{$elem->{attrs}}).
+                        q{>};
+                }
             }
-            $content .= ']';
         }
 
         if ($i < $#positions) {
-            $content .= $self->content_range($position, $positions[$i+1]);
+            $content .= encode_entities($self->content_range($position, $positions[$i+1]));
         }
 
     }
@@ -1478,8 +1495,6 @@ sub annotated_content_range {
 package ripple::line;
 
 use base qw(Class::Accessor);
-
-use HTML::Entities;
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer start end properties));
@@ -1496,12 +1511,12 @@ sub render {
     my $properties = $self->properties;
 
     if (!exists $properties->{lineType}) {
-        $out .= encode_entities($content).q{<br />};
+        $out .= $content.q{<br />};
     }
     else {
         $out .=
             q{<}.$properties->{lineType}.q{>}.
-            encode_entities($content).
+            $content.
             q{</}.$properties->{lineType}.q{>};
     }
 
@@ -1526,6 +1541,20 @@ use base qw(Class::Accessor);
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(renderer start end name value));
+}
+
+sub boundary_marker {
+    my ($self) = @_;
+
+    my $marker = {};
+
+    given ($self->name) {
+        when (m{^style/(.*)}) {
+            $marker->{style}->{$1} = $self->value;
+        }
+    }
+
+    return $marker;
 }
 
 
