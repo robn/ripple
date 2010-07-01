@@ -1231,12 +1231,13 @@ sub annotated_content_range {
 
             for my $annotation (@end_annotations) {
                 my $marker = $annotation->boundary_marker;
+
                 push @elems, $_ for @{$marker->{elements}};
                 $style += keys %{$marker->{style}};
-
-                $content .= q{</}.$_.q{>} for map { $_->{tag} } reverse @elems;
-                $content .= q{</span>} if $style;
             }
+
+            $content .= q{</}.$_.q{>} for map { $_->{tag} } reverse @elems;
+            $content .= q{</span>} if $style;
         }
 
         if (@start_annotations) {
@@ -1244,16 +1245,17 @@ sub annotated_content_range {
 
             for my $annotation (@start_annotations) {
                 my $marker = $annotation->boundary_marker;
+
                 push @elems, $_ for @{$marker->{elements}};
                 $style{$_} = $marker->{style}->{$_} for keys %{$marker->{style}};
+            }
 
-                $content .= q{<span style='}.join('; ', map { "$_: $style{$_}" } keys %style).q{'>} if keys %style;
-                for my $elem (@elems) {
-                    $content .=
-                        q{<}.$elem->{tag}.
-                        join(q{}, map { " $_='".encode_entities($elem->{attrs}->{$_})."'" } keys %{$elem->{attrs}}).
-                        q{>};
-                }
+            $content .= q{<span style='}.join('; ', map { "$_: $style{$_}" } keys %style).q{'>} if keys %style;
+            for my $elem (@elems) {
+                $content .=
+                    q{<}.$elem->{tag}.
+                    join(q{}, map { " $_='".encode_entities($elem->{attrs}->{$_})."'" } keys %{$elem->{attrs}}).
+                    q{>};
             }
         }
 
