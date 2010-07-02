@@ -738,7 +738,7 @@ sub render {
             q{<b>}.join(q{</b>, <b>}, main::_pretty_names(@{$data->{waveletData}->{participants}})).q{</b>}.
         q{</div>};
 
-    $out .= $self->blip($data->{waveletData}->{rootBlipId})->render;
+    $out .= ripple::thread->new({ wavelet => $self, blip_ids => $data->{waveletData}->{rootThread}->{blipIds} })->render;
 
     if ($self->debug) {
         $out .=
@@ -759,6 +759,30 @@ sub blip {
     return if not $blipdata;
 
     return ripple::blip->new({ wavelet => $self, data => $blipdata });
+}
+
+
+
+package ripple::thread;
+
+use base qw(Class::Accessor);
+
+BEGIN {
+    __PACKAGE__->mk_accessors(qw(wavelet blip_ids));
+}
+
+sub render {
+    my ($self) = @_;
+
+    my $out = '';
+
+    for my $blip_id (@{$self->blip_ids}) {
+        $out .= $self->wavelet->blip($blip_id)->render;
+    }
+
+    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_ids->[0]);
+
+    return $out;
 }
 
 
@@ -789,21 +813,7 @@ sub render {
 
     my $data = $self->data;
 
-    my %children = map { $_ => 1 } @{$data->{childBlipIds}};
-    delete $children{$_} for map { $_->{type} eq "INLINE_BLIP" ? $_->{properties}->{id} : () } values %{$data->{elements}};
-
-    my $out;
-
-    my $distance = 0;
-    {
-        my $blip = $self;
-        while ($blip) {
-            $blip = $self->wavelet->blip($blip->data->{parentBlipId});
-            $distance++ if $blip;
-        }
-    }
-
-    $out .=
+    my $out =
         q{<div class='blip' id='}.$self->blip_id.q{'>}.
             q{<b>}.main::_pretty_name($data->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
@@ -822,7 +832,6 @@ sub render {
             q{<div class='blip-debug'>}.
                 q{blip: }.$self->blip_id.q{<br />}.
                 q{parent: }.$data->{parentBlipId}.q{<br />}.
-                q{distance: }.$distance.q{<br />}.
             q{</div>};
     }
 
@@ -884,66 +893,17 @@ sub render {
 
     $out .= $linegroup->render;
 
-    $out .= q{</div>};
+    $out .= q{</div>}.q{</div>};
 
-    #
-    # that's the blip rendered. now for the stuff under it. this happens
-    # slightly differently depending on what kind of blip it is.
-    #
-    # since we don't have access to the conversation model, we have to infer
-    # things a bit. this results it a structure that isn't strictly correct
-    # but there's limits to what we can do
-    #
-    # we define three blip types: root, top and thread, as follows
-    #
-    # root
-    # top
-    #   thread
-    #   thread
-    #   thread
-    # top
-    #   thread
-    # top
-    # top
-    #   thread
-    #   thread
-    #
-    # replies to thread blips appear underneath as more thread blips (this is
-    # where the lack of the conversation model hurts). a reply box is added to
-    # the root and every top blip
-    #
-    # inline blips are just top blips rendered inside the blip content
-    #
-    # the distance is the how far away we are from the root. because of the
-    # way children are defined are setup in the wave json, we can infer the
-    # following from the blip distance:
-    #
-    # 0: root
-    # 1: top
-    # 2+ thread
-    #
+    if (@{$data->{replyThreadIds}}) {
+        for my $thread_blip_id (@{$data->{replyThreadIds}}) {
+            next if $self->wavelet->data->{threads}->{$thread_blip_id}->{location} != -1;
 
-    # root blip gets a reply box
-    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_id) if $distance == 0;
-
-    # the root and thread blips don't have any other blips inside them
-    $out .= q{</div>} if $distance != 1;
-
-    # render the child blips
-    if (@{$data->{childBlipIds}}) {
-        for my $child_blip_id (grep { exists $children{$_} } @{$data->{childBlipIds}}) {
-            $out .= $self->wavelet->blip($child_blip_id)->render;
+            $out .= ripple::thread->new({
+                wavelet => $self->wavelet,
+                blip_ids => $self->wavelet->data->{threads}->{$thread_blip_id}->{blipIds},
+            })->render;
         }
-    }
-
-    # end of a top blip
-    if ($distance == 1) {
-        # get a reply box after all their thread blips.  the reply gets added
-        # to the final thread blip though. more conversation model hack
-        $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, @{$data->{childBlipIds}} ? $data->{childBlipIds}->[-1] : $self->blip_id);
-
-        # and that's that
-        $out .= q{</div>} if $distance == 1;
     }
 
     return $out;
@@ -1396,7 +1356,10 @@ use base qw(ripple::element);
 sub render {
     my ($self) = @_;
 
-    return $self->blip->wavelet->blip($self->properties->{id})->render;
+    return ripple::thread->new({
+        wavelet => $self->blip->wavelet,
+        blip_ids => $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds},
+    })->render;
 }
 
 
