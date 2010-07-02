@@ -52,6 +52,7 @@ my $oa_auth_uri   = q{https://www.google.com/accounts/OAuthAuthorizeToken};
 my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
 
 my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
+my $sandbox_rpc_uri = q{https://www-opensocial-sandbox.googleusercontent.com/api/rpc};
 
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
@@ -497,7 +498,7 @@ sub _wave_request {
 
     my $oa_req = Net::OAuth->request("protected resource")->new(
         _default_request_params("POST"),
-        request_url  => $rpc_uri,
+        request_url  => $q->cookie("identity") =~ m/\@wavesandbox.com$/ ? $sandbox_rpc_uri : $rpc_uri,
         token        => $opts->{token}  // $q->cookie("token"),
         token_secret => $opts->{secret} // $q->cookie("secret"),
     );
