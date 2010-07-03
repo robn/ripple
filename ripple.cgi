@@ -783,7 +783,7 @@ sub render {
         $out .= $self->wavelet->blip($blip_id)->render;
     }
 
-    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_ids->[0]);
+    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_ids->[-1]);
 
     $out .= q{</div>};
 
