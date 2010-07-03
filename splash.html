@@ -31,8 +31,8 @@ images, attachments and most rich-text, and post simple plaintext replies.
 
 <ul>
   <li>There's a bug in the data API that means you can't read some waves that you are not a direct participant in.</li>
-  <li>ripple doesn't yet support the latest version of the data API that exposes the conversation model (that is, the tree structure of blips in the wave). Instead it makes some guesses as to where to place blips and how to reply. Things often come out out-of-order, but you can usually still see what's going on. Reimplementing this properly is the next thing on my list.</li>
-  <li>Speaking of profiles, user profile support isn't available. That mostly means no pretty user pictures. Google are days away from releasing support for this, so things should get shiny soon.</li>
+  <li>No editing support, and no ability to reply to an arbitrary blip. I'm not yet sure how to implement these without overcomplicating the layout and/or resorting to Javascript.</li>
+  <li>The data API doesn't yet expose user profiles, so there's no pretty user pictures. Google are days away from releasing support for this, so things should get shiny soon.</li>
   <li>No gadget support. ripple does not implement a gadget container. You'll see placeholders where gadgets would normally go. There however a simple read-only view of the AreYouIn/YesNoMaybe gadget. I'm still working out a more general approach to gadgets.</li>
   <li>Everything is quite boxy and ugly right now. I have some ideas for making things a bit more visually appealing, but I'm not there yet.</li>
 </ul>
@@ -58,7 +58,7 @@ We're discussing ripple in <a href='https://wave.google.com/wave/waveref/eatenby
 </p>
 
 <p>
-Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Gian Wild, Pamela Fox and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
+Thanks to Lisa Marsh, Stephen Edmonds, Ed Bassett, Chris Hagan, Gian Wild, Pamela Fox, Dhanji Prassana and antimatter15. You all did something, even if you don't know me and/or don't remember what you did :)
 </p>
 
 <p>
