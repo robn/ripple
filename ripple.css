@@ -59,24 +59,18 @@ div.wave {
     border: solid black 1px;
 }
 
-/* root blip */
-body > div.blip {
-    margin: 5px;
-    padding: 5px;
-    background-color: #9999ff;
-    border: solid black 1px;
+div.thread {
+    padding-left: 5px;
 }
 
-/* normal blip */
-div.blip > div.blip {
-    margin: 5px;
-    padding: 5px;
-    background-color: #9999ff;
+div.thread > div.thread {
+    margin-left: 1em;
+    border-left: solid gray 1px;
+    border-bottom: solid gray 1px;
 }
 
-/* inline blip */
-div.blip-content > div.blip {
-    margin: 5px;
+div.blip {
+    margin: 5px 5px 5px 0;
     padding: 5px;
     background-color: #9999ff;
     border: solid black 1px;
@@ -104,7 +98,10 @@ div.blip-content div.indent {
 }
 
 div.blip-reply {
+    margin: 5px 5px 5px 0;
     padding: 5px;
+    background-color: #99ff99;
+    border: solid black 1px;
 }
 div.blip-reply form {
     display: inline;
