@@ -738,7 +738,10 @@ sub render {
             q{<b>}.join(q{</b>, <b>}, main::_pretty_names(@{$data->{waveletData}->{participants}})).q{</b>}.
         q{</div>};
 
-    $out .= ripple::thread->new({ wavelet => $self, blip_ids => $data->{waveletData}->{rootThread}->{blipIds} })->render;
+    $out .= ripple::thread->new({
+        wavelet  => $self, 
+        blip_ids => $data->{waveletData}->{rootThread}->{blipIds}
+    })->render;
 
     if ($self->debug) {
         $out .=
@@ -774,13 +777,15 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
-    my $out = '';
+    my $out = q{<div class='thread'>};
 
     for my $blip_id (@{$self->blip_ids}) {
         $out .= $self->wavelet->blip($blip_id)->render;
     }
 
     $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_ids->[0]);
+
+    $out .= q{</div>};
 
     return $out;
 }
@@ -900,7 +905,7 @@ sub render {
             next if $self->wavelet->data->{threads}->{$thread_blip_id}->{location} != -1;
 
             $out .= ripple::thread->new({
-                wavelet => $self->wavelet,
+                wavelet  => $self->wavelet,
                 blip_ids => $self->wavelet->data->{threads}->{$thread_blip_id}->{blipIds},
             })->render;
         }
@@ -1357,7 +1362,7 @@ sub render {
     my ($self) = @_;
 
     return ripple::thread->new({
-        wavelet => $self->blip->wavelet,
+        wavelet  => $self->blip->wavelet,
         blip_ids => $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds},
     })->render;
 }
