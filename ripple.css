@@ -61,9 +61,10 @@ div.wave {
 
 div.thread {
     padding-left: 5px;
+    margin-bottom: 5px;
 }
 
-div.thread > div.thread, div.blip-content > div.thread {
+div.thread div.thread, div.blip-content div.thread {
     margin-left: 1em;
     border-left: solid gray 1px;
     border-bottom: solid gray 1px;
