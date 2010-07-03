@@ -1012,7 +1012,7 @@ sub annotated_content_range {
             my (@elems, $style);
 
             for my $annotation (@end_annotations) {
-                my $marker = $annotation->boundary_marker;
+                my $marker = $annotation->markup;
 
                 push @elems, $_ for @{$marker->{elements}};
                 $style += keys %{$marker->{style}};
@@ -1030,7 +1030,7 @@ sub annotated_content_range {
             my (@elems, %style);
 
             for my $annotation (@start_annotations) {
-                my $marker = $annotation->boundary_marker;
+                my $marker = $annotation->markup;
 
                 push @elems, $_ for @{$marker->{elements}};
                 $style{$_} = $marker->{style}->{$_} for keys %{$marker->{style}};
@@ -1099,7 +1099,7 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw(blip start end name value));
 }
 
-sub boundary_marker {
+sub markup {
     my ($self) = @_;
 
     my $marker = {};
