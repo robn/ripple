@@ -1302,8 +1302,11 @@ sub new {
     my $type = delete $args->{type};
 
     given ($type) {
-        when (m/^(?:IMAGE|ATTACHMENT)$/) {
+        when ("ATTACHMENT") {
             return ripple::attachment->new($args);
+        }
+        when ("IMAGE") {
+            return ripple::image->new($args);
         }
         when ("INLINE_BLIP") {
             return ripple::inline_blip->new($args);
@@ -1352,6 +1355,24 @@ sub render {
                 $caption.
             q{</a>}.
         q{</div>};
+
+    return $out;
+}
+
+
+
+package ripple::image;
+
+use base qw(ripple::element);
+
+sub render {
+    my ($self) = @_;
+
+    my $props = $self->properties;
+
+    my $out = q{<img src='}.$props->{url}.q{' };
+    $out .= q{alt='}.$props->{caption}.q{' } if exists $props->{caption};
+    $out .= q{/>};
 
     return $out;
 }
