@@ -1146,7 +1146,7 @@ package ripple::linegroup;
 use base qw(Class::Accessor);
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(blip properties _div_close));
+    __PACKAGE__->mk_accessors(qw(blip properties));
 }
 
 sub add {
@@ -1234,6 +1234,8 @@ sub render {
 
     my $out = '';
 
+    my $div_close = 0;
+
     given ($props->{lineType}) {
         when ("li") {
             $out .= q{<ul>};
@@ -1260,7 +1262,7 @@ sub render {
                 }
                 $out .= q{>};
 
-                $self->_div_close(1);
+                $div_close = 1;
             }
         }
     }
@@ -1274,10 +1276,7 @@ sub render {
             $out .= q{</ul>};
         }
         default {
-            if ($self->_div_close) {
-                $out .= q{</div>};
-                $self->_div_close(0);
-            }
+            $out .= q{</div>} if $div_close;
         }
     }
 
