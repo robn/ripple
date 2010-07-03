@@ -844,29 +844,28 @@ sub render {
             q{</div>};
     }
 
-    my @element_positions = sort { $a <=> $b } keys %{$data->{elements}};
-    for my $i (0 .. $#element_positions) {
-        my $position = $element_positions[$i];
+    my @line_positions = sort { $a <=> $b } grep { $data->{elements}->{$_}->{type} eq "LINE" } keys %{$data->{elements}};
+    for my $i (0 .. $#line_positions) {
+        my $position = $line_positions[$i];
+        my $line = $data->{elements}->{$position};
+
+        push @{$self->{lines}}, ripple::line->new({
+            blip       => $self,
+            start      => $position,
+            end        => $i == $#line_positions ? length $data->{content} : $line_positions[$i+1],
+            properties => $line->{properties},
+        });
+    }
+
+    for my $position (sort { $a <=> $b } grep { $data->{elements}->{$_}->{type} ne "LINE" } keys %{$data->{elements}}) {
         my $element = $data->{elements}->{$position};
 
-        given ($element->{type}) {
-            when ("LINE") {
-                push @{$self->{elements}}, ripple::line->new({
-                    blip       => $self,
-                    start      => $position,
-                    end        => $i == $#element_positions ? length $data->{content} : $element_positions[$i+1],
-                    properties => $element->{properties},
-                });
-            }
-            default {
-                push @{$self->{elements}}, ripple::element->new({
-                    blip       => $self,
-                    position   => $position,
-                    type       => $element->{type},
-                    properties => $element->{properties},
-                });
-            }
-        }
+        push @{$self->{elements}}, ripple::element->new({
+            blip       => $self,
+            position   => $position,
+            type       => $element->{type},
+            properties => $element->{properties},
+        });
     }
 
     for my $annotation (@{$data->{annotations}}) {
@@ -883,20 +882,12 @@ sub render {
 
     my $linegroup = ripple::linegroup->new({ renderer => $self });
 
-    for my $element (@{$self->{elements}}) {
-        if ($element->isa("ripple::line")) {
-            if (! $linegroup->add($element)) {
-                $out .= $linegroup->render;
-                $linegroup = ripple::linegroup->new({ renderer => $self });
-
-                $linegroup->add($element);
-            }
-        }
-        else {
+    for my $line (@{$self->{lines}}) {
+        if (! $linegroup->add($line)) {
             $out .= $linegroup->render;
             $linegroup = ripple::linegroup->new({ renderer => $self });
 
-            $out .= $element->render;
+            $linegroup->add($line);
         }
     }
 
@@ -977,6 +968,17 @@ sub annotated_content_range {
         $boundaries{$boundary_end}   = [];
     }
 
+    # make boundaries for elements as well. this allows us to get eg inline
+    # images for free
+    my %element_positions;
+    for my $element (@{$self->{elements}}) {
+        my $position = $element->position;
+        next if !($position >= $start && $position <= $end);
+
+        $boundaries{$position} = [] if not exists $boundaries{$position};
+        push @{$element_positions{$position}}, $element;
+    }
+
     # loop over the boundary positions and attach a list of split annotations
     # that start at that position to each
     my @positions = sort { $a <=> $b } keys %boundaries;
@@ -1018,6 +1020,10 @@ sub annotated_content_range {
 
             $content .= q{</}.$_.q{>} for map { $_->{tag} } reverse @elems;
             $content .= q{</span>} if $style;
+        }
+
+        for my $element (@{$element_positions{$position}}) {
+            $content .= $element->render;
         }
 
         if (@start_annotations) {
