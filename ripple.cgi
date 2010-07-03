@@ -1108,7 +1108,7 @@ package ripple::annotation;
 
 use base qw(Class::Accessor);
 
-use URI::Escape;
+use URI::Escape qw(uri_escape uri_escape_utf8);
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw(blip start end name value));
