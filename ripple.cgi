@@ -1140,7 +1140,7 @@ sub markup {
                 $href = main::_build_internal_uri(a => 'read', w => uri_escape($waveid));
             }
             else {
-                $href = main::_build_internal_uri(a => 'redirect', u => uri_escape($self->value));
+                $href = main::_build_internal_uri(a => 'redirect', u => uri_escape_utf8($self->value));
             }
 
             push @{$marker->{elements}}, {
