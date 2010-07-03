@@ -1112,6 +1112,11 @@ sub boundary_marker {
             $marker->{style}->{$name} = $self->value;
         }
 
+        when ("conv/title") {
+            $marker->{style}->{'font-weight'} = 'bold';
+            $marker->{style}->{'font-size'} = 'larger';
+        }
+
         when (m{^link/(?:manual|auto)}) {
             my $href;
 
