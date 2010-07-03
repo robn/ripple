@@ -794,6 +794,8 @@ BEGIN {
 sub render {
     my ($self) = @_;
 
+    return if !@{$self->blip_ids};
+
     my $out = q{<div class='thread'>};
 
     for my $blip_id (@{$self->blip_ids}) {
