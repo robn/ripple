@@ -329,6 +329,10 @@ sub action_reply {
 
     my $blip_id = sprintf q{TBD_%s_0x%08x}, $wavelet_id, int rand 4294967296;
 
+    my $reply_text = $q->param("r");
+    $reply_text =~ s{\r\n}{\n}smg;
+    $reply_text =~ s{\r}{}smg;
+
     my $data = _wave_request([{
         id     => "create1",
         method => "wave.blip.createChild",
@@ -354,7 +358,7 @@ sub action_reply {
             modifyAction => {
                 modifyHow => "REPLACE",
                 values    => [
-                    "\n".$q->param("r"),
+                    "\n".$reply_text,
                 ],
             },
         },
