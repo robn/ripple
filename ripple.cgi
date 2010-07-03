@@ -709,7 +709,7 @@ use HTML::Entities;
 use Data::Dumper;
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id));
+    __PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id title));
 }
 
 sub new {
@@ -721,6 +721,19 @@ sub new {
     $self->wavelet_id($self->data->{waveletData}->{waveletId});
 
     return $self;
+}
+
+sub title {
+    my ($self) = @_;
+
+    if (my $title = $self->_title_accessor) {
+        return $title;
+    }
+
+    my $blip = $self->blip($self->data->{waveletData}->{rootBlipId});
+    my ($title_annotation) = grep { $_->{name} eq "conv/title" } @{$blip->data->{annotations}};
+
+    return $self->_title_accessor($blip->content_range($title_annotation->{range}->{start}, $title_annotation->{range}->{end}));
 }
 
 sub render {
