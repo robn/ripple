@@ -1501,7 +1501,7 @@ sub render {
         for my $user (@users) {
             $out .=
                 q{<li>}.
-                $user;
+                main::_pretty_name($user);
 
             $out .= q{ - }.$props->{"$user:status"} if $props->{"$user:status"};
 
