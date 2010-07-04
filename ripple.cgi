@@ -1276,7 +1276,7 @@ sub render {
                                  $props->{alignment} eq 'j' ? "justify" :
                                                               "left") if exists $props->{alignment} && $props->{alignment} ne 'l';
 
-    if (@class || @style) {
+    if ($block_elem eq "ul" || @class || @style) {
         $out .= q{<}.$block_elem;
         if (@class) {
             $out .= q{ class='}.join(' ', @class).q{'};
