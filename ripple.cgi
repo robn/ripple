@@ -1248,6 +1248,22 @@ sub count {
     return scalar @{$self->{objects} || []};
 }
 
+sub start {
+    my ($self) = @_;
+
+    return -1 if !$self->count;
+
+    return $self->{objects}->[0]->start;
+}
+
+sub end {
+    my ($self) = @_;
+
+    return -1 if !$self->count;
+
+    return $self->{objects}->[-1]->end;
+}
+
 sub render {
     my ($self) = @_;
 
@@ -1295,7 +1311,7 @@ sub render {
 
     $out .= q{</}.$block_elem.q{>} if $block_close;
 
-    #$out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
+    #$out .= sprintf q{<pre>LINEGROUP [%d %d %D]: %s</pre>}, $self->count, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
     return $out;
 }
