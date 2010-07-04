@@ -953,22 +953,18 @@ sub annotated_content_range {
     #
     #            | AC |ABC|---- BC ---|C |   |-- D --|
 
-    # find the annotations
-    my @annotations = grep {
-        ($_->start >= $start && $_->start < $end) || ($_->end > $start && $_->end <= $end) || ($_->start < $start && $_->end > $end)
-    } @{$self->{annotations}};
-
-    # if there's no annotations then the raw content is all we need
-    if (!@annotations) {
-        return $self->content_range($start, $end);
-    }
-
     # loop over the annotations and figure out where all the boundaries are.
     # while we're at it, build a list of annotations with coerced ranges such
     # that they always fall inside the wanted range
     my %boundaries;
     my @coerced_annotations;
-    for my $annotation (@annotations) {
+    for my $annotation (@{$self->{annotations}}) {
+        next if ! (
+            ($annotation->start >= $start && $annotation->start <  $end) ||
+            ($annotation->end   >  $start && $annotation->end   <= $end) ||
+            ($annotation->start <  $start && $annotation->end   >  $end)
+        );
+
         my $boundary_start = $annotation->start < $start ? $start : $annotation->start;
         my $boundary_end   = $annotation->end   > $end   ? $end   : $annotation->end;
 
@@ -994,9 +990,15 @@ sub annotated_content_range {
         push @{$element_positions{$position}}, $element;
     }
 
+    my @positions = sort { $a <=> $b } keys %boundaries;
+    if (!@positions) {
+        # no positions recorded so there's nothing here and the raw content
+        # range will be fine
+        return $self->content_range($start, $end);
+    }
+
     # loop over the boundary positions and attach a list of split annotations
     # that start at that position to each
-    my @positions = sort { $a <=> $b } keys %boundaries;
     for my $i (0 .. $#positions-1) {
         my $position = $positions[$i];
 
