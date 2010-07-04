@@ -313,8 +313,8 @@ sub action_read {
         return $out;
     }
 
-    my $wave = ripple::wavelet->new({ data => $data->{data}, debug => $q->param("d") });
-    return $wave->render;
+    my $wavelet = ripple::wavelet->new({ data => $data->{data}, debug => $q->param("d") });
+    return $wavelet->render;
 }
 
 sub action_redirect {
@@ -742,8 +742,8 @@ sub render {
     my $data = $self->data;
 
     my $out =
-        q{<div class='wave'>}.
-            q{<div class='wave-action-box'>}.
+        q{<div class='wavelet'>}.
+            q{<div class='wavelet-action-box'>}.
                 main::_form_wrap(
                     [qw(hidden w), $self->wave_id],
                     [qw(hidden wl), $self->wavelet_id],

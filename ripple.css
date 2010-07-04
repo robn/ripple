@@ -44,15 +44,15 @@ div.search-item > a {
     text-decoration: none;
 }
 
-div.wave-action-box {
+div.wavelet-action-box {
     float: right;
 }
-div.wave-action-box > form {
+div.wavelet-action-box > form {
     padding: 0;
     margin: 0;
 }
 
-div.wave {
+div.wavelet {
     margin: 5px;
     padding: 5px;
     background-color: #ff9999;
