@@ -900,13 +900,15 @@ sub render {
     for my $line (@{$self->{lines}}) {
         if (! $linegroup->add($line)) {
             $out .= $linegroup->render;
-            $linegroup = ripple::linegroup->new({ renderer => $self });
+            $out .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
 
+            $linegroup = ripple::linegroup->new({ renderer => $self });
             $linegroup->add($line);
         }
     }
 
     $out .= $linegroup->render;
+    $out .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
 
     $out .= q{</div>}.q{</div>};
 
@@ -1069,6 +1071,12 @@ sub annotated_content_range {
     }
 
     return $content;
+}
+
+sub elements_in_range {
+    my ($self, $start, $end) = @_;
+
+    return grep { $_->position >= $start && $_->position <= $end } @{$self->{elements}};
 }
 
 
