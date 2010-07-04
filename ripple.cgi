@@ -1310,51 +1310,38 @@ sub render {
 
     my $out = '';
 
-    my $div_close = 0;
+    my $block_close;
+    my $block_elem = exists $props->{lineType} && $props->{lineType} eq "li" ? "ul" : "div";
 
-    given ($props->{lineType}) {
-        when ("li") {
-            $out .= q{<ul>};
+    my (@class, @style);
+
+    push @class, "indent" if $props->{indent};
+
+    push @style, "direction: rtl" if exists $props->{direction} && $props->{direction} eq 'r';
+
+    push @style, "text-align: ".($props->{alignment} eq 'c' ? "center"  :
+                                 $props->{alignment} eq 'r' ? "right"   :
+                                 $props->{alignment} eq 'j' ? "justify" :
+                                                              "left") if exists $props->{alignment} && $props->{alignment} ne 'l';
+
+    if (@class || @style) {
+        $out .= q{<}.$block_elem;
+        if (@class) {
+            $out .= q{ class='}.join(' ', @class).q{'};
         }
-        default {
-            my (@class, @style);
-
-            push @class, "indent" if $props->{indent};
-
-            push @style, "direction: rtl" if exists $props->{direction} && $props->{direction} eq 'r';
-
-            push @style, "text-align: ".($props->{alignment} eq 'c' ? "center"  :
-                                         $props->{alignment} eq 'r' ? "right"   :
-                                         $props->{alignment} eq 'j' ? "justify" :
-                                                                      "left") if exists $props->{alignment} && $props->{alignment} ne 'l';
-
-            if (@class || @style) {
-                $out .= q{<div};
-                if (@class) {
-                    $out .= q{ class='}.join(' ', @class).q{'};
-                }
-                if (@style) {
-                    $out .= q{ style='}.join('; ', @style).q{;'};
-                }
-                $out .= q{>};
-
-                $div_close = 1;
-            }
+        if (@style) {
+            $out .= q{ style='}.join('; ', @style).q{;'};
         }
+        $out .= q{>};
+
+        $block_close = 1;
     }
 
     for my $object (@{$self->{objects}}) {
         $out .= $object->render;
     }
 
-    given ($props->{lineType}) {
-        when ("li") {
-            $out .= q{</ul>};
-        }
-        default {
-            $out .= q{</div>} if $div_close;
-        }
-    }
+    $out .= q{</}.$block_elem.q{>} if $block_close;
 
     #$out .= sprintf q{<pre>LINEGROUP [%d]: %s</pre>}, $self->count, Data::Dumper::Dumper($self->properties);
 
