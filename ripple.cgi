@@ -1070,7 +1070,7 @@ sub annotated_content_range {
         }
 
         for my $element (@{$element_positions{$position}}) {
-            $content .= $element->render;
+            $content .= $element->render_inline;
         }
 
         if (@start_annotations) {
@@ -1382,10 +1382,12 @@ sub new {
     }
 }
 
-sub render {
-    my ($self) = @_;
+sub render_block {
+    return '';
+}
 
-    return $q->pre(q{ELEMENT }.$self->type);
+sub render_inline {
+    return '';
 }
 
 
@@ -1394,7 +1396,7 @@ package ripple::attachment;
 
 use base qw(ripple::element);
 
-sub render {
+sub render_block {
     my ($self) = @_;
 
     my $props = $self->properties;
@@ -1427,7 +1429,7 @@ package ripple::image;
 
 use base qw(ripple::element);
 
-sub render {
+sub render_inline {
     my ($self) = @_;
 
     my $props = $self->properties;
@@ -1445,7 +1447,7 @@ package ripple::inline_blip;
 
 use base qw(ripple::element);
 
-sub render {
+sub render_block {
     my ($self) = @_;
 
     return ripple::thread->new({
@@ -1482,7 +1484,7 @@ sub new {
     return $class->SUPER::new($args);
 }
 
-sub render {
+sub render_block {
     my ($self) = @_;
 
     my $props = $self->properties;
@@ -1510,7 +1512,7 @@ package ripple::gadget::yesnomaybe;
 
 use base qw(ripple::gadget);
 
-sub render {
+sub render_block {
     my ($self) = @_;
 
     my $props = $self->properties;
