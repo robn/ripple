@@ -1086,8 +1086,6 @@ sub render {
 
     my $out = '';
 
-    #$out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
-
     my $content = $self->blip->annotated_content_range($self->start, $self->end);
     my $properties = $self->properties;
 
@@ -1100,6 +1098,8 @@ sub render {
             $content.
             q{</}.$properties->{lineType}.q{>};
     }
+
+    #$out .= sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
     return $out;
 }
@@ -1186,12 +1186,6 @@ sub add {
         return 1;
     }
 
-    # if its exactly the same as us, we can add it
-    if (Data::Compare::Compare($self->properties, $line->properties)) {
-        $self->_add_internal($line);
-        return 1;
-    }
-
     # if its not the same kind of thing as us then we can't go any further
     if ((!$self->properties->{lineType} && !$line->properties->{lineType}) ||
         $self->properties->{lineType} ne $line->properties->{lineType}) {
@@ -1206,6 +1200,12 @@ sub add {
         # if the subgroup didn't like it then its finished here
         $self->_add_internal($self->{subgroup});
         delete $self->{subgroup};
+    }
+
+    # if its exactly the same as us, we can add it
+    if (Data::Compare::Compare($self->properties, $line->properties)) {
+        $self->_add_internal($line);
+        return 1;
     }
 
     # if it looks like us, just add it here
