@@ -979,6 +979,28 @@ sub annotated_content_range {
         $boundaries{$boundary_end}   = [];
     }
 
+    # convert lines into annotations for rendering purposes
+    for my $line (@{$self->{lines}}) {
+        next if ! (
+            ($line->start >= $start && $line->start <  $end) ||
+            ($line->end   >  $start && $line->end   <= $end) ||
+            ($line->start <  $start && $line->end   >  $end)
+        );
+
+        my $boundary_start = $line->start < $start ? $start : $line->start;
+        my $boundary_end   = $line->end   > $end   ? $end   : $line->end;
+
+        push @coerced_annotations, ripple::annotation->new({
+            start => $boundary_start,
+            end   => $boundary_end,
+            name  => "_ripple/line",
+            value => $line,
+        });
+
+        $boundaries{$boundary_start} //= [];
+        $boundaries{$boundary_end}   //= [];
+    }
+
     # make boundaries for elements as well. this allows us to get eg inline
     # images for free
     my %element_positions;
@@ -1035,7 +1057,15 @@ sub annotated_content_range {
                 $style += keys %{$marker->{style}};
             }
 
-            $content .= q{</}.$_.q{>} for map { $_->{tag} } reverse @elems;
+            for my $elem (reverse @elems) {
+                if (exists $elem->{start_html} || exists $elem->{end_html}) {
+                    $content .= $elem->{end_html} if exists $elem->{end_html};
+                }
+                else {
+                    $content .= q{</}.$elem->{tag}.q{>};
+                }
+            }
+
             $content .= q{</span>} if $style;
         }
 
@@ -1054,11 +1084,17 @@ sub annotated_content_range {
             }
 
             $content .= q{<span style='}.join('; ', map { "$_: $style{$_}" } keys %style).q{'>} if keys %style;
+
             for my $elem (@elems) {
-                $content .=
-                    q{<}.$elem->{tag}.
-                    join(q{}, map { " $_='".encode_entities($elem->{attrs}->{$_})."'" } keys %{$elem->{attrs}}).
-                    q{>};
+                if (exists $elem->{start_html} || exists $elem->{end_html}) {
+                    $content .= $elem->{start_html} if exists $elem->{start_html};
+                }
+                else {
+                    $content .=
+                        q{<}.$elem->{tag}.
+                        join(q{}, map { " $_='".encode_entities($elem->{attrs}->{$_})."'" } keys %{$elem->{attrs}}).
+                        q{>};
+                }
             }
         }
 
@@ -1088,20 +1124,27 @@ sub render {
 
     #$out = sprintf q{<pre>LINE [%d %d]: %s</pre>}, $self->start, $self->end, Data::Dumper::Dumper($self->properties);
 
-    my $content = $self->blip->annotated_content_range($self->start, $self->end);
-    my $properties = $self->properties;
+    return $self->blip->annotated_content_range($self->start, $self->end);
+}
 
-    if (!exists $properties->{lineType}) {
-        $out .= $content.q{<br />};
-    }
-    else {
-        $out .=
-            q{<}.$properties->{lineType}.q{>}.
-            $content.
-            q{</}.$properties->{lineType}.q{>};
+sub markup {
+    my ($self) = @_;
+
+    my $props = $self->properties;
+    
+    if (!exists $props->{lineType}) {
+        return {
+            elements => [ {
+                end_html => '<br />',
+            } ],
+        };
     }
 
-    return $out;
+    return {
+        elements => [ {
+            tag => $props->{lineType},
+        } ],
+    }
 }
 
 
@@ -1162,6 +1205,11 @@ sub markup {
             };
         }
 
+        when ("_ripple/line") {
+            my $line_markup = $self->value->markup;
+            push @{$marker->{elements}}, @{$line_markup->{elements}} if exists $line_markup->{elements};
+            push @{$marker->{style}},    @{$line_markup->{style}}    if exists $line_markup->{style};
+        }
     }
 
     return $marker;
