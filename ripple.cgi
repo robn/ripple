@@ -1399,15 +1399,6 @@ sub render_block {
     return $out;
 }
 
-sub render_inline {
-    my ($self) = @_;
-
-    return
-        q{ <a href='#}.$self->properties->{attachmentId}.q{'>}.
-            q{<img src='}.$icon_path.q{attachment.png' alt='[link to attachment]' />}.
-        q{</a> };
-}
-
 
 
 package ripple::image;
