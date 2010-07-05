@@ -22,7 +22,8 @@ use File::Basename;
 use Data::Compare ();
 
 # uri to the script. you can hard code this if you like, otherwise this will try to infer it
-my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME};
+my $base_uri = $ENV{SCRIPT_URI} // (sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME});
+
 
 # path to splash screen file
 my $splash_file = (fileparse($ENV{SCRIPT_FILENAME}))[1]."splash.html";
