@@ -856,6 +856,7 @@ sub render {
             q{<div class='blip-debug'>}.
                 q{blip: }.$self->blip_id.q{<br />}.
                 q{parent: }.$data->{parentBlipId}.q{<br />}.
+                q{thread: }.$data->{threadId}.q{<br />}.
             q{</div>};
     }
 
