@@ -54,7 +54,7 @@ sub render {
                 ).
             q{</div>}.
             q{In this wave: }.
-            q{<b>}.join(q{</b>, <b>}, main::_pretty_names(@{$data->{waveletData}->{participants}})).q{</b>}.
+            q{<b>}.join(q{</b>, <b>}, map { App::Ripple->pretty_name($_) } @{$data->{waveletData}->{participants}}).q{</b>}.
         q{</div>};
 
     $out .= App::Ripple::Thread->new({

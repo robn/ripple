@@ -20,4 +20,10 @@ use App::Ripple::Element::InlineBlip;
 
 use App::Ripple::Element::Gadget::YesNoMaybe;
 
+sub pretty_name {
+    my ($class, $name) = @_;
+    $name =~ s{\@googlewave.com$}{};
+    return $name;
+}
+
 1;

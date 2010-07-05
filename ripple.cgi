@@ -638,16 +638,6 @@ sub _form_wrap {
     $out .= q{</form>};
 }
 
-sub _pretty_name {
-    my ($name) = @_;
-    $name =~ s{\@googlewave.com$}{};
-    return $name;
-}
-
-sub _pretty_names {
-    return map { _pretty_name($_) } @_;
-}
-
 sub _reply_textarea {
     my ($wave_id, $wavelet_id, $blip_id) = @_;
 

@@ -35,7 +35,7 @@ sub render_block {
         for my $user (@users) {
             $out .=
                 q{<li>}.
-                main::_pretty_name($user);
+                App::Ripple->pretty_name($user);
 
             $out .= q{ - }.$props->{"$user:status"} if $props->{"$user:status"};
 
