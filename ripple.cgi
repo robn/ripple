@@ -24,7 +24,6 @@ use JSON qw(decode_json encode_json);
 use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
-use Data::Compare ();
 
 # uri to the script. you can hard code this if you like, otherwise this will try to infer it
 my $base_uri = $ENV{SCRIPT_URI} // (sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME});

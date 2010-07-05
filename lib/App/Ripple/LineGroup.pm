@@ -8,6 +8,8 @@ use strict;
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(blip properties));
 
+use Data::Compare ();
+
 sub add {
     my ($self, $line) = @_;
 
