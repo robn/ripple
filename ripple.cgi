@@ -1385,7 +1385,7 @@ sub render_block {
     my $url = $props->{attachmentUrl} || $props->{url};
 
     my $out =
-        q{<div class='}.$type.q{'>}.
+        q{<div class='}.$type.q{' id='}.$props->{attachmentId}.q{'>}.
             q{<a href='}.$url.q{'}.
                 q{<img}.
                     q{ src='}.($type eq "image" ? $url : $icon_path.$icon).q{'}.
@@ -1397,6 +1397,15 @@ sub render_block {
         q{</div>};
 
     return $out;
+}
+
+sub render_inline {
+    my ($self) = @_;
+
+    return
+        q{ <a href='#}.$self->properties->{attachmentId}.q{'>}.
+            q{<img src='}.$icon_path.q{attachment.png' alt='[link to attachment]' />}.
+        q{</a> };
 }
 
 
@@ -1430,6 +1439,15 @@ sub render_block {
         wavelet  => $self->blip->wavelet,
         blip_ids => $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds},
     })->render;
+}
+
+sub render_inline {
+    my ($self) = @_;
+
+    return
+        q{ <a href='#}.$self->properties->{id}.q{'>}.
+            q{<img src='}.$icon_path.q{inline-blip.png' alt='[link to inline discussion]' />}.
+        q{</a> };
 }
 
 
