@@ -19,7 +19,16 @@ sub render {
         $out .= $self->wavelet->blip($blip_id)->render;
     }
 
-    $out .= main::_reply_textarea($self->wavelet->wave_id, $self->wavelet->wavelet_id, $self->blip_ids->[-1]);
+    $out .=
+        q{<div class='blip-reply'>}.
+            main::_form_wrap( { method => 'post' },
+               [qw(hidden w),  $self->wavelet->wave_id    ],
+               [qw(hidden wl), $self->wavelet->wavelet_id ],
+               [qw(hidden b),  $self->blip_ids->[-1]      ],
+               [qw(textarea r)],
+               [qw(submit a reply)], 
+            ).
+        q{</div>};
 
     $out .= q{</div>};
 

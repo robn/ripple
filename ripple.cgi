@@ -637,22 +637,6 @@ sub _form_wrap {
     $out .= q{</form>};
 }
 
-sub _reply_textarea {
-    my ($wave_id, $wavelet_id, $blip_id) = @_;
-
-    return
-        q{<div class='blip-reply'>}.
-            _form_wrap( { method => 'post' },
-               [qw(hidden w),  $wave_id],
-               [qw(hidden wl), $wavelet_id],
-               [qw(hidden b),  $blip_id],
-               [qw(textarea r)],
-               [qw(submit a reply)], 
-            ).
-        q{</div>}
-    ;
-}
-
 sub _html_header {
     return <<HTML_HEADER
 <html>
