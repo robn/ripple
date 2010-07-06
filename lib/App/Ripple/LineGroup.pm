@@ -6,7 +6,7 @@ use warnings;
 use strict;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(blip properties));
+__PACKAGE__->mk_accessors(qw(properties));
 
 use Data::Compare ();
 
@@ -61,7 +61,7 @@ sub add {
     }
 
     # otherwise we're going down the tree
-    $self->{subgroup} = App::Ripple::LineGroup->new({ blip => $self->blip });
+    $self->{subgroup} = App::Ripple::LineGroup->new;
     $self->{subgroup}->add($line);
 
     return 1;

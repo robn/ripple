@@ -91,14 +91,14 @@ sub render {
 
     $out .= q{<div class='blip-content'>};
 
-    my $linegroup = App::Ripple::LineGroup->new({ renderer => $self });
+    my $linegroup = App::Ripple::LineGroup->new;
 
     for my $line (@{$self->{lines}}) {
         if (! $linegroup->add($line)) {
             $out .= $linegroup->render;
             $out .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
 
-            $linegroup = App::Ripple::LineGroup->new({ renderer => $self });
+            $linegroup = App::Ripple::LineGroup->new;
             $linegroup->add($line);
         }
     }
