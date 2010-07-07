@@ -11,13 +11,12 @@ __PACKAGE__->mk_accessors(qw(wavelet blip_ids));
 sub render {
     my ($self) = @_;
 
-    return if !@{$self->blip_ids};
+    my @blips = map { $self->wavelet->blip($_) // () } @{$self->blip_ids};
+    return if !@blips;
 
     my $out = q{<div class='thread'>};
 
-    for my $blip_id (@{$self->blip_ids}) {
-        $out .= $self->wavelet->blip($blip_id)->render;
-    }
+    $out .= $_->render for @blips;
 
     $out .=
         q{<div class='blip-reply'>}.
