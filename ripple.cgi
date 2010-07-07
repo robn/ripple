@@ -14,10 +14,7 @@ use lib "$FindBin::Bin/lib";
 
 use App::Ripple;
 
-use URI::Escape;
 use CGI::Carp qw(fatalsToBrowser);
-use Net::OAuth 0.25;
-use LWP::UserAgent;
 use CGI ();
 use HTML::Entities;
 use Data::Dumper;
