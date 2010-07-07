@@ -19,7 +19,6 @@ use CGI::Carp qw(fatalsToBrowser);
 use Net::OAuth 0.25;
 use LWP::UserAgent;
 use CGI ();
-use JSON qw(decode_json encode_json);
 use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
@@ -51,12 +50,13 @@ my $oa_consumer_secret = "anonymous";
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
-my $oa = App::Ripple::OAuth->new({
+my $q = CGI->new;
+
+my $waveservice = App::Ripple::WaveService->new({
     consumer_key    => $oa_consumer_key,
     consumer_secret => $oa_consumer_secret,
 });
-
-my $q = CGI->new;
+$waveservice->use_sandbox($q->cookie("identity") =~ m/\@wavesandbox.com$/);
 
 if ($q->param("l")) {
     do_wave();
@@ -100,7 +100,7 @@ sub do_splash {
 }
 
 sub do_login {
-    my ($uri, $token_secret) = $oa->get_login_uri(callback => _build_internal_uri(s => 'callback'));
+    my ($uri, $token_secret) = $waveservice->get_login_uri(callback => _build_internal_uri(s => 'callback'));
 
     print $q->redirect(
         -uri => $uri,
@@ -111,7 +111,7 @@ sub do_login {
 }
 
 sub do_callback {
-    my ($token, $token_secret) = $oa->handle_callback($q->cookie("secret"), $q->Vars);
+    my ($token, $token_secret) = $waveservice->handle_callback($q->cookie("secret"), $q->Vars);
 
     print $q->redirect(
         -uri => _build_internal_uri(), 
@@ -460,29 +460,7 @@ sub _wave_request {
         return ref $rpc eq "HASH" ? shift @data : \@data;
     }
 
-    my $oa_req = Net::OAuth->request("protected resource")->new(
-        _default_request_params("POST"),
-        request_url  => $q->cookie("identity") =~ m/\@wavesandbox.com$/ ? $sandbox_rpc_uri : $rpc_uri,
-        token        => $opts->{token}  // $q->cookie("token"),
-        token_secret => $opts->{secret} // $q->cookie("secret"),
-    );
-    $oa_req->sign;
-
-    my $ua = LWP::UserAgent->new;
-    $ua->default_header(Authorization => $oa_req->to_authorization_header);
-    my $res = $ua->post($oa_req->request_url, Content_type => "application/json", Content => encode_json($rpc));
-
-    if (!$res->is_success) {
-        die "could not do rpc call: ".$res->status_line."\n".$res->content;
-    }
-
-    my $data = decode_json($res->content);
-
-#    if (ref $rpc eq "HASH" && $rpc->{id} eq "read1") {
-#        _save_raw_data($rpc->{params}->{waveId}, $data);
-#    }
-    
-    return $data;
+    return $waveservice->rpc_call($opts->{token} // $q->cookie("token"), $opts->{secret} // $q->cookie("secret"), $rpc);
 }
 
 # a utility function that I use from time to time to save the json locally so
