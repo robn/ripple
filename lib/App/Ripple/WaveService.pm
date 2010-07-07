@@ -1,4 +1,4 @@
-package App::Ripple::OAuth;
+package App::Ripple::WaveService;
 
 use 5.010;
 
