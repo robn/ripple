@@ -17,7 +17,6 @@ use App::Ripple;
 use URI::Escape;
 use CGI::Carp qw(fatalsToBrowser);
 use Net::OAuth 0.25;
-use Data::Random qw(rand_chars);
 use LWP::UserAgent;
 use CGI ();
 use JSON qw(decode_json encode_json);
@@ -44,8 +43,8 @@ our %icon_type_map = (
 );
 
 # oauth key and secret. if you change these you'll need to register your app with Google
-my $consumer_key    = "anonymous";
-my $consumer_secret = "anonymous";
+my $oa_consumer_key    = "anonymous";
+my $oa_consumer_secret = "anonymous";
 
 
 # you shouldn't need to change anything under here
@@ -61,6 +60,15 @@ my $sandbox_rpc_uri = q{https://www-opensocial-sandbox.googleusercontent.com/api
 
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
+
+my $oa = App::Ripple::OAuth->new({
+    get_request_token_uri => $oa_req_uri,
+    authorize_token_uri   => $oa_auth_uri,
+    get_access_token_uri  => $oa_access_uri,
+    scope                 => $oa_scope,
+    consumer_key          => $oa_consumer_key,
+    consumer_secret       => $oa_consumer_secret,
+});
 
 my $q = CGI->new;
 
@@ -106,65 +114,26 @@ sub do_splash {
 }
 
 sub do_login {
-    my $oa_req = Net::OAuth->request("request token")->new(
-        _default_request_params(),
-        request_url => $oa_req_uri,
-        extra_params => {
-            scope => $oa_scope,
-        },
-    );
-    $oa_req->sign;
-
-    my $ua = LWP::UserAgent->new;
-    my $res = $ua->get($oa_req->to_url);
-
-    if (!$res->is_success) {
-        die "could not get request token: ".$res->status_line."\n".$res->content;
-    }
-
-    my $oa_res = Net::OAuth->response("request token")->from_post_body($res->content);
-
-    $oa_req = Net::OAuth->request("user auth")->new(
-        token    => $oa_res->token,
-        callback => _build_internal_uri(s => 'callback'),
-    );
-
+    my ($uri, $token_secret) = $oa->get_login_uri(callback => _build_internal_uri(s => 'callback'));
 
     print $q->redirect(
-        -uri => $oa_req->to_url($oa_auth_uri),
+        -uri => $uri,
         -cookie => [
-            $q->cookie(-name => "secret", -value => $oa_res->token_secret),
+            $q->cookie(-name => "secret", -value => $token_secret),
         ]
     );
 }
 
 sub do_callback {
-    my $oa_res = Net::OAuth->response("user auth")->from_hash({$q->Vars});
-
-    my $oa_req = Net::OAuth->request("access token")->new(
-        _default_request_params(),
-        request_url  => $oa_access_uri,
-        token        => $oa_res->token,
-        token_secret => $q->cookie("secret"),
-    );
-    $oa_req->sign;
-
-    my $ua = LWP::UserAgent->new;
-    my $res = $ua->get($oa_req->to_url);
-
-    if (!$res->is_success) {
-        die "could not get access token: ".$res->status_line."\n".$res->content;
-    }
-
-    $oa_res = Net::OAuth->response("access token")->from_post_body($res->content);
+    my ($token, $token_secret) = $oa->handle_callback($q->cookie("secret"), $q->Vars);
 
     print $q->redirect(
         -uri => _build_internal_uri(), 
         -cookie => [
-            $q->cookie(-name => "token",    -value => $oa_res->token),
-            $q->cookie(-name => "secret",   -value => $oa_res->token_secret),
-            $q->cookie(-name => "identity", -value => _identify_user($oa_res->token, $oa_res->token_secret)),
-        ]
+            $q->cookie(-name => "token",    -value => $token),
+            $q->cookie(-name => "secret",   -value => $token_secret),
+            $q->cookie(-name => "identity", -value => _identify_user($token, $token_secret)),
+        ],
     );
 }
 
@@ -541,20 +510,6 @@ sub _save_raw_data {
         print $fh Dumper $data;
         close $fh;
     }
-}
-
-sub _default_request_params {
-    my ($method) = @_;
-    $method //= "GET";
-
-    return (
-        consumer_key     => $consumer_key,
-        consumer_secret  => $consumer_secret,
-        request_method   => $method,
-        signature_method => "HMAC-SHA1",
-        timestamp        => time,
-        nonce            => join('', rand_chars(size => 16, set => "alphanumeric"))
-    );
 }
 
 sub _build_internal_uri {

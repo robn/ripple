@@ -5,6 +5,8 @@ use 5.010;
 use warnings;
 use strict;
 
+use App::Ripple::OAuth;
+
 use App::Ripple::Wavelet;
 use App::Ripple::Blip;
 use App::Ripple::Thread;
