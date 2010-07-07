@@ -100,7 +100,7 @@ sub do_splash {
 }
 
 sub do_login {
-    my ($uri, $token_secret) = $waveservice->get_login_uri(callback => _build_internal_uri(s => 'callback'));
+    my ($uri, $token_secret) = $waveservice->get_login_uri(_build_internal_uri(s => 'callback'));
 
     print $q->redirect(
         -uri => $uri,
@@ -111,7 +111,7 @@ sub do_login {
 }
 
 sub do_callback {
-    my ($token, $token_secret) = $waveservice->handle_callback($q->cookie("secret"), $q->Vars);
+    my ($token, $token_secret) = $waveservice->handle_callback($q->cookie("secret"), {$q->Vars});
 
     print $q->redirect(
         -uri => _build_internal_uri(), 

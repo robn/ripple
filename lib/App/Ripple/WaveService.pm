@@ -42,7 +42,7 @@ sub get_login_uri {
         croak "could not get request token: ".$res->status_line."\n".$res->content;
     }
 
-    my $oa_res = Net::OAuth::response->("request token")->from_post_body($res->content);
+    my $oa_res = Net::OAuth->response("request token")->from_post_body($res->content);
 
     $oa_req = Net::OAuth->request("user auth")->new(
         token    => $oa_res->token,
