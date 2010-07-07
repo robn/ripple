@@ -49,25 +49,11 @@ my $oa_consumer_secret = "anonymous";
 
 # you shouldn't need to change anything under here
 
-my $oa_scope = q{http://wave.googleusercontent.com/api/rpc};
-
-my $oa_req_uri    = q{https://www.google.com/accounts/OAuthGetRequestToken?scope=}.uri_escape($oa_scope);
-my $oa_auth_uri   = q{https://www.google.com/accounts/OAuthAuthorizeToken};
-my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
-
-my $rpc_uri = q{https://www-opensocial.googleusercontent.com/api/rpc};
-my $sandbox_rpc_uri = q{https://www-opensocial-sandbox.googleusercontent.com/api/rpc};
-
-
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
 my $oa = App::Ripple::OAuth->new({
-    get_request_token_uri => $oa_req_uri,
-    authorize_token_uri   => $oa_auth_uri,
-    get_access_token_uri  => $oa_access_uri,
-    scope                 => $oa_scope,
-    consumer_key          => $oa_consumer_key,
-    consumer_secret       => $oa_consumer_secret,
+    consumer_key    => $oa_consumer_key,
+    consumer_secret => $oa_consumer_secret,
 });
 
 my $q = CGI->new;

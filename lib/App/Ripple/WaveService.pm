@@ -5,22 +5,32 @@ use 5.010;
 use warnings;
 use strict;
 
+use URI::Escape;
 use Net::OAuth 0.25;
 use LWP::UserAgent;
 use Data::Random qw(rand_chars);
 use Carp;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(get_request_token_uri authorize_token_uri get_access_token_uri scope consumer_key consumer_secret));
+__PACKAGE__->mk_accessors(qw(consumer_key consumer_secret));
+
+my $oa_scope = q{http://wave.googleusercontent.com/api/rpc};
+
+my $oa_req_uri    = q{https://www.google.com/accounts/OAuthGetRequestToken?scope=}.uri_escape($oa_scope);
+my $oa_auth_uri   = q{https://www.google.com/accounts/OAuthAuthorizeToken};
+my $oa_access_uri = q{https://www.google.com/accounts/OAuthGetAccessToken};
+
+my $wave_rpc_uri         = q{https://www-opensocial.googleusercontent.com/api/rpc};
+my $wave_sandbox_rpc_uri = q{https://www-opensocial-sandbox.googleusercontent.com/api/rpc};
 
 sub get_login_uri {
     my ($self, $callback) = @_;
 
     my $oa_req = Net::OAuth->request("request token")->new(
         $self->_default_request_params,
-        request_url  => $self->get_request_token_uri,
+        request_url  => $oa_req_uri,
         extra_params => {
-            scope => $self->scope,
+            scope => $oa_scope,
         },
     );
     $oa_req->sign;
@@ -38,7 +48,7 @@ sub get_login_uri {
         callback => $callback,
     );
 
-    return ($oa_req->to_url($self->authorize_token_uri), $oa_res->token_secret);
+    return ($oa_req->to_url($oa_auth_uri), $oa_res->token_secret);
 }
 
 sub handle_callback {
@@ -48,7 +58,7 @@ sub handle_callback {
 
     my $oa_req = Net::OAuth->request("access token")->new(
         $self->_default_request_params(),
-        request_url  => $self->get_access_token_uri,
+        request_url  => $oa_access_uri,
         token        => $oa_res->token,
         token_secret => $token_secret,
     );
@@ -63,6 +73,9 @@ sub handle_callback {
     $oa_res = Net::OAuth->response("access_token")->from_post_body($res->content);
 
     return ($oa_res->token, $oa_res->token_secret);
+}
+
+sub wave_rpc_call {
 }
         
 sub _default_request_params {
