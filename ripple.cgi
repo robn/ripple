@@ -20,18 +20,14 @@ use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
 
-# uri to the script. you can hard code this if you like, otherwise this will try to infer it
-my $base_uri = $ENV{SCRIPT_URI} // (sprintf "http://%s%s%s", $ENV{SERVER_NAME}, ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), $ENV{SCRIPT_NAME});
+my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
-
-# path to splash screen file
-my $splash_file = (fileparse($ENV{SCRIPT_FILENAME}))[1]."splash.html";
-
-# url path to stylesheet
-my $css_path = ($ENV{SCRIPT_NAME} =~ m{^(.*/)})[0] . "ripple.css";
-
-# uri path to icons
-our $icon_path = ($ENV{SCRIPT_NAME} =~ m{^(.*/)})[0] . "icons/";
+my $r = App::Ripple->new({
+    script_uri => $ENV{SCRIPT_NAME},
+    readme_uri => "$base_uri/splash.html",
+    css_uri    => "$base_uri/ripple.css",
+    icon_uri   => "$base_uri/icons",
+});
 
 # icons for attachments. key is the mime type, value is the file under $icon_path
 our %icon_type_map = (
@@ -82,18 +78,8 @@ given ($q->param("s")) {
 exit 0;
 
 sub do_splash {
-    print
-        $q->header,
-
-        _html_header(),
-
-        _html_splash(),
-
-        _form_wrap(
-            [qw(submit s login)],
-        ),
-
-        _html_footer();
+    print $q->redirect($r->readme_uri);
+    exit 0;
 }
 
 sub do_login {
@@ -558,7 +544,7 @@ sub _html_header {
 <html>
 <head>
 <title>ripple</title>
-<link rel='stylesheet' type='text/css' href='$css_path' />
+<link rel='stylesheet' type='text/css' href='$r->css_uri' />
 </head>
 <body>
 HTML_HEADER
@@ -575,22 +561,4 @@ sub _html_footer {
 </html>
 HTML_FOOTER
 ;
-}
-
-sub _html_splash {
-    my $html = eval {
-        do { local (@ARGV, $/) = ($splash_file); <ARGV> };
-    };
-    if (!$html) {
-        $html = <<HTML_SPLASH
-<h1>ripple</h1>
-
-<p>
-A pure-HTML client for <a href='http://wave.google.com/'>Google Wave</a>.
-</p>
-HTML_SPLASH
-;
-    }
-
-    return $html;
 }

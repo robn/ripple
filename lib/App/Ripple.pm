@@ -5,6 +5,9 @@ use 5.010;
 use warnings;
 use strict;
 
+use base qw(Class::Accessor);
+__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri));
+
 use App::Ripple::WaveService;
 
 use App::Ripple::Wavelet;
