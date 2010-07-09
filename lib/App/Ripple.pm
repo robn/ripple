@@ -35,7 +35,7 @@ sub waveservice {
 }
     
 sub pretty_name {
-    my ($class, $name) = @_;
+    my ($self, $name) = @_;
     $name =~ s{\@googlewave.com$}{};
     return $name;
 }
