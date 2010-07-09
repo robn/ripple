@@ -33,10 +33,10 @@ sub markup {
 
             if (my ($waveid) = $self->value =~ m{^waveid://(.*)}) {
                 $waveid =~ s{/}{!};
-                $href = main::_build_internal_uri(a => 'read', w => uri_escape($waveid));
+                $href = $self->blip->wavelet->app->build_internal_uri(a => 'read', w => uri_escape($waveid));
             }
             else {
-                $href = main::_build_internal_uri(a => 'redirect', u => uri_escape_utf8($self->value));
+                $href = $self->blip->wavelet->app->build_internal_uri(a => 'redirect', u => uri_escape_utf8($self->value));
             }
 
             push @{$marker->{elements}}, {
@@ -51,7 +51,7 @@ sub markup {
             push @{$marker->{elements}}, {
                 tag => 'a',
                 attrs => {
-                    href => main::_build_internal_uri(a => 'read', w => uri_escape($self->value)),
+                    href => $self->blip->wavelet->app->build_internal_uri(a => 'read', w => uri_escape($self->value)),
                 },
             };
         }

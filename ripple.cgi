@@ -20,6 +20,8 @@ use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
 
+my $q = CGI->new;
+
 my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
 my $app = App::Ripple->new({
@@ -27,6 +29,8 @@ my $app = App::Ripple->new({
     readme_uri => "$base_uri/splash.html",
     css_uri    => "$base_uri/ripple.css",
     icon_uri   => "$base_uri/icons",
+
+    debug      => $q->param("d"),
 });
 
 # oauth key and secret. if you change these you'll need to register your app with Google
@@ -38,7 +42,6 @@ my $oa_consumer_secret = "anonymous";
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
-my $q = CGI->new;
 
 my $waveservice = App::Ripple::WaveService->new({
     consumer_key    => $oa_consumer_key,
@@ -78,7 +81,7 @@ sub do_splash {
 }
 
 sub do_login {
-    my ($uri, $token_secret) = $waveservice->get_login_uri(_build_internal_uri(s => 'callback'));
+    my ($uri, $token_secret) = $waveservice->get_login_uri($app->build_internal_uri(s => 'callback'));
 
     print $q->redirect(
         -uri => $uri,
@@ -92,7 +95,7 @@ sub do_callback {
     my ($token, $token_secret) = $waveservice->handle_callback($q->cookie("secret"), {$q->Vars});
 
     print $q->redirect(
-        -uri => _build_internal_uri(), 
+        -uri => $app->build_internal_uri(), 
         -cookie => [
             $q->cookie(-name => "token",    -value => $token),
             $q->cookie(-name => "secret",   -value => $token_secret),
@@ -103,7 +106,7 @@ sub do_callback {
 
 sub do_logout {
     print $q->redirect(
-        -uri => _build_internal_uri(), 
+        -uri => $app->build_internal_uri(), 
         -cookie => [
             $q->cookie(-name => "token",    -value => "", -expires => "-1d"),
             $q->cookie(-name => "secret",   -value => "", -expires => "-1d"),
@@ -190,7 +193,7 @@ sub action_search {
 
             $out .=
                 q{<div class='search-item'>}.
-                    q{<a href='}._build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
+                    q{<a href='}.$app->build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
                         q{<h1>}.encode_entities($title).q{</h1>}.
                         encode_entities($snippet).
                     q{</a>}.
@@ -302,7 +305,7 @@ sub action_reply {
         },
     }]);
 
-    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
+    print $q->redirect(-uri => $app->build_internal_uri(a => 'read', w => $wave_id));
 }
 
 sub action_new {
@@ -311,7 +314,7 @@ sub action_new {
     if (!$title) {
         return
             q{<h1>create new wave</h1>}.
-            q{<form class='new-wave-form' action='}._build_internal_uri().q{' method='post'>}.
+            q{<form class='new-wave-form' action='}.$app->build_internal_uri().q{' method='post'>}.
                 q{<p>}.
                     q{Wave title:<br />}.
                     q{<input type='text' name='t' />}.
@@ -373,7 +376,7 @@ sub action_new {
     }]);
 
     my $new_wave_id = $data->[0]->{data}->{waveId};
-    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $new_wave_id));
+    print $q->redirect(-uri => $app->build_internal_uri(a => 'read', w => $new_wave_id));
 
     return;
 }
@@ -382,7 +385,7 @@ sub action_add {
     if (!$q->param("r")) {
         return
             q{<h1>add recipients</h1>}.
-            q{<form class='add-recipients-form' action='}._build_internal_uri().q{' method='post'>}.
+            q{<form class='add-recipients-form' action='}.$app->build_internal_uri().q{' method='post'>}.
                 q{<p>}.
                     q{Enter addresses (one per line):<br />}.
                     q{<textarea name='r'></textarea>}.
@@ -414,7 +417,7 @@ sub action_add {
 
     my $data = _wave_request(\@ops);
 
-    print $q->redirect(-uri => _build_internal_uri(a => 'read', w => $wave_id));
+    print $q->redirect(-uri => $app->build_internal_uri(a => 'read', w => $wave_id));
 
     return;
 }
@@ -452,16 +455,6 @@ sub _save_raw_data {
         print $fh Dumper $data;
         close $fh;
     }
-}
-
-sub _build_internal_uri {
-    my (%args) = @_;
-
-    $args{d} = 1 if $q->param("d");
-
-    my $fragment = delete $args{'#'};
-
-    return $app->script_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
 }
 
 sub _identify_user {
@@ -510,7 +503,7 @@ sub _form_wrap {
     $opts //= {};
     $opts->{'method'} ||= 'get';
 
-    my $out = q{<form action='}._build_internal_uri().q{' method='}.$opts->{method}.q{'>};
+    my $out = q{<form action='}.$app->build_internal_uri().q{' method='}.$opts->{method}.q{'>};
 
     push @elements, [qw(hidden d 1)] if $q->param("d");
 

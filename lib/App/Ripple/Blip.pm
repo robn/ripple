@@ -167,6 +167,7 @@ sub annotated_content_range {
         my $boundary_end   = $annotation->end   > $end   ? $end   : $annotation->end;
 
         push @coerced_annotations, App::Ripple::Annotation->new({
+            blip  => $self,
             start => $boundary_start,
             end   => $boundary_end,
             name  => $annotation->name,
@@ -204,6 +205,7 @@ sub annotated_content_range {
 
         for my $annotation (@start_annotations) {
             my $split_annotation = App::Ripple::Annotation->new({
+                blip  => $self,
                 start => $position,
                 end   => $positions[$i+1],
                 name  => $annotation->name,

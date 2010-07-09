@@ -6,7 +6,7 @@ use warnings;
 use strict;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri));
+__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri debug));
 
 use App::Ripple::WaveService;
 
@@ -29,6 +29,16 @@ sub pretty_name {
     my ($class, $name) = @_;
     $name =~ s{\@googlewave.com$}{};
     return $name;
+}
+
+sub build_internal_uri {
+    my ($self, %args) = @_;
+
+    $args{d} = 1 if $self->debug;
+
+    my $fragment = delete $args{'#'};
+
+    return $self->script_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
 }
 
 1;
