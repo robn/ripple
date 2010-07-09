@@ -37,7 +37,7 @@ sub render {
             q{<b>}.$self->wavelet->app->pretty_name($data->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
 
-    my @contributors = map { $self->app->pretty_name($_) } grep { $_ ne $data->{creator} } @{$data->{contributors}};
+    my @contributors = map { $self->wavelet->app->pretty_name($_) } grep { $_ ne $data->{creator} } @{$data->{contributors}};
     if (@contributors) {
         $out .=
             q{<br />}.
