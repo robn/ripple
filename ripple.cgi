@@ -22,10 +22,13 @@ use File::Basename;
 
 my $q = CGI->new;
 
-my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
+#my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
+my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME},
+                                        ($ENV{SERVER_PORT} == 80 ? q{} : ":$ENV{SERVER_PORT}"), 
+                                        ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
 my $app = App::Ripple->new({
-    script_uri      => $ENV{SCRIPT_NAME},
+    script_uri      => "$base_uri/ripple.cgi",
     readme_uri      => "$base_uri/splash.html",
     css_uri         => "$base_uri/ripple.css",
     icon_uri        => "$base_uri/icons",
