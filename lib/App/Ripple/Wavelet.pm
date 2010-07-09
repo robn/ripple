@@ -6,7 +6,7 @@ use warnings;
 use strict;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(data debug wave_id wavelet_id title));
+__PACKAGE__->mk_accessors(qw(app data debug wave_id wavelet_id title));
 
 use App::Ripple::Thread;
 use App::Ripple::Blip;

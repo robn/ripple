@@ -34,10 +34,10 @@ sub render {
 
     my $out =
         q{<div class='blip' id='}.$self->blip_id.q{'>}.
-            q{<b>}.App::Ripple->pretty_name($data->{creator}).q{</b>}.
+            q{<b>}.$self->wavelet->app->pretty_name($data->{creator}).q{</b>}.
             time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
 
-    my @contributors = map { App::Ripple->pretty_name($_) } grep { $_ ne $data->{creator} } @{$data->{contributors}};
+    my @contributors = map { $self->app->pretty_name($_) } grep { $_ ne $data->{creator} } @{$data->{contributors}};
     if (@contributors) {
         $out .=
             q{<br />}.

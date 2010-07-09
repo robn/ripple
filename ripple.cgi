@@ -22,17 +22,12 @@ use File::Basename;
 
 my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
-our $r = App::Ripple->new({
+my $app = App::Ripple->new({
     script_uri => $ENV{SCRIPT_NAME},
     readme_uri => "$base_uri/splash.html",
     css_uri    => "$base_uri/ripple.css",
     icon_uri   => "$base_uri/icons",
 });
-
-# icons for attachments. key is the mime type, value is the file under $icon_path
-our %icon_type_map = (
-    '_unknown'   => 'unknown.png',
-);
 
 # oauth key and secret. if you change these you'll need to register your app with Google
 my $oa_consumer_key    = "anonymous";
@@ -78,7 +73,7 @@ given ($q->param("s")) {
 exit 0;
 
 sub do_splash {
-    print $q->redirect($r->readme_uri);
+    print $q->redirect($app->readme_uri);
     exit 0;
 }
 
@@ -256,7 +251,7 @@ sub action_read {
         return $out;
     }
 
-    my $wavelet = App::Ripple::Wavelet->new({ data => $data->{data}, debug => $q->param("d") });
+    my $wavelet = App::Ripple::Wavelet->new({ app => $app, data => $data->{data}, debug => $q->param("d") });
     return $wavelet->render;
 }
 
@@ -544,7 +539,7 @@ sub _html_header {
 <html>
 <head>
 <title>ripple</title>
-<link rel='stylesheet' type='text/css' href='${\$r->css_uri}' />
+<link rel='stylesheet' type='text/css' href='${\$app->css_uri}' />
 </head>
 <body>
 HTML_HEADER
