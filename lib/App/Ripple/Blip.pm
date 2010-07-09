@@ -110,6 +110,7 @@ sub render {
 
     if (@{$data->{replyThreadIds}}) {
         for my $thread_blip_id (@{$data->{replyThreadIds}}) {
+            next if ! $self->wavelet->data->{threads}->{$thread_blip_id}->{blipIds};
             next if $self->wavelet->data->{threads}->{$thread_blip_id}->{location} != -1;
 
             $out .= App::Ripple::Thread->new({

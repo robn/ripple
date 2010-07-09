@@ -12,6 +12,8 @@ use App::Ripple::Thread;
 sub render_block {
     my ($self) = @_;
 
+    return '' if ! $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds};
+
     return App::Ripple::Thread->new({
         wavelet  => $self->blip->wavelet,
         blip_ids => $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds},
@@ -20,6 +22,8 @@ sub render_block {
 
 sub render_inline {
     my ($self) = @_;
+
+    return '' if ! $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds};
 
     return
         q{ <a href='#}.$self->properties->{id}.q{'>}.
