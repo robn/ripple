@@ -135,6 +135,10 @@ sub do_wave {
 
             _html_header(),
 
+            q{<div class='logo'>},
+                q{<img src='ripple.png' alt='[ripple logo]'>},
+            q{</div>},
+
             q{<div class='identity'>},
                 q{Logged in as: <b>}.$q->cookie("identity").q{</b>},
             q{</div>},
