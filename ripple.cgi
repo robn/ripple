@@ -22,7 +22,7 @@ use File::Basename;
 
 my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
-my $r = App::Ripple->new({
+our $r = App::Ripple->new({
     script_uri => $ENV{SCRIPT_NAME},
     readme_uri => "$base_uri/splash.html",
     css_uri    => "$base_uri/ripple.css",
@@ -544,7 +544,7 @@ sub _html_header {
 <html>
 <head>
 <title>ripple</title>
-<link rel='stylesheet' type='text/css' href='$r->css_uri' />
+<link rel='stylesheet' type='text/css' href='${\$r->css_uri}' />
 </head>
 <body>
 HTML_HEADER

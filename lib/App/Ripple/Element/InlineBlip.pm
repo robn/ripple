@@ -23,7 +23,7 @@ sub render_inline {
 
     return
         q{ <a href='#}.$self->properties->{id}.q{'>}.
-            q{<img src='}.$main::icon_path.q{inline-blip.png' alt='[link to inline discussion]' />}.
+            q{<img src='}.$main::r->icon_uri.q{/inline-blip.png' alt='[link to inline discussion]' />}.
         q{</a> };
 }
 

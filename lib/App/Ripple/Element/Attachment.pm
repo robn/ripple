@@ -23,7 +23,7 @@ sub render_block {
         q{<div class='}.$type.q{' id='}.$props->{attachmentId}.q{'>}.
             q{<a href='}.$url.q{'}.
                 q{<img}.
-                    q{ src='}.($type eq "image" ? $url : $main::icon_path.$icon).q{'}.
+                    q{ src='}.($type eq "image" ? $url : $main::r->icon_uri."/".$icon).q{'}.
                     q{ alt='}.$caption.q{'}.
                 q{ />}.
                 q{<br />}.
