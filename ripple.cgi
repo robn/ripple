@@ -25,29 +25,22 @@ my $q = CGI->new;
 my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 
 my $app = App::Ripple->new({
-    script_uri => $ENV{SCRIPT_NAME},
-    readme_uri => "$base_uri/splash.html",
-    css_uri    => "$base_uri/ripple.css",
-    icon_uri   => "$base_uri/icons",
+    script_uri      => $ENV{SCRIPT_NAME},
+    readme_uri      => "$base_uri/splash.html",
+    css_uri         => "$base_uri/ripple.css",
+    icon_uri        => "$base_uri/icons",
 
-    debug      => $q->param("d"),
+    consumer_key    => "anonymous",
+    consumer_secret => "anonymous",
+
+    debug           => $q->param("d"),
 });
-
-# oauth key and secret. if you change these you'll need to register your app with Google
-my $oa_consumer_key    = "anonymous";
-my $oa_consumer_secret = "anonymous";
-
 
 # you shouldn't need to change anything under here
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
-
-my $waveservice = App::Ripple::WaveService->new({
-    consumer_key    => $oa_consumer_key,
-    consumer_secret => $oa_consumer_secret,
-});
-$waveservice->use_sandbox($q->cookie("identity") =~ m/\@wavesandbox.com$/);
+$app->waveservice->use_sandbox($q->cookie("identity") =~ m/\@wavesandbox.com$/);
 
 if ($q->param("l")) {
     do_wave();
@@ -81,7 +74,7 @@ sub do_splash {
 }
 
 sub do_login {
-    my ($uri, $token_secret) = $waveservice->get_login_uri($app->build_internal_uri(s => 'callback'));
+    my ($uri, $token_secret) = $app->waveservice->get_login_uri($app->build_internal_uri(s => 'callback'));
 
     print $q->redirect(
         -uri => $uri,
@@ -92,7 +85,7 @@ sub do_login {
 }
 
 sub do_callback {
-    my ($token, $token_secret) = $waveservice->handle_callback($q->cookie("secret"), {$q->Vars});
+    my ($token, $token_secret) = $app->waveservice->handle_callback($q->cookie("secret"), {$q->Vars});
 
     print $q->redirect(
         -uri => $app->build_internal_uri(), 
@@ -441,7 +434,7 @@ sub _wave_request {
         return ref $rpc eq "HASH" ? shift @data : \@data;
     }
 
-    return $waveservice->rpc_call($opts->{token} // $q->cookie("token"), $opts->{secret} // $q->cookie("secret"), $rpc);
+    return $app->waveservice->rpc_call($opts->{token} // $q->cookie("token"), $opts->{secret} // $q->cookie("secret"), $rpc);
 }
 
 # a utility function that I use from time to time to save the json locally so

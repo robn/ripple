@@ -6,7 +6,7 @@ use warnings;
 use strict;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri debug));
+__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri consumer_key consumer_secret debug));
 
 use App::Ripple::WaveService;
 
@@ -25,6 +25,15 @@ use App::Ripple::Element::InlineBlip;
 
 use App::Ripple::Element::Gadget::YesNoMaybe;
 
+sub waveservice {
+    my ($self) = @_;
+
+    return $self->{waveservice} //= App::Ripple::WaveService->new({
+        consumer_key    => $self->consumer_key,
+        consumer_secret => $self->consumer_secret,
+    });
+}
+    
 sub pretty_name {
     my ($class, $name) = @_;
     $name =~ s{\@googlewave.com$}{};
