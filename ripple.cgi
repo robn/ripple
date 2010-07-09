@@ -461,7 +461,7 @@ sub _build_internal_uri {
 
     my $fragment = delete $args{'#'};
 
-    return $base_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
+    return $app->script_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
 }
 
 sub _identify_user {
