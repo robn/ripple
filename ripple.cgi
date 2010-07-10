@@ -36,7 +36,7 @@ my $app = App::Ripple->new({
     consumer_key    => "anonymous",
     consumer_secret => "anonymous",
 
-    debug           => $q->param("d"),
+    debug           => $q->param("d") // 0,
 });
 
 # you shouldn't need to change anything under here
