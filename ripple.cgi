@@ -43,7 +43,9 @@ my $app = App::Ripple->new({
 
 local $Data::Dumper::Sortkeys = sub { my ($hash) = @_; return [sort { $a <=> $b } keys %$hash] };
 
-$app->waveservice->use_sandbox($q->cookie("identity") =~ m/\@wavesandbox.com$/);
+if ($q->cookie("identity")) {
+    $app->waveservice->use_sandbox($q->cookie("identity") =~ m/\@wavesandbox.com$/);
+}
 
 if ($q->param("l")) {
     do_wave();
