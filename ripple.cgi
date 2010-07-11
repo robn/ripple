@@ -137,19 +137,15 @@ sub do_wave {
 
             _html_header(),
 
-            q{<div class='logo'>},
-                q{<img src='ripple.png' alt='[ripple logo]'>},
+            q{<div class='header'>},
+                q{<div class='header-logo'></div>},
+                q{<ul>},
+                    q{<li><a href='}.$app->build_internal_uri(a => 'inbox').q{'>Inbox</a></li>},
+                    q{<li><a href='}.$app->build_internal_uri(a => 'new').q{'>New Wave</a></li>},
+                    q{<li><a href='}.$app->build_internal_uri(s => 'logout').q{'>Logout</a></li>},
+                q{</ul>},
+                q{<div class='header-text'><span class='hidden'>Signed in as: </span>}.$q->cookie("identity").q{</div>},
             q{</div>},
-
-            q{<div class='identity'>},
-                q{Logged in as: <b>}.$q->cookie("identity").q{</b>},
-            q{</div>},
-
-            _form_wrap(
-                [qw(submit a inbox)],
-                [qw(submit a new)],
-                [qw(submit s logout)],
-            ),
 
             q{<div class='search-box'>},
                 _form_wrap(
@@ -543,7 +539,7 @@ HTML_HEADER
 
 sub _html_footer {
      return <<HTML_FOOTER
-<p>
+<p class='footer'>
 <a href='http://eatenbyagrue.org/a/ripple'>ripple</a> &copy; 2010 <a href='mailto:rob\@eatenbyagrue.org'>Robert Norris</a>
 </p>
 
