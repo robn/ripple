@@ -49,6 +49,7 @@ div.header > ul {
 div.header > div.header-text {
     display: inline-block;
     height: 24px;
+    padding-left: 5px;
 }
 
 div.header > div.header-logo {
