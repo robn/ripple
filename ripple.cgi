@@ -141,7 +141,7 @@ sub do_wave {
                 q{<div class='header-logo'></div>},
                 q{<ul>},
                     q{<li><a href='}.$app->build_internal_uri(a => 'inbox').q{'>Inbox</a></li>},
-                    q{<li><a href='}.$app->build_internal_uri(a => 'new').q{'>New Wave</a></li>},
+                    q{<li><a href='}.$app->build_internal_uri(a => 'new').q{'>New wave</a></li>},
                     q{<li><a href='}.$app->build_internal_uri(s => 'logout').q{'>Logout</a></li>},
                 q{</ul>},
                 q{<div class='header-text'><span class='hidden'>Signed in as: </span>}.$q->cookie("identity").q{</div>},
