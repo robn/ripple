@@ -12,6 +12,8 @@ use Data::Random qw(rand_chars);
 use JSON qw(encode_json decode_json);
 use Carp;
 
+$Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
+
 use base qw(Class::Accessor);
 __PACKAGE__->mk_accessors(qw(consumer_key consumer_secret use_sandbox));
 
@@ -30,6 +32,7 @@ sub get_login_uri {
     my $oa_req = Net::OAuth->request("request token")->new(
         $self->_default_request_params,
         request_url  => $oa_req_uri,
+        callback     => $callback,
         extra_params => {
             scope => $oa_scope,
         },
@@ -46,7 +49,6 @@ sub get_login_uri {
 
     $oa_req = Net::OAuth->request("user auth")->new(
         token    => $oa_res->token,
-        callback => $callback,
     );
 
     return ($oa_req->to_url($oa_auth_uri), $oa_res->token_secret);
@@ -60,6 +62,7 @@ sub handle_callback {
     my $oa_req = Net::OAuth->request("access token")->new(
         $self->_default_request_params(),
         request_url  => $oa_access_uri,
+        verifier     => $oa_res->verifier,
         token        => $oa_res->token,
         token_secret => $token_secret,
     );
