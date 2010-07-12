@@ -138,6 +138,10 @@ div.header > form.search > input {
     width: 200px;
 }
 
+div.content {
+    margin: 5px;
+}
+
 p.footer {
     padding: 5px;
 }
