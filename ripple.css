@@ -117,6 +117,24 @@ div.header > ul li > a {
     padding: 5px;
 }
 
+div.header > input {
+    display: inline-block;
+    
+    position: absolute;
+    right: 110px;
+
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-width: 1px;
+
+    margin: 6px 0 10px 0px;
+    padding: 2px 0 2px 0;
+
+    width: 200px;
+}
+
 p.footer {
     padding: 5px;
 }
