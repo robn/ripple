@@ -1,3 +1,14 @@
 <div class='thread'>
 [% thread_html %]
+
+  <div class='thread-reply'>
+    <form method='post' action='[% script_uri %]'>
+      <input type='hidden' name='w' value='[% wave_id %]' />
+      <input type='hidden' name='wl' value='[% wavelet_id %]' />
+      <input type='hidden' name='b' value='[% blip_id %]' />
+      <textarea name='r'></textarea>
+      <input type='submit' name='a' value='reply' />
+    </form>
+  </div>
+
 </div>

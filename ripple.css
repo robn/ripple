@@ -227,16 +227,16 @@ div.blip-content div.indent {
     margin-left: 3em;
 }
 
-div.blip-reply {
+div.thread-reply {
     margin: 5px 5px 5px 0;
     padding: 5px;
     background-color: #99ff99;
     border: solid black 1px;
 }
-div.blip-reply form {
+div.thread-reply form {
     display: inline;
 }
-div.blip-reply textarea {
+div.thread-reply textarea {
     width: 100%;
 }
 
