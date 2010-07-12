@@ -121,8 +121,11 @@ p.footer {
     padding: 5px;
 }
 
-.hidden {
-    display: none;
+.context {
+    position: absolute;
+    left: -999em;
+    width: 1em;
+    overflow: hidden;
 }
 
 div.search-box {
