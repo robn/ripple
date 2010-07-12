@@ -117,7 +117,11 @@ div.header > ul li > a {
     padding: 5px;
 }
 
-div.header > input {
+div.header > form.search {
+    display: inline-block;
+}
+
+div.header > form.search > input {
     display: inline-block;
     
     position: absolute;
@@ -144,17 +148,6 @@ p.footer {
     left: -999em;
     width: 1em;
     overflow: hidden;
-}
-
-div.search-box {
-    padding: 0 5px 0 5px;
-}
-div.search-box input[type=text] {
-    width: 100%;
-}
-div.search-box input[type=submit] {
-    position: absolute;
-    right: 10px;
 }
 
 div.search-item {

@@ -148,19 +148,13 @@ sub do_wave {
             $q->header("text/html"),
 
             $template->("header.html", {
+                script_uri    => $app->script_uri,
                 css_uri       => $app->css_uri,
                 inbox_uri     => $app->build_internal_uri(a => 'inbox'),
                 new_uri       => $app->build_internal_uri(a => 'new'),
                 logout_uri    => $app->build_internal_uri(s => 'logout'),
                 user_identity => $q->cookie("identity"),
             }),
-
-            q{<div class='search-box'>},
-                _form_wrap(
-                    [qw(text q), $q->param("q") || "in:inbox" ],
-                    [qw(submit a search)],
-                ),
-            q{</div>},
 
             $out,
 
