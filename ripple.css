@@ -102,7 +102,6 @@ div.header > ul li:hover {
 } 
 div.header > ul li:active {
     background-color: rgba(0, 0, 0, 0.3);
-    -webkit-transition-duration: 0.0s;
 }
 
 div.header > ul li > a {
