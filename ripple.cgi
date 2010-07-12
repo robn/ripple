@@ -19,13 +19,8 @@ use CGI ();
 use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
-use Template;
 
 my $q = CGI->new;
-
-my $t = Template->new({
-    INCLUDE_PATH => ["$FindBin::Bin/templates"],
-});
 
 #my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME},
@@ -37,6 +32,8 @@ my $app = App::Ripple->new({
     readme_uri      => "$base_uri/splash.html",
     css_uri         => "$base_uri/ripple.css",
     icon_uri        => "$base_uri/icons",
+
+    template_path   => "$FindBin::Bin/templates",
 
     consumer_key    => "anonymous",
     consumer_secret => "anonymous",
@@ -136,18 +133,11 @@ sub do_wave {
         $out = $action_handler{$action}->();
     }
 
-    my $template = sub {
-        my ($file, $vars) = @_;
-        $vars //= {};
-        $t->process($file, $vars, \my $out);
-        return $out;
-    };
-
     if (defined $out) {
         print
             $q->header("text/html"),
 
-            $template->("header.html", {
+            $app->expand_template("header", {
                 script_uri    => $app->script_uri,
                 css_uri       => $app->css_uri,
                 inbox_uri     => $app->build_internal_uri(a => 'inbox'),
@@ -158,7 +148,7 @@ sub do_wave {
 
             $out,
 
-            $template->("footer.html");
+            $app->expand_template("footer");
     }
 }
 

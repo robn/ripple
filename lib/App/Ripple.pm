@@ -6,7 +6,7 @@ use warnings;
 use strict;
 
 use base qw(Class::Accessor);
-__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri consumer_key consumer_secret debug));
+__PACKAGE__->mk_accessors(qw(script_uri readme_uri css_uri icon_uri template_path consumer_key consumer_secret debug));
 
 use App::Ripple::WaveService;
 
@@ -24,6 +24,8 @@ use App::Ripple::Element::Image;
 use App::Ripple::Element::InlineBlip;
 
 use App::Ripple::Element::Gadget::YesNoMaybe;
+
+use Template;
 
 sub waveservice {
     my ($self) = @_;
@@ -48,6 +50,20 @@ sub build_internal_uri {
     my $fragment = delete $args{'#'};
 
     return $self->script_uri . (keys %args ? q{?}.join(q{&}, map { "$_=$args{$_}" } keys %args) : q{}) . ($fragment ? '#'.$fragment : q{});
+}
+
+sub expand_template {
+    my ($self, $template, $vars) = @_;
+
+    $self->{template_engine} //= Template->new({
+        INCLUDE_PATH => [$self->template_path],
+    });
+
+    $vars //= {};
+
+    $self->{template_engine}->process("$template.html", $vars, \my $out);
+
+    return $out;
 }
 
 1;
