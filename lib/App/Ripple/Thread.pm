@@ -14,11 +14,10 @@ sub render {
     my @blips = map { $self->wavelet->blip($_) // () } @{$self->blip_ids};
     return if !@blips;
 
-    my $out = q{<div class='thread'>};
-
-    $out .= $_->render for @blips;
-
-    $out .=
+    my $thread_html = '';
+    $thread_html .= $_->render for @blips;
+ 
+    $thread_html .=
         q{<div class='blip-reply'>}.
             main::_form_wrap( { method => 'post' },
                [qw(hidden w),  $self->wavelet->wave_id    ],
@@ -29,9 +28,7 @@ sub render {
             ).
         q{</div>};
 
-    $out .= q{</div>};
-
-    return $out;
+    return $self->wavelet->app->expand_template('thread', { thread_html => $thread_html });
 }
 
 1;
