@@ -19,8 +19,13 @@ use CGI ();
 use HTML::Entities;
 use Data::Dumper;
 use File::Basename;
+use Template;
 
 my $q = CGI->new;
+
+my $t = Template->new({
+    INCLUDE_PATH => ["$FindBin::Bin/templates"],
+});
 
 #my $base_uri = ($ENV{SCRIPT_NAME} =~ m{^(.*)/})[0];
 my $base_uri = sprintf "http://%s%s%s", $ENV{SERVER_NAME},
@@ -131,11 +136,18 @@ sub do_wave {
         $out = $action_handler{$action}->();
     }
 
+    my $template = sub {
+        my ($file, $vars) = @_;
+        $vars //= {};
+        $t->process($file, $vars, \my $out);
+        return $out;
+    };
+
     if (defined $out) {
         print
             $q->header("text/html"),
 
-            _html_header(),
+            $template->("header.html", { css_uri => $app->css_uri }),
 
             q{<div class='header'>},
                 q{<div class='header-logo'></div>},
@@ -156,7 +168,7 @@ sub do_wave {
 
             $out,
 
-            _html_footer();
+            $template->("footer.html");
     }
 }
 
@@ -523,28 +535,4 @@ sub _form_wrap {
     }
 
     $out .= q{</form>};
-}
-
-sub _html_header {
-    return <<HTML_HEADER
-<html>
-<head>
-<title>ripple</title>
-<link rel='stylesheet' type='text/css' href='${\$app->css_uri}' />
-</head>
-<body>
-HTML_HEADER
-;
-}
-
-sub _html_footer {
-     return <<HTML_FOOTER
-<p class='footer'>
-<a href='http://eatenbyagrue.org/a/ripple'>ripple</a> &copy; 2010 <a href='mailto:rob\@eatenbyagrue.org'>Robert Norris</a>
-</p>
-
-</body>
-</html>
-HTML_FOOTER
-;
 }
