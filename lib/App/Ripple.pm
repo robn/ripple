@@ -61,6 +61,11 @@ sub expand_template {
 
     $vars //= {};
 
+    $vars->{script_uri} //= $self->script_uri;
+    $vars->{readme_uri} //= $self->readme_uri;
+    $vars->{css_uri}    //= $self->css_uri;
+    $vars->{icon_uri}   //= $self->icon_uri;
+
     $self->{template_engine}->process("$template.html", $vars, \my $out);
 
     return $out;

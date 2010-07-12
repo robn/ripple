@@ -138,8 +138,6 @@ sub do_wave {
             $q->header("text/html"),
 
             $app->expand_template("header", {
-                script_uri    => $app->script_uri,
-                css_uri       => $app->css_uri,
                 inbox_uri     => $app->build_internal_uri(a => 'inbox'),
                 new_uri       => $app->build_internal_uri(a => 'new'),
                 logout_uri    => $app->build_internal_uri(s => 'logout'),
