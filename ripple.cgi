@@ -147,17 +147,13 @@ sub do_wave {
         print
             $q->header("text/html"),
 
-            $template->("header.html", { css_uri => $app->css_uri }),
-
-            q{<div class='header'>},
-                q{<div class='header-logo'></div>},
-                q{<ul>},
-                    q{<li><a href='}.$app->build_internal_uri(a => 'inbox').q{'>Inbox</a></li>},
-                    q{<li><a href='}.$app->build_internal_uri(a => 'new').q{'>New wave</a></li>},
-                    q{<li><a href='}.$app->build_internal_uri(s => 'logout').q{'>Logout</a></li>},
-                q{</ul>},
-                q{<div class='header-text'><span class='hidden'>Signed in as: </span>}.$q->cookie("identity").q{</div>},
-            q{</div>},
+            $template->("header.html", {
+                css_uri       => $app->css_uri,
+                inbox_uri     => $app->build_internal_uri(a => 'inbox'),
+                new_uri       => $app->build_internal_uri(a => 'new'),
+                logout_uri    => $app->build_internal_uri(s => 'logout'),
+                user_identity => $q->cookie("identity"),
+            }),
 
             q{<div class='search-box'>},
                 _form_wrap(

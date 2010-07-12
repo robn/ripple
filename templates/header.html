@@ -1,6 +1,18 @@
 <html>
+
 <head>
-<title>ripple</title>
-<link rel='stylesheet' type='text/css' href='[% css_uri %]' />
+  <title>ripple</title>
+  <link rel='stylesheet' type='text/css' href='[% css_uri %]' />
 </head>
+
 <body>
+  <div class='header'>
+    <div class='header-logo'></div>
+      <ul>
+        <li><a href='[% inbox_uri %]'>Inbox</a></li><li><a href='[% new_uri %]'>New wave</a></li><li><a href='[% logout_uri %]'>Logout</a></li>
+      </ul>
+    <div class='header-text'>
+      <span class='hidden'>Signed in as: </span>
+      [% user_identity %]
+  </div>
+</div>
