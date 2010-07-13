@@ -43,27 +43,21 @@ sub render {
 
     my $data = $self->data;
 
-    my $out =
-        q{<div class='wavelet'>}.
-            q{<div class='wavelet-action-box'>}.
-                main::_form_wrap(
-                    [qw(hidden w), $self->wave_id],
-                    [qw(hidden wl), $self->wavelet_id],
-                    [qw(hidden a add)],
-                    [qw(submit), undef, q{add people}],
-                ).
-            q{</div>}.
-            q{In this wave: }.
-            q{<b>}.join(q{</b>, <b>}, map { App::Ripple->pretty_name($_) } @{$data->{waveletData}->{participants}}).q{</b>}.
-        q{</div>};
+    my $template_data = {};
 
-    $out .= App::Ripple::Thread->new({
+    $template_data->{wave_id} = $self->wave_id;
+    $template_data->{wavelet_id} = $self->wavelet_id;
+
+    my @participants = map { App::Ripple->pretty_name($_) } @{$data->{waveletData}->{participants}};
+    $template_data->{participants} = \@participants;
+
+    $template_data->{thread_html} = App::Ripple::Thread->new({
         wavelet  => $self, 
         blip_ids => $data->{waveletData}->{rootThread}->{blipIds}
     })->render;
 
     if ($self->debug) {
-        $out .=
+        $template_data->{debug} =
             q{<div class='protocol-debug'>}.
                 q{<pre>}.
                     encode_entities(Dumper($data)).
@@ -71,7 +65,7 @@ sub render {
             q{</div>};
     }
 
-    return $out;
+    return $self->app->expand_template('wavelet', $template_data);
 }
 
 sub blip {
