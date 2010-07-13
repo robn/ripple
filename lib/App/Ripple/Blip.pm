@@ -32,27 +32,25 @@ sub render {
 
     my $data = $self->data;
 
-    my $out =
-        q{<div class='blip' id='}.$self->blip_id.q{'>}.
-            q{<b>}.$self->wavelet->app->pretty_name($data->{creator}).q{</b>}.
-            time2str(q{ at <b>%l:%M%P</b> on <b>%e %B</b>}, $data->{lastModifiedTime}/1000);
+    my $template_args = {};
+
+    $template_args->{blip_id} = $self->blip_id;
+    $template_args->{creator} = $self->wavelet->app->pretty_name($data->{creator});
+
+    $template_args->{time} = time2str(q{%l:%M%P}, $data->{lastModifiedTime}/1000);
+    $template_args->{date} = time2str(q{%e %B},   $data->{lastModifiedTime}/1000);
 
     my @contributors = map { $self->wavelet->app->pretty_name($_) } grep { $_ ne $data->{creator} } @{$data->{contributors}};
     if (@contributors) {
-        $out .=
-            q{<br />}.
-            q{with <b>}.
-            join (q{</b>, <b>}, @contributors).
-            q{</b>};
+        $template_args->{contributors} = \@contributors;
     }
 
     if ($self->wavelet->debug) {
-        $out .= 
-            q{<div class='blip-debug'>}.
-                q{blip: }.$self->blip_id.q{<br />}.
-                q{parent: }.$data->{parentBlipId}.q{<br />}.
-                q{thread: }.$data->{threadId}.q{<br />}.
-            q{</div>};
+        $template_args->{debug} = [
+            q{blip: }.$self->blip_id,
+            q{parent: }.$data->{parentBlipId},
+            q{thread: }.$data->{threadId},
+        ];
     }
 
     my @line_positions = sort { $a <=> $b } grep { $data->{elements}->{$_}->{type} eq "LINE" } keys %{$data->{elements}};
@@ -89,38 +87,42 @@ sub render {
         });
     }
 
-    $out .= q{<div class='blip-content'>};
+    my $blip_html = '';
 
     my $linegroup = App::Ripple::LineGroup->new;
 
     for my $line (@{$self->{lines}}) {
         if (! $linegroup->add($line)) {
-            $out .= $linegroup->render;
-            $out .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
+            $blip_html .= $linegroup->render;
+            $blip_html .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
 
             $linegroup = App::Ripple::LineGroup->new;
             $linegroup->add($line);
         }
     }
 
-    $out .= $linegroup->render;
-    $out .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
+    $blip_html .= $linegroup->render;
+    $blip_html .= $_->render_block for $self->elements_in_range($linegroup->start, $linegroup->end);
 
-    $out .= q{</div>}.q{</div>};
+    $template_args->{blip_html} = $blip_html;
 
     if (@{$data->{replyThreadIds}}) {
+        my $reply_html = '';
+
         for my $thread_blip_id (@{$data->{replyThreadIds}}) {
             next if ! $self->wavelet->data->{threads}->{$thread_blip_id}->{blipIds};
             next if $self->wavelet->data->{threads}->{$thread_blip_id}->{location} != -1;
 
-            $out .= App::Ripple::Thread->new({
+            $reply_html .= App::Ripple::Thread->new({
                 wavelet  => $self->wavelet,
                 blip_ids => $self->wavelet->data->{threads}->{$thread_blip_id}->{blipIds},
             })->render;
         }
+
+        $template_args->{reply_html} = $reply_html if $reply_html;
     }
 
-    return $out;
+    return $self->wavelet->app->expand_template('blip', $template_args);
 }
 
 sub content_range {
