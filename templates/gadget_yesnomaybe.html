@@ -1,0 +1,22 @@
+<div class='gadget-yesnomaybe'>
+  [% INCLUDE list list_name="yes"   count=yes.count   users=yes.users   %]
+  [% INCLUDE list list_name="no"    count=no.count    users=no.users    %]
+  [% INCLUDE list list_name="maybe" count=maybe.count users=maybe.users %]
+</div>
+
+[% BLOCK list %]
+  <div class='gadget-yesnomaybe-list gadget-yesnomaybe-[% list_name %]'>
+    <div class='gadget-yesnomaybe-[% list_name %]'>
+       [% list_name %] ([% count %])
+    </div>
+    <ul>
+      [% FOREACH user IN users %]
+        <li>[% user.name %]
+        [% IF user.status %]
+          - [% user.status %]
+        [% END %]
+        </li>
+      [% END %]
+    </ul>
+  </div>
+[% END %]

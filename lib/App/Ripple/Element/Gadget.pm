@@ -34,21 +34,15 @@ sub render_block {
 
     my $props = $self->properties;
 
-    my $out =
-        q{<div class='gadget-unknown'>}.
-            q{GADGET: }.encode_entities($props->{url}).
-        q{</div>};
+    my $template_args = {};
+
+    $template_args->{url} = encode_entities($props->{url});
 
     if ($self->blip->wavelet->debug) {
-        $out .=
-            q{<div class='protocol-debug'>}.
-                q{<pre>}.
-                    encode_entities(Dumper($props)).
-                q{</pre>}.
-            q{</div>};
+        $template_args->{debug} = encode_entities(Dumper($props));
     }
 
-    return $out;
+    return $self->blip->wavelet->app->expand_template('gadget', $template_args);
 }
 
 1;
