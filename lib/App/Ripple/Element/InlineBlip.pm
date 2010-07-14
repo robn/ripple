@@ -25,10 +25,11 @@ sub render_inline {
 
     return '' if ! $self->blip->wavelet->data->{threads}->{$self->properties->{id}}->{blipIds};
 
-    return
-        q{ <a href='#}.$self->properties->{id}.q{'>}.
-            q{<img src='}.$self->blip->wavelet->app->icon_uri.q{/inline-blip.png' alt='[link to inline discussion]' />}.
-        q{</a> };
+    my $template_args = {
+        blip_id => $self->properties->{id},
+    };
+
+    return $self->blip->wavelet->app->expand_template('inline_blip', $template_args);
 }
 
 1;
