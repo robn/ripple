@@ -175,9 +175,9 @@ sub action_search {
     if ($template_data->{count} > 0) {
         for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
             push @{$template_data->{digests}}, {
-                title   => $digest->{title}   || "(no title)",
-                snippet => $digest->{snippet} || "",
-                uri     =>$app->build_internal_uri(a => 'read', w => $digest->{waveId}),
+                title   => encode_entities($digest->{title} || "(no title)"),
+                snippet => encode_entities($digest->{snippet} || ""),
+                uri     => $app->build_internal_uri(a => 'read', w => $digest->{waveId}),
             };
         }
     }
