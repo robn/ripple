@@ -143,6 +143,13 @@ div.header > form.search > input {
 
 div.content {
     margin: 5px;
+    padding: 5px;
+    background-color: white;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
 }
 
 div.footer {
