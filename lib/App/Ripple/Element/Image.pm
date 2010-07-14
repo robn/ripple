@@ -12,11 +12,12 @@ sub render_inline {
 
     my $props = $self->properties;
 
-    my $out = q{<img src='}.$props->{url}.q{' };
-    $out .= q{alt='}.$props->{caption}.q{' } if exists $props->{caption};
-    $out .= q{/>};
+    my $template_args = {
+        url     => $props->{url},
+        caption => $props->{caption} // '',
+    };
 
-    return $out;
+    return $self->blip->wavelet->app->expand_template('image', $template_args);
 }
 
 1;
