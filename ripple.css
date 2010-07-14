@@ -240,14 +240,14 @@ div.thread-reply textarea {
     width: 100%;
 }
 
-div.image, div.attachment {
+div.attachment {
     display: table-cell;
     border: solid #999999 1px;
     background-color: #ffff99;
     margin: 0;
     padding: 0;
 }
-div.image > a, div.attachment > a {
+div.attachment > a {
     display: block;
     padding: 5px;
     color: inherit;
