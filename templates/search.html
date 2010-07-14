@@ -1,0 +1,31 @@
+[% IF count == 0 %]
+  <p>aww, no more...</p>
+
+[% ELSE %]
+
+  [% FOREACH digest IN digests %]
+    [% INCLUDE digest uri=digest.uri title=digest.title snippet=digest.snippet %]
+  [% END %]
+
+  <form method='get' action='[% script_uri %]'>
+    <input type='hidden' name='q' value='[% query %]' />
+    <input type='hidden' name='i' value='[% index %]' />
+    <input type='hidden' name='a' value='search' />
+    <input type='submit' value='find more...' />
+  </form>
+[% END %]
+
+[% IF debug %]
+  <div class='protocol-debug'>
+    <pre>[% debug %]</pre>
+  </div>
+[% END %]
+ 
+[% BLOCK digest %]
+  <div class='search-digest'>
+    <a href='[% uri %]'>
+      <h1>[% title %]</h1>
+      [% snippet %]
+    </a>
+  </div>
+[% END %]

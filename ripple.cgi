@@ -166,46 +166,27 @@ sub action_search {
         },
     });
 
-    my $out;
+    my $template_data = {
+        count => $data->{data}->{searchResults}->{numResults},
+        query => $q->param("q"),
+        index => ($q->param("i") // 0) + 10,
+    };
 
-    if ($data->{data}->{searchResults}->{numResults} == 0) {
-        $out =
-            q{<p>aww, no more...</p>};
-    }
-
-    else {
-        $out = '';
+    if ($template_data->{count} > 0) {
         for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
-            my $title   = $digest->{title}   || "(no title)";
-            my $snippet = $digest->{snippet} || "";
-
-            $out .=
-                q{<div class='search-item'>}.
-                    q{<a href='}.$app->build_internal_uri(a => 'read', w => $digest->{waveId}).q{'>}.
-                        q{<h1>}.encode_entities($title).q{</h1>}.
-                        encode_entities($snippet).
-                    q{</a>}.
-                q{</div>};
+            push @{$template_data->{digests}}, {
+                title   => $digest->{title}   || "(no title)",
+                snippet => $digest->{snippet} || "",
+                uri     =>$app->build_internal_uri(a => 'read', w => $digest->{waveId}),
+            };
         }
-
-        $out .= _form_wrap(
-            [qw(hidden q), $q->param("q")],
-            [qw(hidden i), ($q->param("i") // 0) + 10],
-            [qw(hidden a search)],
-            [q{submit}, undef, q{find more...}],
-        );
     }
 
     if ($q->param("d")) {
-        $out .=
-            q{<div class='protocol-debug'>}.
-                q{<pre>}.
-                    encode_entities(Dumper($data)).
-                q{</pre>}.
-            q{</div>};
+        $template_data->{debug} = encode_entities(Dumper($data));
     }
 
-    return $out;
+    return $app->expand_template('search', $template_data);
 }
 
 sub action_read {
