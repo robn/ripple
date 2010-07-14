@@ -7,6 +7,8 @@ use strict;
 
 use base qw(App::Ripple::Element);
 
+use URI::Escape qw(uri_escape_utf8);
+
 my %icon_type_map = (
     '_unknown'   => 'unknown.png',
 );
@@ -20,10 +22,11 @@ sub render_block {
 
     my $icon = $icon_type_map{$props->{mimeType}} ? $icon_type_map{$props->{mimeType}} : $icon_type_map{_unknown};
 
-    my $url = $props->{attachmentUrl} || $props->{url};
+    my $url = $self->blip->wavelet->app->build_internal_uri(a => 'redirect', u => uri_escape_utf8($props->{attachmentUrl} || $props->{url}));
 
     my $template_args = {
         attachment_id      => $props->{attachmentId},
+        attachment_url     => $url,
         attachment_image   => $type eq "image" ? $url : $self->blip->wavelet->app->icon_uri."/".$icon,
         attachment_caption => $props->{caption} ? $props->{caption} : $props->{attachmentId},
     };
