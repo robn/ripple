@@ -167,9 +167,10 @@ sub action_search {
     });
 
     my $template_data = {
-        count => $data->{data}->{searchResults}->{numResults},
-        query => $q->param("q"),
-        index => ($q->param("i") // 0) + 10,
+        count         => $data->{data}->{searchResults}->{numResults},
+        query         => $q->param("q"),
+        current_index => $q->param("i") // 0,
+        next_index    => ($q->param("i") // 0) + 10,
     };
 
     if ($template_data->{count} > 0) {

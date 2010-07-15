@@ -1,18 +1,22 @@
 [% IF count == 0 %]
-  <p>aww, no more...</p>
+  <div class='content'>aww, no more...</div>
 
+  <div class='button-set'>
+    <a class='button-single' href='[% script_uri %]?q=[% query %]&a=search'>Back to start</a>
+  </div>
 [% ELSE %]
 
   [% FOREACH digest IN digests %]
     [% INCLUDE digest uri=digest.uri title=digest.title snippet=digest.snippet %]
   [% END %]
 
-  <form method='get' action='[% script_uri %]'>
-    <input type='hidden' name='q' value='[% query %]' />
-    <input type='hidden' name='i' value='[% index %]' />
-    <input type='hidden' name='a' value='search' />
-    <input type='submit' value='find more...' />
-  </form>
+  <div class='button-set'>
+  [% IF current_index > 0 %]
+    <a class='button' href='[% script_uri %]?q=[% query %]&a=search'>Back to start</a><a class='button' href='[% script_uri %]?q=[% query %]&i=[% next_index %]&a=search'>Next page</a>
+  [% ELSE %]
+    <a class='button-single' href='[% script_uri %]?q=[% query %]&i=[% next_index %]&a=search'>Next page</a>
+  [% END %]
+  </div>
 [% END %]
 
 [% IF debug %]
