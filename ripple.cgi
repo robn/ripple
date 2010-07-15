@@ -177,7 +177,7 @@ sub action_search {
         for my $digest (@{$data->{data}->{searchResults}->{digests}}) {
             push @{$template_data->{digests}}, {
                 title   => encode_entities($digest->{title} || "(no title)"),
-                snippet => encode_entities($digest->{snippet} || ""),
+                snippet => $digest->{snippet} ? encode_entities($digest->{snippet}) : "&nbsp;",
                 uri     => $app->build_internal_uri(a => 'read', w => $digest->{waveId}),
             };
         }
