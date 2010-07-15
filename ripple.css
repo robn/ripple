@@ -141,7 +141,7 @@ div.header > form.search > input {
     width: 200px;
 }
 
-div.content {
+div.content, div.wavelet, div.blip {
     margin: 10px;
     padding: 5px;
     background-color: white;
@@ -202,22 +202,10 @@ div.search-digest > a {
     text-decoration: none;
 }
 
-div.thread {
-    padding-left: 5px;
-    margin-bottom: 5px;
-}
-
 div.thread div.thread, div.blip-content div.thread {
     margin-left: 1em;
     border-left: solid gray 1px;
     border-bottom: solid gray 1px;
-}
-
-div.blip {
-    margin: 5px 5px 5px 0;
-    padding: 5px;
-    background-color: #9999ff;
-    border: solid black 1px;
 }
 
 div.blip-debug {
@@ -229,7 +217,21 @@ div.blip-debug {
     font-family: monospace;
 }
 
+div.blip-participants {
+    display: inline-block;
+    float: left;
+    width: 84%;
+}
+
+div.blip-timestamp {
+    display: inline-block;
+    float: right;
+    width: 15%;
+    text-align: right;
+}
+
 div.blip-content {
+    clear: both;
     padding: 5px;
     background-color: #ffffff;
     border: solid black 1px;

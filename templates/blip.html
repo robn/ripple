@@ -6,12 +6,16 @@
     </div>
   [% END %]
 
-  <b>[% creator %]</b> at <b>[% time %]</b> on <b>[% date %]</b>
+  <div class='blip-participants'>
+    <b>[% creator %]</b>
+    [% IF contributors %]
+      with <b>[% contributors.join('</b>, <b>') %]</b>
+    [% END %]
+  </div>
 
-  [% IF contributors %]
-    <br />
-    with <b>[% contributors.join('</b>, <b>') %]</b>
-  [% END %]
+  <div class='blip-timestamp'>
+    <b>[% time %]</b> on <b>[% date %]</b>
+  </div>
 
   <div class='blip-content'>
     [% blip_html %]
