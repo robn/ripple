@@ -1,11 +1,6 @@
-<div class='wavelet'>
-  <div class='wavelet-action-box'>
-    <form method='get' action='[% script_uri %]'>
-      <input type='hidden' name='w' value='[% wave_id %]' />
-      <input type='hidden' name='wl' value='[% wavelet_id %]' />
-      <input type='hidden' name='a' value='add' />
-      <input type='submit' value='add people' />
-    </form>
+<div class='wavelet content'>
+  <div class='button-set'>
+    <a class='button-single' href='[% script_uri %]?w=[% wave_id %]&wl=[% wavelet_id %]&a=add'>Add people</a>
   </div>
 
   In this wave: <b>[% participants.join('</b>, <b>') %]</b>

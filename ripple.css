@@ -145,8 +145,10 @@ div.content {
     margin: 10px;
     padding: 5px;
     background-color: white;
+
     border-radius: 5px;
     -moz-border-radius: 5px;
+
     -webkit-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
@@ -198,21 +200,6 @@ div.search-digest > a {
     padding: 5px;
     color: inherit;
     text-decoration: none;
-}
-
-div.wavelet-action-box {
-    float: right;
-}
-div.wavelet-action-box > form {
-    padding: 0;
-    margin: 0;
-}
-
-div.wavelet {
-    margin: 5px;
-    padding: 5px;
-    background-color: #ff9999;
-    border: solid black 1px;
 }
 
 div.thread {
@@ -363,6 +350,9 @@ form.add-recipients-form textarea {
     font-size: 14px;
     font-weight: bold;
     font-family: sans-serif;
+
+    border-radius: 5px;
+    -moz-border-radius: 5px;
 }
 
 a.button, a.button-single {
