@@ -1,17 +1,21 @@
 <div class='blip' id='[% blip_id %]'>
 
-  <div class='blip-participants'>
-    <b>[% creator %]</b>
-    [% IF contributors %]
-      with <b>[% contributors.splice(0, 15).join('</b>, <b>') %]</b>
-      [% IF contributors.size > 0 %]
-        (and [% contributors.size %] more)
-      [% END %]
-    [% END %]
-  </div>
+  <div class='blip-header'>
 
-  <div class='blip-timestamp'>
-    <b>[% time %]</b> on <b>[% date %]</b>
+    <div class='blip-participants'>
+      <b>[% creator %]</b>
+      [% IF contributors %]
+        with <b>[% contributors.splice(0, 15).join('</b>, <b>') %]</b>
+        [% IF contributors.size > 0 %]
+          (and [% contributors.size %] more)
+        [% END %]
+      [% END %]
+    </div>
+
+    <div class='blip-timestamp'>
+      <b>[% time %]</b> on <b>[% date %]</b>
+    </div>
+  
   </div>
 
   <div class='blip-content'>
