@@ -145,6 +145,7 @@ div.content, div.wavelet, div.blip {
     clear: both;
 
     margin: 10px;
+    padding: 5px;
     background-color: white;
 
     border-radius: 5px;
@@ -153,6 +154,10 @@ div.content, div.wavelet, div.blip {
     -webkit-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
+}
+
+div.blip {
+    padding: 0px;
 }
 
 div.footer {
