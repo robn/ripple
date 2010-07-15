@@ -1,11 +1,5 @@
 <div class='blip' id='[% blip_id %]'>
 
-  [% IF debug %]
-    <div class='blip-debug'>
-      [% debug.join('<br />') %]
-    </div>
-  [% END %]
-
   <div class='blip-participants'>
     <b>[% creator %]</b>
     [% IF contributors %]
@@ -21,6 +15,12 @@
   </div>
 
   <div class='blip-content'>
+    [% IF debug %]
+      <div class='blip-debug'>
+        [% debug.join('<br />') %]
+      </div>
+    [% END %]
+
     [% blip_html %]
   </div>
 
