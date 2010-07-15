@@ -9,7 +9,10 @@
   <div class='blip-participants'>
     <b>[% creator %]</b>
     [% IF contributors %]
-      with <b>[% contributors.join('</b>, <b>') %]</b>
+      with <b>[% contributors.splice(0, 15).join('</b>, <b>') %]</b>
+      [% IF contributors.size > 0 %]
+        (and [% contributors.size %] more)
+      [% END %]
     [% END %]
   </div>
 
