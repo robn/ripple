@@ -180,6 +180,10 @@ div.search-digest {
     -webkit-transition: background 0.2s ease-in-out;
     -moz-transition: background 0.2s ease-in-out;
     transition: background 0.2s ease-in-out;
+
+    overflow: hidden;
+    text-overflow: ellipsis; /* XXX not working. why? */
+    white-space: nowrap;
 }
 div.search-digest:hover {
     background-color: #ffff99;
