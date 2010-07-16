@@ -143,6 +143,7 @@ div.header > form.search > input {
 
 div.content, div.wavelet, div.blip {
     clear: both;
+    overflow: hidden;
 
     margin: 10px;
     padding: 5px;
@@ -154,10 +155,6 @@ div.content, div.wavelet, div.blip {
     -webkit-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
     box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.5);
-}
-
-div.blip {
-    padding: 0px;
 }
 
 div.footer {
@@ -208,10 +205,19 @@ div.search-digest > a {
     text-decoration: none;
 }
 
+/*
 div.thread div.thread, div.blip-content div.thread {
     margin-left: 1em;
     border-left: solid gray 1px;
     border-bottom: solid gray 1px;
+}
+*/
+
+div.wavelet-participants {
+}
+
+div.blip {
+    padding: 0px;
 }
 
 div.blip-debug {
@@ -237,8 +243,7 @@ div.blip-header {
 
 div.blip-participants {
     display: inline-block;
-    position: absolute;
-    left: 10px;
+    float: left;
     padding: 5px;
 }
 
@@ -256,6 +261,12 @@ div.blip-content {
     border-radius: 0px 0px 3px 3px;
     -moz-border-radius: 0px 0px 3px 3px;
 }
+
+div.blip-content div.blip-content {
+    border-left: 1px solid rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
 div.blip-content h1 {
     display: inline;
 }
@@ -355,7 +366,9 @@ form.add-recipients-form textarea {
 
 
 .button-set {
+    display: inline-block;
     float: right;
+
     margin: 10px;
     list-style-type: none;
 

@@ -3,10 +3,12 @@
     <a class='button-single' href='[% script_uri %]?w=[% wave_id %]&wl=[% wavelet_id %]&a=add'>Add people</a>
   </div>
 
-  In this wave: <b>[% participants.splice(0, 15).join('</b>, <b>') %]</b>
-  [% IF participants.size > 0 %]
-    (and [% participants.size %] more)
-  [% END %]
+  <div class='wavelet-participants'>
+    In this wave: <b>[% participants.splice(0, 15).join('</b>, <b>') %]</b>
+    [% IF participants.size > 0 %]
+      (and [% participants.size %] more)
+    [% END %]
+  </div>
 </div>
 
 [% thread_html %]
