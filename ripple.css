@@ -223,6 +223,9 @@ div.blip-debug {
     border: solid black 1px;
     background-color: #ffff99;
     font-family: monospace;
+    
+    border-radius: 3px;
+    -moz-border-radius: 3px;
 }
 
 div.blip-header {
@@ -256,6 +259,8 @@ div.blip-content {
 
     border-radius: 0px 0px 3px 3px;
     -moz-border-radius: 0px 0px 3px 3px;
+
+    overflow: hidden;
 }
 
 div.blip-content div.blip-content {
