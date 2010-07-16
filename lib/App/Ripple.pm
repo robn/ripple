@@ -24,6 +24,7 @@ use App::Ripple::Element::Image;
 use App::Ripple::Element::InlineBlip;
 
 use App::Ripple::Element::Gadget::YesNoMaybe;
+use App::Ripple::Element::Gadget::EverybodyWave::Image;
 
 use Template;
 

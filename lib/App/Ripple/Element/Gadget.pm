@@ -13,6 +13,7 @@ use Data::Dumper;
 # XXX replace with a plugin registration thing
 my %gadget_classes = (
     "http://wave-api.appspot.com/public/gadgets/areyouin/gadget.xml" => "App::Ripple::Element::Gadget::YesNoMaybe",
+    "http://everybodywave.appspot.com/gadget/image/gadget.xml"       => "App::Ripple::Element::Gadget::EverybodyWave::Image",
 );
 
 sub new {
