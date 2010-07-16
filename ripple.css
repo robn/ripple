@@ -205,13 +205,9 @@ div.search-digest > a {
     text-decoration: none;
 }
 
-/*
 div.thread div.thread, div.blip-content div.thread {
-    margin-left: 1em;
-    border-left: solid gray 1px;
-    border-bottom: solid gray 1px;
+    margin-left: 10px;
 }
-*/
 
 div.wavelet-participants {
 }
